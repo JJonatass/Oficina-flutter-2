@@ -50,6 +50,36 @@ NAT_MEMBERS = r"""  if(v.nat==='Ticker'){
       case 'tick':return v.tm.n}}
 """
 
+CANVAS_FN = r"""/* ===== Oficina 2: CustomPaint desenhado num <canvas> (bem mais rápido que SVG a cada quadro) ===== */
+var P2D={};var P2Dn=0;
+function p2d(d){var p=P2D[d];if(!p){if(++P2Dn>600){P2D={};P2Dn=0}p=P2D[d]=new Path2D(d)}return p}
+function paintCanvas(res,w,h){
+  var dpr=Math.min(2,window.devicePixelRatio||1),cv=document.createElement('canvas');
+  cv.width=Math.max(1,Math.round(w*dpr));cv.height=Math.max(1,Math.round(h*dpr));
+  cv.style.width=w+'px';cv.style.height=h+'px';cv.style.display='block';
+  var g=cv.getContext('2d');if(!g)return cv;
+  var cache={};function css(c){return cache[c]||(cache[c]=pcssColor(c))}
+  res.ops.forEach(function(o){
+    var p=o.p||{color:'#000',style:'fill',sw:0,cap:'butt',join:'miter'},col=css(p.color),m=o.m,stroke=p.style==='stroke'&&!o.pt;
+    g.save();
+    if(o.clip>=0&&res.clips[o.clip]){var c=res.clips[o.clip];g.setTransform(dpr,0,0,dpr,0,0);g.transform(c.m[0],c.m[1],c.m[2],c.m[3],c.m[4],c.m[5]);g.clip(p2d(c.d))}
+    g.setTransform(dpr,0,0,dpr,0,0);g.transform(m[0],m[1],m[2],m[3],m[4],m[5]);
+    g.fillStyle=col;g.strokeStyle=col;g.lineWidth=p.sw||1;g.lineCap=p.cap||'butt';g.lineJoin=p.join||'miter';
+    function paint(){if(stroke)g.stroke();else g.fill()}
+    switch(o.k){
+      case 'circle':g.beginPath();g.arc(o.cx,o.cy,Math.max(0,o.r),0,Math.PI*2);paint();break;
+      case 'line':g.beginPath();g.moveTo(o.x1,o.y1);g.lineTo(o.x2,o.y2);g.stroke();break;
+      case 'rect':if(stroke)g.strokeRect(o.x,o.y,o.w,o.h);else g.fillRect(o.x,o.y,o.w,o.h);break;
+      case 'rrect':{g.beginPath();var r=Math.max(0,Math.min(o.r||0,Math.abs(o.w)/2,Math.abs(o.h)/2));if(g.roundRect)g.roundRect(o.x,o.y,o.w,o.h,r);else g.rect(o.x,o.y,o.w,o.h);paint();break}
+      case 'oval':g.beginPath();g.ellipse(o.cx,o.cy,Math.max(0,o.rx),Math.max(0,o.ry),0,0,Math.PI*2);paint();break;
+      case 'path':if(o.d){if(stroke)g.stroke(p2d(o.d));else g.fill(p2d(o.d))}break;
+      case 'color':g.fillRect(-5000,-5000,10000,10000);break;
+      case 'text':{g.fillStyle=css(o.color);g.font=(o.bold?'700 ':'')+o.size+'px Roboto,Arial,sans-serif';g.textBaseline='top';
+        String(o.text).split('\n').forEach(function(t,i){g.fillText(t,o.x,o.y+i*o.size*1.2)});break}}
+    g.restore()});
+  return cv}
+"""
+
 
 def patch(src):
     # createTicker(callback) dentro de um State com SingleTickerProviderStateMixin
@@ -146,4 +176,49 @@ def patch(src):
         "  else if(keepG.length)ST.order.forEach(function(n){var f=ST.fields[n];f.value=initOf(f)});\n"
         "  if(fresh&&ST.initState)ST.runInit()};\n",
         'load restore game loop')
+    # canvas no lugar do SVG
+    src = sub1(src, "function paintSvg(res,w,h){", CANVAS_FN + "function paintSvg(res,w,h){", 'paintCanvas fn')
+    src = sub1(src,
+        "        if(res)lay.innerHTML=paintSvg(res,cw||0,chh||0);return lay}",
+        "        if(res){if(OF.useSvg)lay.innerHTML=paintSvg(res,cw||0,chh||0);else lay.appendChild(paintCanvas(res,cw||0,chh||0))}return lay}",
+        'paintLayer canvas')
+    src = sub1(src,
+        "if(res)lay0.innerHTML=paintSvg(res,w,chh)});",
+        "if(res){if(OF.useSvg)lay0.innerHTML=paintSvg(res,w,chh);else{lay0.innerHTML='';lay0.appendChild(paintCanvas(res,w,chh))}}});",
+        'post canvas')
+    # patchRender: o canvas novo é copiado para o que já está na tela (atributos não carregam pixels)
+    src = sub1(src,
+        "  if(a.tagName==='INPUT'&&document.activeElement!==a&&a.value!==b.value)a.value=b.value;\n  patchKids(a,b)}",
+        "  if(a.tagName==='INPUT'&&document.activeElement!==a&&a.value!==b.value)a.value=b.value;\n"
+        "  if(a.tagName==='CANVAS'){var gc=a.getContext('2d');if(gc){gc.setTransform(1,0,0,1,0,0);gc.clearRect(0,0,a.width,a.height);gc.drawImage(b,0,0)}if(OF.popSched)OF.popSched();return}\n"
+        "  patchKids(a,b)}",
+        'patchEl canvas')
+    # janela separada (⤢ Janela): copiar também os pixels dos canvas
+    src = sub1(src,
+        "function popSched(){if(!popRaf)popRaf=requestAnimationFrame(popSync)}\n",
+        "function popSched(){if(!popRaf)popRaf=requestAnimationFrame(popSync)}\nOF.popSched=function(){if(popW)popSched()};\n",
+        'popSched expose')
+    src = sub1(src,
+        "  m.innerHTML=screen.innerHTML;\n",
+        "  m.innerHTML=screen.innerHTML;\n"
+        "  (function(){var ca=screen.querySelectorAll('canvas'),cb=m.querySelectorAll('canvas');for(var k=0;k<ca.length&&k<cb.length;k++){try{cb[k].width=ca[k].width;cb[k].height=ca[k].height;cb[k].getContext('2d').drawImage(ca[k],0,0)}catch(e){}}})();\n",
+        'popSync canvas')
+    # analisador: o mesmo trecho de código não é tokenizado de novo a cada quadro
+    src = sub1(src,
+        "function Ps(src){src=provSub(src);this.src=src;this.t=lex(src);this.i=0}",
+        "var LEXC=new Map();\nfunction lexC(src){var t=LEXC.get(src);if(!t){if(LEXC.size>4000)LEXC.clear();t=lex(src);LEXC.set(src,t)}return t}\n"
+        "function Ps(src){src=provSub(src);this.src=src;this.t=lexC(src);this.i=0}",
+        'lex cache')
+    # expressões: a árvore de uma expressão é guardada por (tokens, posição); o laço não reanalisa a cada quadro
+    src = sub1(src,
+        "function pTern(p){var c=pBin(p,0);",
+        "var PTC=new WeakMap();\n"
+        "function pTern(p){var mt=PTC.get(p.t);if(!mt){mt=new Map();PTC.set(p.t,mt)}var key=p.i*4+(p.noCasc?1:0)+(p.hn?2:0),hit=p.hn?null:mt.get(key);if(hit){p.i=hit.e;return hit.a}var at=pTern0(p);if(!p.hn)mt.set(key,{a:at,e:p.i});return at}\n"
+        "function pTern0(p){var c=pBin(p,0);",
+        'pTern memo')
+    # limite de comandos de desenho por quadro: o canvas aguenta bem mais que o SVG
+    src = sub1(src,
+        "if(cv.ops.length>4000)throw exc('muitos comandos de desenho (limite 4000)')",
+        "if(cv.ops.length>20000)throw exc('muitos comandos de desenho (limite 20000 por quadro)')",
+        'ops limit')
     return src
