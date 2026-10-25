@@ -11,7 +11,7 @@ import json, re, sys, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'tools'))
-import patch_engine, patch_input, lessons  # noqa: E402
+import patch_engine, patch_input, patch_media, lessons  # noqa: E402
 
 
 def sub1(src, old, new, label):
@@ -40,6 +40,8 @@ def lessons_js():
         o = {'t': 'x. ' + L['t'], 'text': L['text'], 'tryit': L['tryit'], 'code': L['code'].lstrip('\n')}
         if L.get('lim'):
             o['lim'] = L['lim']
+        if L.get('setup'):
+            o['setup'] = L['setup']
         out.append(js(o))
     return 'var LESSONS=[\n' + ',\n'.join(out) + '\n];\n'
 
@@ -48,6 +50,7 @@ def build():
     src = (ROOT / 'tools' / 'upstream.html').read_text(encoding='utf-8')
     src = patch_engine.patch(src)
     src = patch_input.patch(src)
+    src = patch_media.patch(src)
 
     # marca e textos do cabeçalho
     src = sub1(src, '<title>Oficina Flutter</title>', '<title>Oficina Flutter 2</title>', 'title')
@@ -78,6 +81,7 @@ def build():
             if re.search(step[2], code):
                 raise SystemExit(f'[build] a etapa "{step[0]}" ({k}) já vem cumprida no código inicial')
 
+    src = patch_media.finish(src)
     (ROOT / 'index.html').write_text(src, encoding='utf-8')
     print(f'index.html: {len(src):,} bytes, {len(lessons.LESSONS)} aulas')
 

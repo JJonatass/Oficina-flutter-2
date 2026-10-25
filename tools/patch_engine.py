@@ -161,7 +161,10 @@ def patch(src):
         " 'Funcionam: Ticker com createTicker (SingleTickerProviderStateMixin), start, stop e dispose; Timer.periodic e Timer, com cancel e isActive; Random; CustomPainter com save, restore, translate, rotate e scale; Rect com overlaps, intersect, deflate, inflate, shift e contains; getters do State.',\n"
         " 'Toque e arrasto: GestureDetector com onTapDown (assim que o dedo encosta), onTapUp, onPanDown, onPanStart, onPanUpdate, onPanEnd e os arrastos horizontal e vertical. Os detalhes trazem localPosition, globalPosition, delta, primaryDelta e velocity.pixelsPerSecond.',\n"
         " 'Teclado: Focus e KeyboardListener com onKeyEvent (KeyDownEvent, KeyUpEvent, KeyRepeatEvent e event.logicalKey) e HardwareKeyboard.instance.isLogicalKeyPressed no laço. Clique no celular antes de usar as teclas.',\n"
-        " 'Ainda não existem: vários dedos ao mesmo tempo, imagens desenhadas no Canvas (drawImage, sprites) e som.',\n"
+        " 'Imagens: rootBundle.load + decodeImageFromList (ou ui.instantiateImageCodec), canvas.drawImage e drawImageRect, e Image.asset. Só os sprites prontos do simulador existem: assets/sprites/heroi.png, moeda.png, slime.png, nave.png, explosao.png, tiro.png, caixa.png, coracao.png, maca.png, grama.png e nuvem.png.',\n"
+        " 'Som: AudioPlayer com play(AssetSource(...)), setVolume, stop e dispose (pacote audioplayers) e SystemSound.play. Os sons são sintetizados pelo navegador: sons/pulo.wav, moeda, batida, explosao, tiro, vitoria, derrota, clique, dano e poder. O botão 🔊 Som liga e desliga.',\n"
+        " 'Texto no Canvas: TextPainter com cor, tamanho, negrito, itálico, letterSpacing, sombra, contorno (foreground: Paint com stroke) e fonte, incluindo GoogleFonts.pressStart2p, silkscreen, vt323 e bungee. tp.width e tp.height são medidos de verdade.',\n"
+        " 'Ainda não existem: vários dedos ao mesmo tempo, imagens dos seus próprios arquivos e músicas longas.',\n"
         " 'O pacote Flame ainda não é simulado: os jogos desta trilha usam só Flutter puro, que é a base do Flame.',\n"
         " ]},\n",
         'LIMITS')

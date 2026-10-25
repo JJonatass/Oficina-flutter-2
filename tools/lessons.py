@@ -5,8 +5,8 @@ LESSONS = []
 EXERCISES = {}
 
 
-def aula(t, text, tryit, code, ex, lim=None):
-    LESSONS.append({'t': t, 'text': text, 'tryit': tryit, 'code': code, 'lim': lim})
+def aula(t, text, tryit, code, ex, lim=None, setup=None):
+    LESSONS.append({'t': t, 'text': text, 'tryit': tryit, 'code': code, 'lim': lim, 'setup': setup})
     EXERCISES[t] = ex
 
 
@@ -1621,3 +1621,876 @@ PARTS = [
     ['Projeto · Pula-Caixa', 'Projeto 1 · Pula-Caixa'],
     ['Arrastar: a raquete segue o dedo', 'Parte 2 · Entrada: arrastar e teclado'],
 ]
+
+
+# ---------------------------------------------------------------- Parte 3
+SETUP_SPRITES = (
+    'pubspec.yaml (dentro de flutter:):\n'
+    '  assets:\n'
+    '    - assets/sprites/\n\n'
+    'Coloque os arquivos PNG em assets/sprites/ na raiz do projeto. O simulador já tem estes sprites prontos, '
+    'desenhados para a Oficina: heroi.png (4 quadros de 16×16), moeda.png (6), slime.png (2), nave.png (2), '
+    'explosao.png (5), tiro.png (8×8), caixa.png, coracao.png, maca.png, grama.png (16×16) e nuvem.png (32×16). '
+    'Os arquivos estão na pasta tools/sprites do repositório da Oficina Flutter 2.'
+)
+
+aula(
+    'Sprites: imagens no Canvas',
+    'Sprite é uma imagem pequena que representa um personagem ou objeto do jogo. Em Flutter, para desenhar uma '
+    'imagem no Canvas ela precisa virar um ui.Image (do pacote dart:ui): rootBundle.load lê os bytes do arquivo '
+    'de assets e decodeImageFromList transforma os bytes em imagem. Como ler arquivo leva tempo, a função é '
+    'async e o State começa sem imagens: o body mostra um CircularProgressIndicator até tudo carregar, e o '
+    'setState troca pela cena. Com a imagem pronta, canvas.drawImage desenha ela inteira no tamanho original, e '
+    'canvas.drawImageRect(imagem, origem, destino, paint) recorta um pedaço (origem) e estica para outro '
+    'retângulo (destino). É assim que um sprite de 16×16 vira 64×64 na tela. O Paint padrão usa '
+    'FilterQuality.none, que amplia sem borrar: o pixel art continua nítido. O herói pequeno lá em cima é a '
+    'folha inteira, com os quatro quadros lado a lado.',
+    'Em ▶ Testar, compare a folha pequena com o herói ampliado. Troque o quadro do herói (o x da origem vai de 0 '
+    'a 48, de 16 em 16), aumente a caixa para 64×64 e desenhe uma maçã em cima dela.',
+    r'''
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+void main() => runApp(const MaterialApp(home: Vitrine()));
+
+const double largura = 360;
+const double altura = 520;
+const double chao = 440;
+
+Future<ui.Image> carregarImagem(String caminho) async {
+  final dados = await rootBundle.load(caminho);
+  return decodeImageFromList(dados.buffer.asUint8List());
+}
+
+class Sprites {
+  final ui.Image heroi;
+  final ui.Image grama;
+  final ui.Image caixa;
+  final ui.Image moeda;
+  Sprites(this.heroi, this.grama, this.caixa, this.moeda);
+}
+
+class Cena extends CustomPainter {
+  final Sprites s;
+  Cena(this.s);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF7EC8F2));
+    canvas.drawRect(Rect.fromLTWH(0, chao + 32, size.width, size.height - chao - 32), Paint()..color = const Color(0xFF8B5A2B));
+
+    final tinta = Paint();
+    const bloco = Rect.fromLTWH(0, 0, 16, 16);
+    for (int i = 0; i < 12; i++) {
+      canvas.drawImageRect(s.grama, bloco, Rect.fromLTWH(i * 32.0, chao, 32, 32), tinta);
+    }
+    canvas.drawImageRect(s.caixa, bloco, const Rect.fromLTWH(240, chao - 48, 48, 48), tinta);
+    canvas.drawImageRect(s.moeda, bloco, const Rect.fromLTWH(252, chao - 96, 24, 24), tinta);
+    canvas.drawImageRect(s.heroi, bloco, const Rect.fromLTWH(80, chao - 64, 64, 64), tinta);
+
+    canvas.drawImage(s.heroi, const Offset(16, 16), tinta);
+  }
+
+  @override
+  bool shouldRepaint(covariant Cena antiga) => antiga.s != s;
+}
+
+class Vitrine extends StatefulWidget {
+  const Vitrine({super.key});
+
+  @override
+  State<Vitrine> createState() => _VitrineState();
+}
+
+class _VitrineState extends State<Vitrine> {
+  Sprites? sprites;
+
+  @override
+  void initState() {
+    super.initState();
+    carregar();
+  }
+
+  Future<void> carregar() async {
+    final heroi = await carregarImagem('assets/sprites/heroi.png');
+    final grama = await carregarImagem('assets/sprites/grama.png');
+    final caixa = await carregarImagem('assets/sprites/caixa.png');
+    final moeda = await carregarImagem('assets/sprites/moeda.png');
+    setState(() => sprites = Sprites(heroi, grama, caixa, moeda));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: sprites == null
+          ? const Center(child: CircularProgressIndicator())
+          : Center(
+              child: CustomPaint(
+                size: const Size(largura, altura),
+                painter: Cena(sprites!),
+              ),
+            ),
+    );
+  }
+}
+''',
+    [
+        ['Outro quadro do herói', 'No drawImageRect do herói ampliado, troque a origem bloco por Rect.fromLTWH(32, 0, 16, 16).', r'drawImageRect\(\s*s\.heroi\s*,\s*(?:const\s+)?Rect\.fromLTWH\(\s*(?:16|32|48)\b'],
+        ['Caixa de 64×64', 'No destino da caixa, use largura e altura 64 (e suba o top para chao - 64).', r'drawImageRect\(\s*s\.caixa[^;]*Rect\.fromLTWH\([^;]*,\s*64\s*,\s*64\s*\)'],
+        ['Uma maçã em cima da caixa', "Carregue 'assets/sprites/maca.png' como as outras (um campo novo em Sprites) e desenhe acima da caixa.", r"assets/sprites/maca\.png[\s\S]*drawImageRect\(\s*s\.maca"],
+    ],
+    lim='O simulador desenha a tela a partir do primeiro return do build. Para mostrar algo enquanto carrega, use um if/? dentro do Scaffold (como aqui), não dois return. No simulador, rootBundle só lê os sprites e sons prontos.',
+    setup=SETUP_SPRITES,
+)
+
+aula(
+    'Animação com folha de sprites',
+    'Uma folha de sprites (sprite sheet) guarda os quadros de uma animação lado a lado, todos do mesmo tamanho. '
+    'Animar é escolher qual pedaço recortar em cada momento: o quadro i começa em x = i * 16. O tempo decide o '
+    'quadro: (tempo * 10).floor() % 4 troca de quadro 10 vezes por segundo e volta ao primeiro depois do quarto. '
+    'O herói só conta o tempo de caminhada enquanto anda; parado, ele mostra o quadro 0. A moeda tem o seu '
+    'próprio relógio (12 quadros por segundo, 6 quadros), porque cada animação tem o seu ritmo. Para virar o '
+    'herói para a esquerda não é preciso outra imagem: canvas.save, translate até o centro do sprite, scale(-1, 1) '
+    'espelha tudo o que vier depois, e canvas.restore desfaz a transformação para o resto da cena.',
+    'Em ▶ Testar, toque em pontos à esquerda e à direita e veja o herói andar e virar. Mude a velocidade da '
+    'animação de 10 para 4 e para 20 quadros por segundo. Depois faça a moeda girar mais devagar.',
+    r'''
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+
+void main() => runApp(const MaterialApp(home: Jogo()));
+
+const double largura = 360;
+const double altura = 520;
+const double chao = 440;
+
+Future<ui.Image> carregarImagem(String caminho) async {
+  final dados = await rootBundle.load(caminho);
+  return decodeImageFromList(dados.buffer.asUint8List());
+}
+
+class Cena extends CustomPainter {
+  final ui.Image heroi;
+  final ui.Image moeda;
+  final ui.Image grama;
+  final double x;
+  final double direcao;
+  final int quadroHeroi;
+  final int quadroMoeda;
+  Cena(this.heroi, this.moeda, this.grama, this.x, this.direcao, this.quadroHeroi, this.quadroMoeda);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF7EC8F2));
+    canvas.drawRect(Rect.fromLTWH(0, chao + 32, size.width, size.height - chao - 32), Paint()..color = const Color(0xFF8B5A2B));
+    final tinta = Paint();
+    for (int i = 0; i < 12; i++) {
+      canvas.drawImageRect(grama, const Rect.fromLTWH(0, 0, 16, 16), Rect.fromLTWH(i * 32.0, chao, 32, 32), tinta);
+    }
+
+    final origemMoeda = Rect.fromLTWH(quadroMoeda * 16.0, 0, 16, 16);
+    canvas.drawImageRect(moeda, origemMoeda, const Rect.fromLTWH(300, 24, 40, 40), tinta);
+
+    final origemHeroi = Rect.fromLTWH(quadroHeroi * 16.0, 0, 16, 16);
+    canvas.save();
+    canvas.translate(x + 32, chao - 64);
+    canvas.scale(direcao, 1);
+    canvas.drawImageRect(heroi, origemHeroi, const Rect.fromLTWH(-32, 0, 64, 64), tinta);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant Cena antiga) => true;
+}
+
+class Jogo extends StatefulWidget {
+  const Jogo({super.key});
+
+  @override
+  State<Jogo> createState() => _JogoState();
+}
+
+class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
+  late Ticker ticker;
+  double ultimo = 0;
+  ui.Image? heroi;
+  ui.Image? moeda;
+  ui.Image? grama;
+  double x = 148;
+  double alvo = 148;
+  double direcao = 1;
+  bool andando = false;
+  double tempoAndando = 0;
+  double tempoTotal = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    carregar();
+    ticker = createTicker(quadro);
+    ticker.start();
+  }
+
+  Future<void> carregar() async {
+    final h = await carregarImagem('assets/sprites/heroi.png');
+    final m = await carregarImagem('assets/sprites/moeda.png');
+    final g = await carregarImagem('assets/sprites/grama.png');
+    setState(() {
+      heroi = h;
+      moeda = m;
+      grama = g;
+    });
+  }
+
+  void quadro(Duration tempo) {
+    final agora = tempo.inMicroseconds / 1000000;
+    final dt = agora - ultimo;
+    ultimo = agora;
+    setState(() {
+      tempoTotal += dt;
+      final distancia = alvo - x;
+      final passo = 150 * dt;
+      andando = distancia.abs() > passo;
+      if (andando) {
+        direcao = distancia > 0 ? 1.0 : -1.0;
+        x += passo * direcao;
+        tempoAndando += dt;
+      } else {
+        x = alvo;
+        tempoAndando = 0;
+      }
+    });
+  }
+
+  void tocar(TapDownDetails details) {
+    var novo = details.localPosition.dx - 32;
+    if (novo < 0) novo = 0;
+    if (novo > largura - 64) novo = largura - 64;
+    alvo = novo;
+  }
+
+  @override
+  void dispose() {
+    ticker.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final quadroHeroi = andando ? (tempoAndando * 10).floor() % 4 : 0;
+    final quadroMoeda = (tempoTotal * 12).floor() % 6;
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: heroi == null || moeda == null || grama == null
+          ? const Center(child: CircularProgressIndicator())
+          : Center(
+              child: GestureDetector(
+                onTapDown: tocar,
+                child: CustomPaint(
+                  size: const Size(largura, altura),
+                  painter: Cena(heroi!, moeda!, grama!, x, direcao, quadroHeroi, quadroMoeda),
+                ),
+              ),
+            ),
+    );
+  }
+}
+''',
+    [
+        ['Animação a 4 quadros por segundo', 'No build, troque (tempoAndando * 10) por (tempoAndando * 4).', r'tempoAndando\s*\*\s*4\s*\)'],
+        ['Herói mais rápido', 'No quadro, troque o passo 150 * dt por 300 * dt e confira se a animação ainda combina.', r'passo\s*=\s*300\s*\*\s*dt'],
+        ['Moeda mais devagar', 'Troque (tempoTotal * 12) por (tempoTotal * 6).', r'tempoTotal\s*\*\s*6\s*\)'],
+    ],
+    setup=SETUP_SPRITES,
+)
+
+aula(
+    'Som: efeitos com audioplayers',
+    'Som é metade da sensação de um jogo: o jogador percebe o acerto antes de olhar o placar. O pacote '
+    'audioplayers toca arquivos de áudio. Um AudioPlayer é um tocador; play(AssetSource(\'sons/moeda.wav\')) toca '
+    'um arquivo da pasta assets/sons (o AssetSource já começa em assets/). Aqui há dois tocadores, um para cada '
+    'tipo de efeito, para que um som não corte o outro. O jogo é pegar moedas: elas aparecem em lugares sorteados, '
+    'giram e somem depois de 2 segundos. Tocar numa moeda (a distância entre o dedo e o centro menor que 28) dá '
+    'ponto e toca moeda.wav; errar toca clique.wav; a cada 10 pontos toca poder.wav. A moeda que está para sumir '
+    'fica transparente: o alfa da cor do Paint também vale para imagens.',
+    'Em ▶ Testar, pegue moedas e ouça os efeitos (o botão 🔊 Som no topo liga e desliga). Troque o som do erro por '
+    'batida.wav, deixe as moedas durarem menos e faça o fim de cada moeda perdida tocar dano.wav.',
+    r'''
+import 'dart:math';
+import 'dart:ui' as ui;
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+
+void main() => runApp(const MaterialApp(home: Jogo()));
+
+const double largura = 360;
+const double altura = 520;
+
+Future<ui.Image> carregarImagem(String caminho) async {
+  final dados = await rootBundle.load(caminho);
+  return decodeImageFromList(dados.buffer.asUint8List());
+}
+
+class Moeda {
+  final Offset centro;
+  double vida = 2;
+  Moeda(this.centro);
+}
+
+class Cena extends CustomPainter {
+  final ui.Image folha;
+  final List<Moeda> moedas;
+  final int quadro;
+  Cena(this.folha, this.moedas, this.quadro);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF1D1B33));
+    final origem = Rect.fromLTWH(quadro * 16.0, 0, 16, 16);
+    for (final m in moedas) {
+      final opacidade = m.vida < 0.5 ? m.vida * 2 : 1.0;
+      final tinta = Paint()..color = Colors.white.withOpacity(opacidade);
+      canvas.drawImageRect(folha, origem, Rect.fromCenter(center: m.centro, width: 40, height: 40), tinta);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant Cena antiga) => true;
+}
+
+class Jogo extends StatefulWidget {
+  const Jogo({super.key});
+
+  @override
+  State<Jogo> createState() => _JogoState();
+}
+
+class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
+  late Ticker ticker;
+  double ultimo = 0;
+  ui.Image? folha;
+  final sorteio = Random();
+  final somAcerto = AudioPlayer();
+  final somErro = AudioPlayer();
+  List<Moeda> moedas = [];
+  double tempoProxima = 0;
+  double tempoTotal = 0;
+  int pontos = 0;
+  int perdidas = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    carregar();
+    ticker = createTicker(quadro);
+    ticker.start();
+  }
+
+  Future<void> carregar() async {
+    final f = await carregarImagem('assets/sprites/moeda.png');
+    setState(() => folha = f);
+  }
+
+  void quadro(Duration tempo) {
+    final agora = tempo.inMicroseconds / 1000000;
+    final dt = agora - ultimo;
+    ultimo = agora;
+    if (folha == null) return;
+    setState(() {
+      tempoTotal += dt;
+      tempoProxima -= dt;
+      if (tempoProxima <= 0) {
+        moedas.add(Moeda(Offset(30 + sorteio.nextDouble() * 300, 60 + sorteio.nextDouble() * 420)));
+        tempoProxima = 0.7;
+      }
+      for (final m in moedas) {
+        m.vida -= dt;
+      }
+      perdidas += moedas.where((m) => m.vida <= 0).length;
+      moedas.removeWhere((m) => m.vida <= 0);
+    });
+  }
+
+  void tocar(TapDownDetails details) {
+    Moeda? pega;
+    for (final m in moedas) {
+      if ((m.centro - details.localPosition).distance < 28) {
+        pega = m;
+        break;
+      }
+    }
+    setState(() {
+      if (pega != null) {
+        moedas.remove(pega);
+        pontos++;
+        if (pontos % 10 == 0) {
+          somAcerto.play(AssetSource('sons/poder.wav'));
+        } else {
+          somAcerto.play(AssetSource('sons/moeda.wav'));
+        }
+      } else {
+        somErro.play(AssetSource('sons/clique.wav'));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    ticker.dispose();
+    somAcerto.dispose();
+    somErro.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(title: Text('Moedas: $pontos · perdidas: $perdidas')),
+      body: folha == null
+          ? const Center(child: CircularProgressIndicator())
+          : Center(
+              child: GestureDetector(
+                onTapDown: tocar,
+                child: CustomPaint(
+                  size: const Size(largura, altura),
+                  painter: Cena(folha!, moedas, (tempoTotal * 12).floor() % 6),
+                ),
+              ),
+            ),
+    );
+  }
+}
+''',
+    [
+        ['Erro com batida.wav', "No somErro, troque 'sons/clique.wav' por 'sons/batida.wav'.", r"somErro\.play\(\s*AssetSource\(\s*'sons/batida\.wav'"],
+        ['Moedas que duram menos', 'Na classe Moeda, troque double vida = 2 por 1.2.', r'double vida\s*=\s*1\.2\b'],
+        ['Som quando uma moeda some', "Quando perdidas aumentar, toque AssetSource('sons/dano.wav') no somErro.", r"sons/dano\.wav"],
+    ],
+    lim="No simulador os sons são sintetizados pelo navegador, com timbre de videogame antigo. Os nomes disponíveis são pulo, moeda, batida, explosao, tiro, vitoria, derrota, clique, dano e poder (em sons/NOME.wav). O navegador só libera som depois do primeiro toque ou tecla.",
+    setup='No terminal do projeto:\n  flutter pub add audioplayers\n\npubspec.yaml (dentro de flutter:):\n  assets:\n    - assets/sprites/\n    - assets/sons/\n\nColoque seus arquivos .wav ou .mp3 em assets/sons/. Sites como freesound.org e opengameart.org têm efeitos livres (confira a licença de cada um).',
+)
+
+aula(
+    'Texto de jogo: contorno, sombra e fonte',
+    'Texto dentro do Canvas usa TextPainter: ele recebe um TextSpan com o texto e o estilo, layout() calcula o '
+    'tamanho e paint(canvas, posição) desenha. Depois do layout, tp.width diz a largura real do texto, e '
+    '(size.width - tp.width) / 2 centraliza. O título de jogo clássico tem contorno: o mesmo texto é desenhado '
+    'duas vezes no mesmo lugar, primeiro com foreground: Paint() com style stroke (só a borda, grossa) e depois '
+    'preenchido por cima. A sombra vem de shadows: [Shadow(...)]. A fonte pixelada vem do pacote google_fonts '
+    '(GoogleFonts.pressStart2p), que baixa a fonte na primeira vez. O título balança com sin(tempo), e o convite '
+    'pisca porque só é desenhado quando (tempo * 2).floor() é par.',
+    'Em ▶ Testar, veja o título balançar e o convite piscar; cada toque troca a cor. Engrosse o contorno para 10, '
+    'mude a sombra para baixo e à direita e troque a fonte do recorde por GoogleFonts.vt323.',
+    r'''
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+void main() => runApp(const MaterialApp(home: Abertura()));
+
+const double largura = 360;
+const double altura = 520;
+
+TextPainter escrever(String texto, TextStyle estilo) {
+  return TextPainter(
+    text: TextSpan(text: texto, style: estilo),
+    textDirection: TextDirection.ltr,
+  )..layout();
+}
+
+class Titulo extends CustomPainter {
+  final double tempo;
+  final Color cor;
+  final int recorde;
+  Titulo(this.tempo, this.cor, this.recorde);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF241B4B));
+    final estrela = Paint()..color = Colors.white70;
+    for (int i = 0; i < 40; i++) {
+      canvas.drawCircle(Offset((i * 97) % largura, (i * 53) % altura), i % 3 == 0 ? 2.0 : 1.0, estrela);
+    }
+
+    final y = 140 + sin(tempo * 2) * 6;
+    final borda = escrever('PULA\nCAIXA', TextStyle(
+      fontSize: 64,
+      fontWeight: FontWeight.w900,
+      foreground: Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 8
+        ..color = Colors.black,
+    ));
+    final cheio = escrever('PULA\nCAIXA', TextStyle(
+      fontSize: 64,
+      fontWeight: FontWeight.w900,
+      color: cor,
+      shadows: const [Shadow(color: Colors.black54, offset: Offset(0, 6), blurRadius: 6)],
+    ));
+    final x = (size.width - cheio.width) / 2;
+    borda.paint(canvas, Offset(x, y));
+    cheio.paint(canvas, Offset(x, y));
+
+    if ((tempo * 2).floor() % 2 == 0) {
+      final convite = escrever('TOQUE PARA COMEÇAR', GoogleFonts.pressStart2p(fontSize: 14, color: Colors.white));
+      convite.paint(canvas, Offset((size.width - convite.width) / 2, 380));
+    }
+    final placar = escrever('RECORDE $recorde m', GoogleFonts.pressStart2p(fontSize: 12, color: Colors.amberAccent));
+    placar.paint(canvas, Offset((size.width - placar.width) / 2, 440));
+  }
+
+  @override
+  bool shouldRepaint(covariant Titulo antiga) => true;
+}
+
+class Abertura extends StatefulWidget {
+  const Abertura({super.key});
+
+  @override
+  State<Abertura> createState() => _AberturaState();
+}
+
+class _AberturaState extends State<Abertura> with SingleTickerProviderStateMixin {
+  late Ticker ticker;
+  double tempo = 0;
+  int indiceCor = 0;
+  final cores = [Colors.amber, Colors.lightGreenAccent, Colors.cyanAccent, Colors.pinkAccent];
+
+  @override
+  void initState() {
+    super.initState();
+    ticker = createTicker((t) => setState(() => tempo = t.inMicroseconds / 1000000));
+    ticker.start();
+  }
+
+  @override
+  void dispose() {
+    ticker.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => indiceCor = (indiceCor + 1) % cores.length),
+          child: CustomPaint(
+            size: const Size(largura, altura),
+            painter: Titulo(tempo, cores[indiceCor], 128),
+          ),
+        ),
+      ),
+    );
+  }
+}
+''',
+    [
+        ['Contorno mais grosso (10)', 'No Paint da borda, troque strokeWidth = 8 por 10.', r'strokeWidth\s*=\s*10\b'],
+        ['Sombra para baixo e à direita', 'No Shadow do título, troque Offset(0, 6) por Offset(6, 6).', r'Shadow\([^)]*offset:\s*Offset\(\s*[1-9]\d*\s*,\s*[1-9]'],
+        ['Recorde com VT323', 'No placar, troque GoogleFonts.pressStart2p por GoogleFonts.vt323 (e aumente o fontSize para 24).', r"placar\s*=\s*escrever\([^;]*GoogleFonts\.vt323"],
+    ],
+    lim='No simulador, as fontes do google_fonts que já vêm prontas são pressStart2p, silkscreen, vt323 e bungee. Sem internet, o texto aparece numa fonte parecida.',
+    setup='No terminal do projeto:\n  flutter pub add google_fonts\n\nO google_fonts baixa a fonte na primeira execução. Para o jogo funcionar sem internet, baixe o arquivo .ttf, ponha em assets/fontes/ e declare em fonts: no pubspec.yaml.',
+)
+
+PARTS.append(['Sprites: imagens no Canvas', 'Parte 3 · Sprites, animação, som e texto'])
+
+aula(
+    'Projeto · Pega-Maçã',
+    'O segundo projeto junta as Partes 1, 2 e 3. Maçãs e slimes caem do céu; o herói anda pelo chão, arrastando o '
+    'dedo ou com as setas, e precisa pegar as maçãs e fugir dos slimes. Cada maçã vale um ponto e toca moeda.wav. '
+    'Cada slime tira um coração, toca dano.wav e deixa o herói piscando e invencível por 1 segundo (tempoInvencivel). '
+    'Sem corações, a partida acaba, toca derrota.wav e o recorde é atualizado. Os itens caem cada vez mais rápido e '
+    'mais seguido, porque a velocidade e o intervalo dependem do tempo de partida. A classe Item guarda o que é '
+    'comum às maçãs e aos slimes; o campo boa diz qual é qual. O HUD (corações e pontos) e as telas de começo e '
+    'fim são desenhados no próprio Canvas, com sprites e TextPainter.',
+    'Em ▶ Testar, jogue algumas partidas com o dedo (arrastando) e com as setas do teclado. Depois mude o jogo: '
+    'comece com 5 corações, faça uma maçã dourada (rara) valer 5 pontos e deixe os slimes mais lentos que as maçãs.',
+    r'''
+import 'dart:math';
+import 'dart:ui' as ui;
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+void main() => runApp(const MaterialApp(home: PegaMaca()));
+
+const double largura = 360;
+const double altura = 520;
+const double chao = 448;
+const double tamanhoHeroi = 56;
+
+enum Estado { pronto, jogando, fim }
+
+Future<ui.Image> carregarImagem(String caminho) async {
+  final dados = await rootBundle.load(caminho);
+  return decodeImageFromList(dados.buffer.asUint8List());
+}
+
+TextPainter escrever(String texto, TextStyle estilo) {
+  return TextPainter(text: TextSpan(text: texto, style: estilo), textDirection: TextDirection.ltr)..layout();
+}
+
+class Sprites {
+  final ui.Image heroi;
+  final ui.Image maca;
+  final ui.Image slime;
+  final ui.Image coracao;
+  final ui.Image grama;
+  Sprites(this.heroi, this.maca, this.slime, this.coracao, this.grama);
+}
+
+class Item {
+  double x;
+  double y;
+  final bool boa;
+  Item(this.x, this.y, this.boa);
+
+  Rect get area => Rect.fromLTWH(x, y, 36, 36);
+}
+
+class Cena extends CustomPainter {
+  final Sprites s;
+  final _PegaMacaState jogo;
+  Cena(this.s, this.jogo);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF9AD8F5));
+    final tinta = Paint();
+    const bloco = Rect.fromLTWH(0, 0, 16, 16);
+    for (int i = 0; i < 12; i++) {
+      canvas.drawImageRect(s.grama, bloco, Rect.fromLTWH(i * 32.0, chao, 32, 32), tinta);
+    }
+    canvas.drawRect(Rect.fromLTWH(0, chao + 32, size.width, size.height - chao - 32), Paint()..color = const Color(0xFF8B5A2B));
+
+    final quadroSlime = (jogo.tempoTotal * 4).floor() % 2;
+    for (final item in jogo.itens) {
+      if (item.boa) {
+        canvas.drawImageRect(s.maca, bloco, item.area, tinta);
+      } else {
+        canvas.drawImageRect(s.slime, Rect.fromLTWH(quadroSlime * 16.0, 0, 16, 16), item.area, tinta);
+      }
+    }
+
+    final piscando = jogo.tempoInvencivel > 0 && (jogo.tempoInvencivel * 10).floor() % 2 == 0;
+    if (!piscando) {
+      final quadro = jogo.andando ? (jogo.tempoAndando * 10).floor() % 4 : 0;
+      canvas.save();
+      canvas.translate(jogo.x + tamanhoHeroi / 2, chao - tamanhoHeroi);
+      canvas.scale(jogo.direcao, 1);
+      canvas.drawImageRect(s.heroi, Rect.fromLTWH(quadro * 16.0, 0, 16, 16), const Rect.fromLTWH(-tamanhoHeroi / 2, 0, tamanhoHeroi, tamanhoHeroi), tinta);
+      canvas.restore();
+    }
+
+    for (int i = 0; i < jogo.vidas; i++) {
+      canvas.drawImageRect(s.coracao, bloco, Rect.fromLTWH(12 + i * 28.0, 12, 24, 24), tinta);
+    }
+    final placar = escrever('${jogo.pontos}', GoogleFonts.pressStart2p(fontSize: 18, color: Colors.white, shadows: const [Shadow(color: Colors.black, offset: Offset(2, 2))]));
+    placar.paint(canvas, Offset(size.width - placar.width - 14, 16));
+
+    if (jogo.estado != Estado.jogando) {
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = Colors.black45);
+      final texto = jogo.estado == Estado.pronto ? 'PEGA\nMAÇÃ' : 'FIM!';
+      final borda = escrever(texto, TextStyle(fontSize: 56, fontWeight: FontWeight.w900, foreground: Paint()..style = PaintingStyle.stroke..strokeWidth = 8..color = Colors.black));
+      final cheio = escrever(texto, const TextStyle(fontSize: 56, fontWeight: FontWeight.w900, color: Colors.redAccent));
+      final x = (size.width - cheio.width) / 2;
+      borda.paint(canvas, Offset(x, 110));
+      cheio.paint(canvas, Offset(x, 110));
+      final dica = escrever(jogo.estado == Estado.pronto ? 'TOQUE OU ESPAÇO' : 'RECORDE ${jogo.recorde}', GoogleFonts.pressStart2p(fontSize: 13, color: Colors.white));
+      dica.paint(canvas, Offset((size.width - dica.width) / 2, 300));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant Cena antiga) => true;
+}
+
+class PegaMaca extends StatefulWidget {
+  const PegaMaca({super.key});
+
+  @override
+  State<PegaMaca> createState() => _PegaMacaState();
+}
+
+class _PegaMacaState extends State<PegaMaca> with SingleTickerProviderStateMixin {
+  late Ticker ticker;
+  double ultimo = 0;
+  Sprites? sprites;
+  final sorteio = Random();
+  final somItem = AudioPlayer();
+  final somFim = AudioPlayer();
+
+  Estado estado = Estado.pronto;
+  List<Item> itens = [];
+  double x = (largura - tamanhoHeroi) / 2;
+  double direcao = 1;
+  bool andando = false;
+  double tempoAndando = 0;
+  double ultimoMovimento = -1;
+  double tempoTotal = 0;
+  double tempoDePartida = 0;
+  double tempoProximo = 0;
+  double tempoInvencivel = 0;
+  int vidas = 3;
+  int pontos = 0;
+  int recorde = 0;
+
+  double get velocidadeQueda => 140 + tempoDePartida * 6;
+  double get intervalo => max(0.35, 1.1 - tempoDePartida * 0.02);
+
+  @override
+  void initState() {
+    super.initState();
+    carregar();
+    ticker = createTicker(quadro);
+    ticker.start();
+  }
+
+  Future<void> carregar() async {
+    final heroi = await carregarImagem('assets/sprites/heroi.png');
+    final maca = await carregarImagem('assets/sprites/maca.png');
+    final slime = await carregarImagem('assets/sprites/slime.png');
+    final coracao = await carregarImagem('assets/sprites/coracao.png');
+    final grama = await carregarImagem('assets/sprites/grama.png');
+    setState(() => sprites = Sprites(heroi, maca, slime, coracao, grama));
+  }
+
+  void quadro(Duration tempo) {
+    final agora = tempo.inMicroseconds / 1000000;
+    final dt = agora - ultimo;
+    ultimo = agora;
+    setState(() {
+      tempoTotal += dt;
+      if (estado == Estado.jogando) atualizar(dt);
+    });
+  }
+
+  void atualizar(double dt) {
+    tempoDePartida += dt;
+    if (tempoInvencivel > 0) tempoInvencivel -= dt;
+
+    final teclado = HardwareKeyboard.instance;
+    double movimento = 0;
+    if (teclado.isLogicalKeyPressed(LogicalKeyboardKey.arrowLeft)) movimento -= 260 * dt;
+    if (teclado.isLogicalKeyPressed(LogicalKeyboardKey.arrowRight)) movimento += 260 * dt;
+    if (movimento != 0) mover(movimento);
+    andando = tempoTotal - ultimoMovimento < 0.12;
+    tempoAndando = andando ? tempoAndando + dt : 0;
+
+    tempoProximo -= dt;
+    if (tempoProximo <= 0) {
+      itens.add(Item(sorteio.nextDouble() * (largura - 36), -36, sorteio.nextDouble() < 0.75));
+      tempoProximo = intervalo;
+    }
+    for (final item in itens) {
+      item.y += velocidadeQueda * dt;
+    }
+
+    final heroi = Rect.fromLTWH(x, chao - tamanhoHeroi, tamanhoHeroi, tamanhoHeroi).deflate(8);
+    final pegos = itens.where((item) => item.area.overlaps(heroi)).toList();
+    for (final item in pegos) {
+      if (item.boa) {
+        pontos++;
+        somItem.play(AssetSource('sons/moeda.wav'));
+      } else if (tempoInvencivel <= 0) {
+        vidas--;
+        tempoInvencivel = 1;
+        somItem.play(AssetSource('sons/dano.wav'));
+      }
+    }
+    itens.removeWhere((item) => pegos.contains(item) || item.y > chao);
+
+    if (vidas <= 0) {
+      estado = Estado.fim;
+      if (pontos > recorde) recorde = pontos;
+      somFim.play(AssetSource('sons/derrota.wav'));
+    }
+  }
+
+  void mover(double dx) {
+    x += dx;
+    if (x < 0) x = 0;
+    if (x > largura - tamanhoHeroi) x = largura - tamanhoHeroi;
+    if (dx != 0) {
+      direcao = dx > 0 ? 1.0 : -1.0;
+      ultimoMovimento = tempoTotal;
+    }
+  }
+
+  void comecar() {
+    setState(() {
+      if (estado == Estado.jogando) return;
+      itens.clear();
+      vidas = 3;
+      pontos = 0;
+      tempoDePartida = 0;
+      tempoProximo = 0.5;
+      tempoInvencivel = 0;
+      estado = Estado.jogando;
+      somFim.play(AssetSource('sons/poder.wav'));
+    });
+  }
+
+  KeyEventResult tecla(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.space) {
+      comecar();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  @override
+  void dispose() {
+    ticker.dispose();
+    somItem.dispose();
+    somFim.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: sprites == null
+          ? const Center(child: CircularProgressIndicator())
+          : Center(
+              child: Focus(
+                autofocus: true,
+                onKeyEvent: tecla,
+                child: GestureDetector(
+                  onTapDown: (_) => comecar(),
+                  onPanUpdate: (details) => mover(details.delta.dx),
+                  child: CustomPaint(
+                    size: const Size(largura, altura),
+                    painter: Cena(sprites!, this),
+                  ),
+                ),
+              ),
+            ),
+    );
+  }
+}
+''',
+    [
+        ['Começar com 5 corações', 'Em comecar() e na declaração, troque vidas = 3 por 5.', r'int vidas\s*=\s*5\b[\s\S]*vidas\s*=\s*5\s*;|vidas\s*=\s*5\s*;[\s\S]*int vidas\s*=\s*5\b'],
+        ['Maçã dourada que vale 5', 'Acrescente um campo dourada no Item (sorteado raramente), some 5 pontos quando pegar e pinte com Colors.amber por cima (Paint com colorFilter) ou desenhe um círculo dourado.', r'dourada'],
+        ['Slimes mais lentos', "No laço que faz os itens caírem, use velocidadeQueda * 0.6 quando o item não for boa.", r'boa\s*\?\s*velocidadeQueda\s*:\s*velocidadeQueda\s*\*|!\s*item\.boa[\s\S]{0,80}\*\s*0\.\d'],
+    ],
+    lim="O painter recebe o próprio State (Cena(sprites!, this)) para ler os campos do jogo: é um atalho comum em protótipos. Em projetos maiores, separe o estado do jogo numa classe própria, como o Flame faz.",
+    setup=SETUP_SPRITES + '\n\nSons: flutter pub add audioplayers e assets/sons/ (moeda.wav, dano.wav, derrota.wav, poder.wav).\nFonte: flutter pub add google_fonts.',
+)
+
+PARTS.append(['Projeto · Pega-Maçã', 'Projeto 2 · Pega-Maçã'])

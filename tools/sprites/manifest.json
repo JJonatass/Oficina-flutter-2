@@ -1,0 +1,90 @@
+[
+ {
+  "nome": "heroi",
+  "caminho": "assets/sprites/heroi.png",
+  "largura": 64,
+  "altura": 16,
+  "quadros": 4,
+  "desc": "Herói andando para a direita (4 quadros de 16×16)"
+ },
+ {
+  "nome": "moeda",
+  "caminho": "assets/sprites/moeda.png",
+  "largura": 96,
+  "altura": 16,
+  "quadros": 6,
+  "desc": "Moeda girando (6 quadros de 16×16)"
+ },
+ {
+  "nome": "slime",
+  "caminho": "assets/sprites/slime.png",
+  "largura": 32,
+  "altura": 16,
+  "quadros": 2,
+  "desc": "Inimigo slime pulsando (2 quadros de 16×16)"
+ },
+ {
+  "nome": "nave",
+  "caminho": "assets/sprites/nave.png",
+  "largura": 32,
+  "altura": 16,
+  "quadros": 2,
+  "desc": "Nave apontando para cima, com fogo (2 quadros de 16×16)"
+ },
+ {
+  "nome": "explosao",
+  "caminho": "assets/sprites/explosao.png",
+  "largura": 80,
+  "altura": 16,
+  "quadros": 5,
+  "desc": "Explosão (5 quadros de 16×16)"
+ },
+ {
+  "nome": "tiro",
+  "caminho": "assets/sprites/tiro.png",
+  "largura": 8,
+  "altura": 8,
+  "quadros": 1,
+  "desc": "Tiro de laser (8×8)"
+ },
+ {
+  "nome": "caixa",
+  "caminho": "assets/sprites/caixa.png",
+  "largura": 16,
+  "altura": 16,
+  "quadros": 1,
+  "desc": "Caixa de madeira (16×16)"
+ },
+ {
+  "nome": "coracao",
+  "caminho": "assets/sprites/coracao.png",
+  "largura": 16,
+  "altura": 16,
+  "quadros": 1,
+  "desc": "Coração para vidas (16×16)"
+ },
+ {
+  "nome": "maca",
+  "caminho": "assets/sprites/maca.png",
+  "largura": 16,
+  "altura": 16,
+  "quadros": 1,
+  "desc": "Maçã (16×16)"
+ },
+ {
+  "nome": "grama",
+  "caminho": "assets/sprites/grama.png",
+  "largura": 16,
+  "altura": 16,
+  "quadros": 1,
+  "desc": "Bloco de chão com grama (16×16)"
+ },
+ {
+  "nome": "nuvem",
+  "caminho": "assets/sprites/nuvem.png",
+  "largura": 32,
+  "altura": 16,
+  "quadros": 1,
+  "desc": "Nuvem (32×16)"
+ }
+]
