@@ -2494,3 +2494,701 @@ class _PegaMacaState extends State<PegaMaca> with SingleTickerProviderStateMixin
 )
 
 PARTS.append(['Projeto · Pega-Maçã', 'Projeto 2 · Pega-Maçã'])
+
+
+# ---------------------------------------------------------------- Parte 4 · Flame
+SETUP_FLAME = (
+    'No terminal do projeto:\n'
+    '  flutter pub add flame\n\n'
+    'O Flame procura imagens em assets/images/ e sons em assets/audio/. No pubspec.yaml (dentro de flutter:):\n'
+    '  assets:\n'
+    '    - assets/images/\n'
+    '    - assets/audio/\n\n'
+    'No simulador, os sprites prontos (heroi.png, moeda.png, slime.png, nave.png, explosao.png, tiro.png, caixa.png, '
+    'coracao.png, maca.png, grama.png, nuvem.png) e os sons (pulo.wav, moeda.wav, batida.wav, explosao.wav, tiro.wav, '
+    'vitoria.wav, derrota.wav, clique.wav, dano.wav, poder.wav) já existem com esses nomes.'
+)
+
+aula(
+    'Flame: o primeiro jogo',
+    'Flame é o motor de jogos 2D mais usado com Flutter. Ele traz pronto o que você montou à mão nas Partes 1 a 3: o '
+    'laço com dt, o desenho no Canvas e a lista de objetos. O jogo é uma classe que estende FlameGame e aparece na '
+    'tela com GameWidget(game: MeuJogo()). Tudo dentro dele é um componente: o onLoad do jogo cria as bolas e chama '
+    'add() para colocá-las no jogo. Cada Bola estende PositionComponent, que já tem position, size, angle e anchor. '
+    'O Flame chama update(dt) de todos os componentes a cada quadro e depois render(canvas), com o canvas já '
+    'deslocado para a posição do componente: por isso a bola desenha o círculo em relação ao próprio canto, sem '
+    'somar position. Com anchor: Anchor.center, a position passa a ser o centro da bola. game.size é o tamanho da '
+    'tela do jogo. Ligue o debugMode para ver o contorno e a posição de cada componente.',
+    'Em ▶ Testar, veja as bolas quicarem. Mude debugMode para true, acrescente uma terceira bola no onLoad e troque a '
+    'cor de fundo em backgroundColor.',
+    r'''
+import 'package:flame/components.dart';
+import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(game: MeuJogo()));
+
+class MeuJogo extends FlameGame {
+  @override
+  Future<void> onLoad() async {
+    debugMode = false;
+    add(Bola(Vector2(80, 120), Vector2(150, 110), Colors.amber));
+    add(Bola(Vector2(220, 360), Vector2(-120, 160), Colors.pinkAccent));
+  }
+
+  @override
+  Color backgroundColor() => const Color(0xFF14213D);
+}
+
+class Bola extends PositionComponent with HasGameReference<MeuJogo> {
+  Vector2 velocidade;
+  final Color cor;
+
+  Bola(Vector2 inicio, this.velocidade, this.cor)
+      : super(position: inicio, size: Vector2.all(40), anchor: Anchor.center);
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    position += velocidade * dt;
+    if (position.x < 20 || position.x > game.size.x - 20) {
+      velocidade.x = -velocidade.x;
+    }
+    if (position.y < 20 || position.y > game.size.y - 20) {
+      velocidade.y = -velocidade.y;
+    }
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawCircle(Offset(size.x / 2, size.y / 2), size.x / 2, Paint()..color = cor);
+  }
+}
+''',
+    [
+        ['Ligar o debugMode', 'No onLoad do jogo, troque debugMode = false por true.', r'debugMode\s*=\s*true'],
+        ['Terceira bola', 'Acrescente mais um add(Bola(...)) no onLoad, com outra posição, velocidade e cor.', r'(?:add\(\s*Bola\([\s\S]*?){3}'],
+        ['Outro fundo', 'Em backgroundColor, troque Color(0xFF14213D) por outra cor.', r'^(?![\s\S]*0xFF14213D)'],
+    ],
+    lim='O Flame do simulador é uma versão simplificada: tem os componentes, eventos e colisões mais usados, mas não tem efeitos (MoveEffect e outros), paralaxe, partículas nem overlays.',
+    setup=SETUP_FLAME,
+)
+
+aula(
+    'Flame: sprites e animação',
+    'No Flame, desenhar imagem não precisa de CustomPainter: SpriteComponent mostra um Sprite e SpriteAnimationComponent '
+    'mostra uma animação. game.loadSprite(\'caixa.png\') carrega a imagem da pasta assets/images e devolve o Sprite. '
+    'Para animar uma folha de sprites, game.loadSpriteAnimation recebe a imagem e um SpriteAnimationData.sequenced: '
+    'quantos quadros (amount), quanto tempo cada um fica na tela (stepTime) e o tamanho de cada quadro na folha '
+    '(textureSize). O componente troca de quadro sozinho no update. O herói aqui anda de um lado a outro; ao chegar na '
+    'borda ele inverte a direção e chama flipHorizontallyAroundCenter(), que espelha o desenho sem mudar a posição. A '
+    'moeda gira com 6 quadros, cada um por 0,08 segundo.',
+    'Em ▶ Testar, veja o herói andar e virar nas bordas. Deixe a animação mais lenta (stepTime 0.25), troque a caixa '
+    'pela maçã e coloque três moedas em fila.',
+    r'''
+import 'package:flame/components.dart';
+import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(game: Vitrine()));
+
+class Vitrine extends FlameGame {
+  @override
+  Future<void> onLoad() async {
+    add(RectangleComponent(position: Vector2(0, size.y - 32), size: Vector2(size.x, 32), paint: Paint()..color = const Color(0xFF8B5A2B)));
+    final grama = await loadSprite('grama.png');
+    for (int i = 0; i < 12; i++) {
+      add(SpriteComponent(sprite: grama, position: Vector2(i * 32.0, size.y - 64), size: Vector2.all(32)));
+    }
+    add(SpriteComponent(sprite: await loadSprite('caixa.png'), position: Vector2(250, size.y - 112), size: Vector2.all(48)));
+
+    final giro = await loadSpriteAnimation(
+      'moeda.png',
+      SpriteAnimationData.sequenced(amount: 6, stepTime: 0.08, textureSize: Vector2.all(16)),
+    );
+    add(SpriteAnimationComponent(animation: giro, position: Vector2(262, size.y - 170), size: Vector2.all(24)));
+
+    add(Heroi());
+  }
+
+  @override
+  Color backgroundColor() => const Color(0xFF7EC8F2);
+}
+
+class Heroi extends SpriteAnimationComponent with HasGameReference<Vitrine> {
+  double direcao = 1;
+
+  Heroi() : super(size: Vector2.all(64), anchor: Anchor.bottomCenter);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'heroi.png',
+      SpriteAnimationData.sequenced(amount: 4, stepTime: 0.1, textureSize: Vector2.all(16)),
+    );
+    position = Vector2(80, game.size.y - 64);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    position.x += 120 * direcao * dt;
+    if ((direcao > 0 && position.x > game.size.x - 32) || (direcao < 0 && position.x < 32)) {
+      direcao = -direcao;
+      flipHorizontallyAroundCenter();
+    }
+  }
+}
+''',
+    [
+        ['Animação mais lenta', 'No SpriteAnimationData do herói, troque stepTime: 0.1 por 0.25.', r"heroi\.png[\s\S]{0,140}stepTime:\s*0\.25"],
+        ['Maçã no lugar da caixa', "Troque loadSprite('caixa.png') por loadSprite('maca.png').", r"loadSprite\(\s*'maca\.png'\s*\)"],
+        ['Três moedas', 'Crie as moedas num for com i de 0 a 2, mudando o x de cada uma (todas podem usar a mesma animação giro).', r'for\s*\([^)]*\)\s*\{[\s\S]{0,200}SpriteAnimationComponent\(\s*animation:\s*giro'],
+    ],
+    setup=SETUP_FLAME,
+)
+
+aula(
+    'Flame: toque e arrasto em componentes',
+    'No Flame, quem recebe o toque é o componente. Basta acrescentar o mixin TapCallbacks e escrever onTapDown: o Flame '
+    'só chama o método se o dedo cair dentro do retângulo daquele componente, e event.localPosition diz onde, a partir '
+    'do canto dele. Aqui cada moeda some quando tocada e toca um som com FlameAudio.play(\'moeda.wav\') (os sons ficam '
+    'em assets/audio). Para arrastar, o mixin é DragCallbacks: onDragUpdate recebe event.localDelta, quanto o dedo andou '
+    'desde a última vez. O herói só anda na horizontal, então soma só o x. O próprio jogo também pode ter '
+    'TapCallbacks: ele recebe os toques que não caíram em nenhum componente; aqui um toque no vazio cria uma moeda nova.',
+    'Em ▶ Testar, pegue as moedas tocando nelas, arraste o herói e toque no céu vazio para criar moedas. Faça o herói '
+    'arrastar também na vertical e conte os pontos no título com um TextComponent.',
+    r'''
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame/game.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(game: Toques()));
+
+class Toques extends FlameGame with TapCallbacks {
+  int pontos = 0;
+
+  @override
+  Future<void> onLoad() async {
+    for (int i = 0; i < 4; i++) {
+      add(Moeda(Vector2(60 + i * 80.0, 160)));
+    }
+    add(Heroi());
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    add(Moeda(event.canvasPosition));
+  }
+
+  @override
+  Color backgroundColor() => const Color(0xFF1D1B33);
+}
+
+class Moeda extends SpriteAnimationComponent with TapCallbacks, HasGameReference<Toques> {
+  Moeda(Vector2 posicao) : super(position: posicao, size: Vector2.all(40), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'moeda.png',
+      SpriteAnimationData.sequenced(amount: 6, stepTime: 0.08, textureSize: Vector2.all(16)),
+    );
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    game.pontos++;
+    FlameAudio.play('moeda.wav');
+    removeFromParent();
+  }
+}
+
+class Heroi extends SpriteAnimationComponent with DragCallbacks, HasGameReference<Toques> {
+  Heroi() : super(size: Vector2.all(72), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'heroi.png',
+      SpriteAnimationData.sequenced(amount: 4, stepTime: 0.12, textureSize: Vector2.all(16)),
+    );
+    position = Vector2(game.size.x / 2, game.size.y - 120);
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    position.x += event.localDelta.x;
+  }
+}
+''',
+    [
+        ['Arrastar na vertical também', 'No onDragUpdate, some também event.localDelta.y ao position.y (ou use position += event.localDelta).', r'position\.y\s*\+=\s*event\.localDelta\.y|position\s*\+=\s*event\.localDelta'],
+        ['Moedas maiores', 'No construtor da Moeda, troque Vector2.all(40) por Vector2.all(56).', r'Vector2\.all\(\s*56\s*\)'],
+        ['Placar com TextComponent', "Crie um TextComponent no onLoad do jogo, guarde num campo late TextComponent placar e atualize placar.text no update do jogo.", r'placar\.text\s*='],
+    ],
+    setup=SETUP_FLAME,
+)
+
+aula(
+    'Flame: colisões com hitboxes',
+    'Para o Flame testar colisões, o jogo usa o mixin HasCollisionDetection e cada componente que colide ganha um '
+    'hitbox como filho: RectangleHitbox ou CircleHitbox, que por padrão ocupam o tamanho do componente. O componente '
+    'que quer saber da colisão usa CollisionCallbacks e escreve onCollisionStart(pontos, outro): o Flame chama uma vez, '
+    'no primeiro quadro em que os dois se tocam, e "outro" é o componente do outro lado. Com is dá para saber o tipo '
+    '(if (other is Slime)). Aqui a nave atira sozinha a cada 0,3 segundo (TimerComponent), os slimes descem e, quando '
+    'um tiro acerta um slime, os dois somem e nasce uma explosão: uma SpriteAnimationComponent com loop: false e '
+    'removeOnFinish: true, que se apaga sozinha no último quadro. Ligue o debugMode para ver os hitboxes em amarelo.',
+    'Em ▶ Testar, arraste a nave e acerte os slimes. Ligue debugMode, troque o CircleHitbox do slime por um '
+    'RectangleHitbox e faça a nave atirar mais rápido.',
+    r'''
+import 'dart:math';
+import 'package:flame/collisions.dart';
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame/game.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(game: Espaco()));
+
+class Espaco extends FlameGame with HasCollisionDetection {
+  final sorteio = Random();
+  late Nave nave;
+
+  @override
+  Future<void> onLoad() async {
+    debugMode = false;
+    nave = Nave();
+    add(nave);
+    add(TimerComponent(period: 0.3, repeat: true, onTick: () => add(Tiro(nave.position.clone()))));
+    add(TimerComponent(period: 0.9, repeat: true, onTick: () => add(Slime(Vector2(30 + sorteio.nextDouble() * (size.x - 60), -30)))));
+  }
+
+  @override
+  Color backgroundColor() => const Color(0xFF0B0F2A);
+}
+
+class Nave extends SpriteAnimationComponent with DragCallbacks, HasGameReference<Espaco> {
+  Nave() : super(size: Vector2.all(56), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'nave.png',
+      SpriteAnimationData.sequenced(amount: 2, stepTime: 0.1, textureSize: Vector2.all(16)),
+    );
+    position = Vector2(game.size.x / 2, game.size.y - 90);
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    position.x += event.localDelta.x;
+  }
+}
+
+class Tiro extends SpriteComponent with HasGameReference<Espaco> {
+  Tiro(Vector2 inicio) : super(position: inicio, size: Vector2(12, 24), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    sprite = await game.loadSprite('tiro.png');
+    add(RectangleHitbox());
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    position.y -= 420 * dt;
+    if (position.y < -20) removeFromParent();
+  }
+}
+
+class Slime extends SpriteAnimationComponent with CollisionCallbacks, HasGameReference<Espaco> {
+  Slime(Vector2 inicio) : super(position: inicio, size: Vector2.all(48), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'slime.png',
+      SpriteAnimationData.sequenced(amount: 2, stepTime: 0.3, textureSize: Vector2.all(16)),
+    );
+    add(CircleHitbox());
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    position.y += 90 * dt;
+    if (position.y > game.size.y + 30) removeFromParent();
+  }
+
+  @override
+  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollisionStart(intersectionPoints, other);
+    if (other is Tiro) {
+      other.removeFromParent();
+      removeFromParent();
+      game.add(Explosao(position.clone()));
+      FlameAudio.play('explosao.wav');
+    }
+  }
+}
+
+class Explosao extends SpriteAnimationComponent with HasGameReference<Espaco> {
+  Explosao(Vector2 onde) : super(position: onde, size: Vector2.all(64), anchor: Anchor.center, removeOnFinish: true);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'explosao.png',
+      SpriteAnimationData.sequenced(amount: 5, stepTime: 0.07, textureSize: Vector2.all(16), loop: false),
+    );
+  }
+}
+''',
+    [
+        ['Ver os hitboxes', 'No onLoad do jogo, troque debugMode = false por true.', r'debugMode\s*=\s*true'],
+        ['Slime com RectangleHitbox', 'No onLoad do Slime, troque CircleHitbox() por RectangleHitbox().', r'class Slime[\s\S]*add\(\s*RectangleHitbox\(\s*\)\s*\)[\s\S]*class Explosao'],
+        ['Tiro mais rápido', 'No primeiro TimerComponent, troque period: 0.3 por 0.15.', r'period:\s*0\.15\b'],
+    ],
+    setup=SETUP_FLAME,
+)
+
+aula(
+    'Flame: teclado, mundo e câmera',
+    'Jogos maiores que a tela usam mundo e câmera. Tudo o que é colocado com world.add fica no mundo, um espaço sem '
+    'bordas; a câmera mostra só um pedaço dele. Por padrão o centro da tela é o ponto (0, 0) do mundo, e '
+    'camera.follow(heroi) faz a câmera andar junto com o herói. O que deve ficar parado na tela, como o placar, vai '
+    'para camera.viewport.add: é o HUD. O jogo recebe o teclado com o mixin KeyboardEvents: onKeyEvent ganha o evento '
+    'e keysPressed, o conjunto de teclas apertadas neste momento. Guardar a direção num campo e usá-la no update do '
+    'herói deixa o movimento contínuo enquanto a tecla está apertada. O chão é uma fila de 60 blocos de grama, muito '
+    'mais larga que a tela, e as nuvens ajudam a perceber que a câmera está andando.',
+    'Em ▶ Testar, clique no celular e ande com ← e →. Veja o placar mostrar o x do herói. Mude o zoom da câmera para '
+    '1.5, faça o herói correr segurando Shift e acrescente moedas pelo caminho.',
+    r'''
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+void main() => runApp(GameWidget(game: Caminhada()));
+
+class Caminhada extends FlameGame with KeyboardEvents {
+  late Heroi heroi;
+  late TextComponent placar;
+
+  @override
+  Future<void> onLoad() async {
+    world.add(RectangleComponent(position: Vector2(-960, 96), size: Vector2(1920, 600), paint: Paint()..color = const Color(0xFF8B5A2B)));
+    final grama = await loadSprite('grama.png');
+    for (int i = -30; i < 30; i++) {
+      world.add(SpriteComponent(sprite: grama, position: Vector2(i * 32.0, 64), size: Vector2.all(32)));
+    }
+    final nuvem = await loadSprite('nuvem.png');
+    for (int i = -6; i < 6; i++) {
+      world.add(SpriteComponent(sprite: nuvem, position: Vector2(i * 170.0, -180.0 + (i % 3) * 40), size: Vector2(96, 48)));
+    }
+    heroi = Heroi();
+    world.add(heroi);
+    camera.follow(heroi);
+    camera.viewfinder.zoom = 1;
+
+    placar = TextComponent(
+      text: '',
+      position: Vector2(12, 12),
+      textRenderer: TextPaint(style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+    );
+    camera.viewport.add(placar);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    placar.text = 'x = ${heroi.position.x.toStringAsFixed(0)}';
+  }
+
+  @override
+  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    heroi.direcao = 0;
+    if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) heroi.direcao -= 1;
+    if (keysPressed.contains(LogicalKeyboardKey.arrowRight)) heroi.direcao += 1;
+    return KeyEventResult.handled;
+  }
+
+  @override
+  Color backgroundColor() => const Color(0xFF7EC8F2);
+}
+
+class Heroi extends SpriteAnimationComponent with HasGameReference<Caminhada> {
+  double direcao = 0;
+  bool olhandoDireita = true;
+
+  Heroi() : super(position: Vector2(0, 64), size: Vector2.all(64), anchor: Anchor.bottomCenter);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'heroi.png',
+      SpriteAnimationData.sequenced(amount: 4, stepTime: 0.1, textureSize: Vector2.all(16)),
+    );
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    playing = direcao != 0;
+    position.x += direcao * 180 * dt;
+    if ((direcao < 0 && olhandoDireita) || (direcao > 0 && !olhandoDireita)) {
+      olhandoDireita = !olhandoDireita;
+      flipHorizontallyAroundCenter();
+    }
+  }
+}
+''',
+    [
+        ['Zoom de 1.5', 'Troque camera.viewfinder.zoom = 1 por 1.5.', r'camera\.viewfinder\.zoom\s*=\s*1\.5'],
+        ['Correr com Shift', 'No onKeyEvent, se keysPressed tiver LogicalKeyboardKey.shiftLeft, multiplique a direção por 2.', r'LogicalKeyboardKey\.shiftLeft'],
+        ['Moedas no caminho', "Crie moedas com world.add num for, usando game.loadSpriteAnimation('moeda.png', ...) ou loadSprite.", r"world\.add\([\s\S]{0,200}moeda|moeda\.png[\s\S]*world\.add"],
+    ],
+    lim='Clique no celular antes de usar as teclas. Em celulares de verdade não há teclado: jogos para celular também precisam de controles de toque.',
+    setup=SETUP_FLAME,
+)
+
+PARTS.append(['Flame: o primeiro jogo', 'Parte 4 · Flame'])
+
+aula(
+    'Projeto · Pula-Caixa em Flame',
+    'O Pula-Caixa do Projeto 1 refeito com Flame, para comparar os dois jeitos de fazer o mesmo jogo. Antes havia um '
+    'State com listas, um CustomPainter e a colisão AABB escrita à mão. Agora cada coisa é um componente com a sua '
+    'própria lógica: o Jogador cuida da gravidade e do pulo, cada Caixa anda para a esquerda e se remove quando sai da '
+    'tela, as Nuvens se repetem devagar (paralaxe) e o jogo só coordena: cria caixas, conta a distância e troca de '
+    'estado. A colisão vem do Flame: o hitbox do jogador é um pouco menor que o desenho (RectangleHitbox com position '
+    'e size), e onCollisionStart com uma Caixa termina a partida. O placar e o aviso são TextComponents. O jogo aceita '
+    'toque (TapCallbacks) e teclado (espaço ou seta para cima, com KeyboardEvents) e toca pulo.wav e derrota.wav.',
+    'Em ▶ Testar, jogue tocando ou com o espaço. Compare este código com o do Projeto 1. Depois: deixe o céu noturno, '
+    'aumente a aceleração e toque vitoria.wav quando o jogador passar de 100 m.',
+    r'''
+import 'dart:math';
+import 'package:flame/collisions.dart';
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame/game.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+void main() => runApp(GameWidget(game: PulaCaixa()));
+
+const double gravidade = 1700;
+const double impulso = -680;
+
+enum Estado { pronto, jogando, fim }
+
+class PulaCaixa extends FlameGame with HasCollisionDetection, TapCallbacks, KeyboardEvents {
+  final sorteio = Random();
+  late Jogador jogador;
+  late TextComponent placar;
+  late TextComponent aviso;
+  List<Caixa> caixas = [];
+  Estado estado = Estado.pronto;
+  double tempoDePartida = 0;
+  double distancia = 0;
+  double proximaCaixa = 1;
+  int recorde = 0;
+
+  double get chao => size.y - 96;
+  double get velocidade => 220 + tempoDePartida * 8;
+  int get metros => (distancia / 20).floor();
+
+  @override
+  Future<void> onLoad() async {
+    add(RectangleComponent(
+      position: Vector2(0, chao + 32),
+      size: Vector2(size.x, size.y - chao - 32),
+      paint: Paint()..color = const Color(0xFF8B5A2B),
+    ));
+    final grama = await loadSprite('grama.png');
+    for (int i = 0; i < 12; i++) {
+      add(SpriteComponent(sprite: grama, position: Vector2(i * 32.0, chao), size: Vector2.all(32)));
+    }
+    for (int i = 0; i < 3; i++) {
+      add(Nuvem(Vector2(i * 150.0, 80.0 + i * 50)));
+    }
+    jogador = Jogador();
+    add(jogador);
+
+    const estilo = TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold);
+    placar = TextComponent(position: Vector2(16, 16), textRenderer: TextPaint(style: estilo));
+    aviso = TextComponent(
+      text: 'Toque para começar',
+      position: size / 2,
+      anchor: Anchor.center,
+      textRenderer: TextPaint(style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
+    );
+    add(placar);
+    add(aviso);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (estado == Estado.jogando) {
+      tempoDePartida += dt;
+      distancia += velocidade * dt;
+      proximaCaixa -= dt;
+      if (proximaCaixa <= 0) {
+        final caixa = Caixa(Vector2(size.x + 30, chao), 30 + sorteio.nextDouble() * 30);
+        caixas.add(caixa);
+        add(caixa);
+        proximaCaixa = 0.9 + sorteio.nextDouble() * 1.1;
+      }
+    }
+    placar.text = '$metros m    recorde $recorde m';
+  }
+
+  void acao() {
+    if (estado == Estado.pronto) {
+      estado = Estado.jogando;
+      aviso.text = '';
+    } else if (estado == Estado.jogando) {
+      jogador.pular();
+    } else {
+      for (final c in caixas) {
+        c.removeFromParent();
+      }
+      caixas.clear();
+      tempoDePartida = 0;
+      distancia = 0;
+      proximaCaixa = 1;
+      jogador.position.y = chao;
+      jogador.vy = 0;
+      estado = Estado.pronto;
+      aviso.text = 'Toque para começar';
+    }
+  }
+
+  void perder() {
+    estado = Estado.fim;
+    if (metros > recorde) recorde = metros;
+    aviso.text = 'Fim! $metros m';
+    FlameAudio.play('derrota.wav');
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) => acao();
+
+  @override
+  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    if (event is KeyDownEvent &&
+        (event.logicalKey == LogicalKeyboardKey.space || event.logicalKey == LogicalKeyboardKey.arrowUp)) {
+      acao();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  @override
+  Color backgroundColor() => const Color(0xFF8FD3FE);
+}
+
+class Jogador extends SpriteAnimationComponent with CollisionCallbacks, HasGameReference<PulaCaixa> {
+  double vy = 0;
+
+  Jogador() : super(size: Vector2.all(56), anchor: Anchor.bottomLeft);
+
+  bool get noChao => position.y >= game.chao;
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'heroi.png',
+      SpriteAnimationData.sequenced(amount: 4, stepTime: 0.1, textureSize: Vector2.all(16)),
+    );
+    position = Vector2(60, game.chao);
+    add(RectangleHitbox(position: Vector2(10, 8), size: Vector2(36, 48)));
+  }
+
+  void pular() {
+    if (noChao) {
+      vy = impulso;
+      FlameAudio.play('pulo.wav');
+    }
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    playing = game.estado == Estado.jogando && noChao;
+    if (game.estado != Estado.jogando) return;
+    vy += gravidade * dt;
+    position.y += vy * dt;
+    if (position.y > game.chao) {
+      position.y = game.chao;
+      vy = 0;
+    }
+  }
+
+  @override
+  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollisionStart(intersectionPoints, other);
+    if (other is Caixa && game.estado == Estado.jogando) {
+      game.perder();
+    }
+  }
+}
+
+class Caixa extends SpriteComponent with HasGameReference<PulaCaixa> {
+  Caixa(Vector2 posicao, double lado) : super(position: posicao, size: Vector2.all(lado), anchor: Anchor.bottomLeft);
+
+  @override
+  Future<void> onLoad() async {
+    sprite = await game.loadSprite('caixa.png');
+    add(RectangleHitbox());
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (game.estado == Estado.jogando) {
+      position.x -= game.velocidade * dt;
+    }
+    if (position.x < -size.x) {
+      removeFromParent();
+      game.caixas.remove(this);
+    }
+  }
+}
+
+class Nuvem extends SpriteComponent with HasGameReference<PulaCaixa> {
+  Nuvem(Vector2 posicao) : super(position: posicao, size: Vector2(96, 48));
+
+  @override
+  Future<void> onLoad() async {
+    sprite = await game.loadSprite('nuvem.png');
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (game.estado == Estado.jogando) {
+      position.x -= game.velocidade * 0.2 * dt;
+    }
+    if (position.x < -100) {
+      position.x = game.size.x + 20;
+    }
+  }
+}
+''',
+    [
+        ['Céu noturno', 'Em backgroundColor, troque Color(0xFF8FD3FE) por um azul escuro, como Color(0xFF14213D).', r'^(?![\s\S]*0xFF8FD3FE)'],
+        ['Aceleração mais forte', 'No getter velocidade, troque tempoDePartida * 8 por * 15.', r'tempoDePartida\s*\*\s*15\b'],
+        ['Som ao passar de 100 m', "Guarde um bool comemorou e, no update, quando metros passar de 100 pela primeira vez, toque FlameAudio.play('vitoria.wav').", r"vitoria\.wav"],
+    ],
+    setup=SETUP_FLAME,
+)
+
+PARTS.append(['Projeto · Pula-Caixa em Flame', 'Projeto 3 · Pula-Caixa em Flame'])

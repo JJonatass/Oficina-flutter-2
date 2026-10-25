@@ -165,7 +165,8 @@ def patch(src):
         " 'Som: AudioPlayer com play(AssetSource(...)), setVolume, stop e dispose (pacote audioplayers) e SystemSound.play. Os sons são sintetizados pelo navegador: sons/pulo.wav, moeda, batida, explosao, tiro, vitoria, derrota, clique, dano e poder. O botão 🔊 Som liga e desliga.',\n"
         " 'Texto no Canvas: TextPainter com cor, tamanho, negrito, itálico, letterSpacing, sombra, contorno (foreground: Paint com stroke) e fonte, incluindo GoogleFonts.pressStart2p, silkscreen, vt323 e bungee. tp.width e tp.height são medidos de verdade.',\n"
         " 'Ainda não existem: vários dedos ao mesmo tempo, imagens dos seus próprios arquivos e músicas longas.',\n"
-        " 'O pacote Flame ainda não é simulado: os jogos desta trilha usam só Flutter puro, que é a base do Flame.',\n"
+        " 'Flame (simplificado): FlameGame, GameWidget, Component, PositionComponent, SpriteComponent, SpriteAnimationComponent, TextComponent, RectangleComponent, CircleComponent, TimerComponent e Timer, SpriteSheet, Vector2, Anchor, world e camera (follow, zoom, viewport), debugMode, RectangleHitbox e CircleHitbox com HasCollisionDetection e CollisionCallbacks, TapCallbacks, DragCallbacks, KeyboardEvents, KeyboardHandler e FlameAudio.play.',\n"
+        " 'Do Flame ainda não existem: efeitos (MoveEffect, ScaleEffect e outros), ParallaxComponent, partículas, overlays, Forge2D, tiled e children.query. A rotação não entra no cálculo das colisões nem dos toques.',\n"
         " ]},\n",
         'LIMITS')
     # editar o código com o jogo rodando: o Ticker e o Timer continuam (estado preservado, como no hot reload);
