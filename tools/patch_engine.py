@@ -159,8 +159,9 @@ def patch(src):
         " p:'O laço de jogo roda de verdade em ▶ Testar, no ritmo do navegador (em geral 60 quadros por segundo). Ao sair de ▶ Testar ou mudar o código, o laço para e recomeça do initState.',\n"
         " li:[\n"
         " 'Funcionam: Ticker com createTicker (SingleTickerProviderStateMixin), start, stop e dispose; Timer.periodic e Timer, com cancel e isActive; Random; CustomPainter com save, restore, translate, rotate e scale; Rect com overlaps, intersect, deflate, inflate, shift e contains; getters do State.',\n"
-        " 'Toque: GestureDetector com onTapDown e onTapUp entrega details.localPosition. O simulador entrega o toque quando o clique termina; no celular, onTapDown dispara assim que o dedo encosta.',\n"
-        " 'Ainda não existem: arrastar (onPanUpdate), teclado (KeyboardListener, Focus com onKeyEvent), vários dedos ao mesmo tempo, imagens desenhadas no Canvas (drawImage, sprites) e som.',\n"
+        " 'Toque e arrasto: GestureDetector com onTapDown (assim que o dedo encosta), onTapUp, onPanDown, onPanStart, onPanUpdate, onPanEnd e os arrastos horizontal e vertical. Os detalhes trazem localPosition, globalPosition, delta, primaryDelta e velocity.pixelsPerSecond.',\n"
+        " 'Teclado: Focus e KeyboardListener com onKeyEvent (KeyDownEvent, KeyUpEvent, KeyRepeatEvent e event.logicalKey) e HardwareKeyboard.instance.isLogicalKeyPressed no laço. Clique no celular antes de usar as teclas.',\n"
+        " 'Ainda não existem: vários dedos ao mesmo tempo, imagens desenhadas no Canvas (drawImage, sprites) e som.',\n"
         " 'O pacote Flame ainda não é simulado: os jogos desta trilha usam só Flutter puro, que é a base do Flame.',\n"
         " ]},\n",
         'LIMITS')

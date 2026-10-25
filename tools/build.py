@@ -11,7 +11,7 @@ import json, re, sys, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'tools'))
-import patch_engine, lessons  # noqa: E402
+import patch_engine, patch_input, lessons  # noqa: E402
 
 
 def sub1(src, old, new, label):
@@ -47,6 +47,7 @@ def lessons_js():
 def build():
     src = (ROOT / 'tools' / 'upstream.html').read_text(encoding='utf-8')
     src = patch_engine.patch(src)
+    src = patch_input.patch(src)
 
     # marca e textos do cabeçalho
     src = sub1(src, '<title>Oficina Flutter</title>', '<title>Oficina Flutter 2</title>', 'title')

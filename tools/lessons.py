@@ -427,7 +427,6 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
         ['Marca amarela', 'No Paint da marca, troque Colors.white por Colors.yellow.', r'marca\s*=\s*Paint\(\)\s*\.\.color\s*=\s*Colors\.yellow'],
         ['Cor diferente enquanto anda', 'Passe para a Cena se x != alvo e use um operador ternário na cor do corpo.', r'\?\s*Colors\.\w+[\s\S]{0,40}:\s*Colors\.deepOrange|\?\s*Colors\.deepOrange[\s\S]{0,40}:\s*Colors\.\w+'],
     ],
-    lim='O simulador entrega o toque quando o clique termina (como onTap). No celular, onTapDown dispara assim que o dedo encosta.',
 )
 
 aula(
@@ -1212,7 +1211,413 @@ class _PulaCaixaState extends State<PulaCaixa> with SingleTickerProviderStateMix
     ],
 )
 
+# ---------------------------------------------------------------- Parte 2
+aula(
+    'Arrastar: a raquete segue o dedo',
+    'Tocar serve para ações (pular, atirar). Para controlar uma posição de forma contínua, o gesto certo é '
+    'arrastar. O GestureDetector chama onPanUpdate várias vezes enquanto o dedo desliza, e DragUpdateDetails '
+    'traz details.delta: quanto o dedo andou desde a última chamada. Somar o delta.dx ao x da raquete faz ela '
+    'acompanhar o dedo, de onde quer que o arrasto comece. Os dois if logo depois seguram a raquete dentro da '
+    'tela. A bola usa um Offset para a posição e outro para a velocidade: bola += velocidade * dt anda nos dois '
+    'eixos de uma vez. Quando bate numa parede, só o sinal do eixo daquela parede muda. Na raquete, a bola só '
+    'rebate se estiver descendo (velocidade.dy > 0), senão ela poderia ficar presa vibrando dentro dela.',
+    'Em ▶ Testar, arraste em qualquer lugar da área do jogo para mover a raquete e rebata a bola. Diminua a '
+    'raquete para 50, acelere a bola e faça a bola ir um pouco mais rápido a cada rebatida.',
+    r'''
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+
+void main() => runApp(const MaterialApp(home: Jogo()));
+
+const double largura = 360;
+const double altura = 520;
+const double raqueteY = 470;
+const double raqueteLargura = 80;
+const double raio = 8;
+
+class Cena extends CustomPainter {
+  final double raqueteX;
+  final Offset bola;
+  Cena(this.raqueteX, this.bola);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF14213D));
+    canvas.drawCircle(bola, raio, Paint()..color = Colors.white);
+    final raquete = Rect.fromLTWH(raqueteX, raqueteY, raqueteLargura, 12);
+    canvas.drawRRect(RRect.fromRectAndRadius(raquete, const Radius.circular(6)), Paint()..color = Colors.cyanAccent);
+  }
+
+  @override
+  bool shouldRepaint(covariant Cena antiga) => true;
+}
+
+class Jogo extends StatefulWidget {
+  const Jogo({super.key});
+
+  @override
+  State<Jogo> createState() => _JogoState();
+}
+
+class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
+  late Ticker ticker;
+  double ultimo = 0;
+  double raqueteX = 140;
+  Offset bola = const Offset(180, 120);
+  Offset velocidade = const Offset(160, 240);
+  int rebatidas = 0;
+  int perdidas = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    ticker = createTicker(quadro);
+    ticker.start();
+  }
+
+  void quadro(Duration tempo) {
+    final agora = tempo.inMicroseconds / 1000000;
+    final dt = agora - ultimo;
+    ultimo = agora;
+    setState(() => atualizar(dt));
+  }
+
+  void atualizar(double dt) {
+    bola += velocidade * dt;
+
+    if (bola.dx < raio) {
+      bola = Offset(raio, bola.dy);
+      velocidade = Offset(velocidade.dx.abs(), velocidade.dy);
+    }
+    if (bola.dx > largura - raio) {
+      bola = Offset(largura - raio, bola.dy);
+      velocidade = Offset(-velocidade.dx.abs(), velocidade.dy);
+    }
+    if (bola.dy < raio) {
+      bola = Offset(bola.dx, raio);
+      velocidade = Offset(velocidade.dx, velocidade.dy.abs());
+    }
+
+    final raquete = Rect.fromLTWH(raqueteX, raqueteY, raqueteLargura, 12);
+    if (velocidade.dy > 0 && raquete.contains(bola + const Offset(0, raio))) {
+      velocidade = Offset(velocidade.dx, -velocidade.dy);
+      rebatidas++;
+    }
+
+    if (bola.dy > altura + raio) {
+      perdidas++;
+      bola = const Offset(180, 120);
+      velocidade = const Offset(160, 240);
+    }
+  }
+
+  void arrastar(DragUpdateDetails details) {
+    raqueteX += details.delta.dx;
+    if (raqueteX < 0) raqueteX = 0;
+    if (raqueteX > largura - raqueteLargura) raqueteX = largura - raqueteLargura;
+  }
+
+  @override
+  void dispose() {
+    ticker.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(title: Text('Rebatidas: $rebatidas · Perdidas: $perdidas')),
+      body: Center(
+        child: GestureDetector(
+          onPanUpdate: arrastar,
+          child: CustomPaint(
+            size: const Size(largura, altura),
+            painter: Cena(raqueteX, bola),
+          ),
+        ),
+      ),
+    );
+  }
+}
+''',
+    [
+        ['Raquete menor (50)', 'Troque const double raqueteLargura = 80 por 50.', r'const double raqueteLargura\s*=\s*50\b'],
+        ['Bola mais rápida', 'Aumente os dois números da velocidade inicial, por exemplo Offset(220, 320), nos dois lugares em que ela aparece.', r'velocidade\s*=\s*const\s+Offset\(\s*(?:2[2-9]\d|[3-9]\d\d)'],
+        ['Acelerar a cada rebatida', 'Logo depois de rebatidas++, multiplique a velocidade: velocidade = velocidade * 1.05.', r'velocidade\s*=\s*velocidade\s*\*\s*1\.\d+'],
+    ],
+    lim='O arrasto funciona com mouse e com o dedo. O simulador não junta dois dedos ao mesmo tempo (multitoque).',
+)
+
+aula(
+    'Arremessar: a velocidade do arrasto',
+    'O fim do arrasto também traz informação. onPanStart avisa que o dedo começou a arrastar, onPanUpdate dá a '
+    'posição a cada movimento (details.localPosition) e onPanEnd traz details.velocity.pixelsPerSecond: a '
+    'velocidade do dedo no instante em que ele soltou, em pixels por segundo. Aqui o disco só pode ser pego se o '
+    'arrasto começar em cima dele (a distância até o centro menor que o raio). Enquanto está preso, o disco '
+    'segue o dedo e o laço não o move. Ao soltar, a velocidade do dedo vira a velocidade do disco. O atrito usa '
+    'pow(0.4, dt): a cada segundo sobram 40% da velocidade, e o resultado é o mesmo com qualquer taxa de '
+    'quadros, porque a potência junta os pedaços de tempo do jeito certo.',
+    'Em ▶ Testar, pegue o disco e arremesse contra as paredes. Troque 0.4 por 0.9 (mesa de gelo) e por 0.05 '
+    '(areia). Depois conte quantas vezes o disco bate nas paredes.',
+    r'''
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+
+void main() => runApp(const MaterialApp(home: Jogo()));
+
+const double largura = 360;
+const double altura = 520;
+const double raio = 26;
+
+class Cena extends CustomPainter {
+  final Offset disco;
+  final bool preso;
+  Cena(this.disco, this.preso);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF1B4332));
+    final linha = Paint()
+      ..color = Colors.white24
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+    canvas.drawLine(Offset(0, size.height / 2), Offset(size.width, size.height / 2), linha);
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 50, linha);
+    canvas.drawCircle(disco, raio, Paint()..color = preso ? Colors.orangeAccent : Colors.redAccent);
+    canvas.drawCircle(disco, raio - 8, Paint()..color = Colors.black26);
+  }
+
+  @override
+  bool shouldRepaint(covariant Cena antiga) => true;
+}
+
+class Jogo extends StatefulWidget {
+  const Jogo({super.key});
+
+  @override
+  State<Jogo> createState() => _JogoState();
+}
+
+class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
+  late Ticker ticker;
+  double ultimo = 0;
+  Offset disco = const Offset(180, 380);
+  Offset velocidade = Offset.zero;
+  bool preso = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ticker = createTicker(quadro);
+    ticker.start();
+  }
+
+  void quadro(Duration tempo) {
+    final agora = tempo.inMicroseconds / 1000000;
+    final dt = agora - ultimo;
+    ultimo = agora;
+    if (preso) return;
+    setState(() {
+      disco += velocidade * dt;
+      velocidade = velocidade * pow(0.4, dt).toDouble();
+      if (disco.dx < raio || disco.dx > largura - raio) {
+        velocidade = Offset(-velocidade.dx, velocidade.dy);
+        disco = Offset(disco.dx < raio ? raio : largura - raio, disco.dy);
+      }
+      if (disco.dy < raio || disco.dy > altura - raio) {
+        velocidade = Offset(velocidade.dx, -velocidade.dy);
+        disco = Offset(disco.dx, disco.dy < raio ? raio : altura - raio);
+      }
+    });
+  }
+
+  void comecar(DragStartDetails details) {
+    if ((details.localPosition - disco).distance <= raio) {
+      setState(() {
+        preso = true;
+        velocidade = Offset.zero;
+      });
+    }
+  }
+
+  void mover(DragUpdateDetails details) {
+    if (preso) setState(() => disco = details.localPosition);
+  }
+
+  void soltar(DragEndDetails details) {
+    if (preso) {
+      setState(() {
+        preso = false;
+        velocidade = details.velocity.pixelsPerSecond;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    ticker.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(title: Text('${velocidade.distance.toStringAsFixed(0)} px/s')),
+      body: Center(
+        child: GestureDetector(
+          onPanStart: comecar,
+          onPanUpdate: mover,
+          onPanEnd: soltar,
+          child: CustomPaint(
+            size: const Size(largura, altura),
+            painter: Cena(disco, preso),
+          ),
+        ),
+      ),
+    );
+  }
+}
+''',
+    [
+        ['Mesa de gelo (0.9)', 'No atrito, troque pow(0.4, dt) por pow(0.9, dt).', r'pow\(\s*0\.9\s*,\s*dt\s*\)'],
+        ['Disco menor (raio 18)', 'Troque const double raio = 26 por 18.', r'const double raio\s*=\s*18\b'],
+        ['Contar as batidas nas paredes', 'Crie int batidas = 0, some 1 dentro dos dois if das paredes e mostre no título da AppBar.', r'batidas\s*(?:\+\+|\+=\s*1)[\s\S]*batidas\s*(?:\+\+|\+=\s*1)[\s\S]*\$batidas'],
+    ],
+)
+
+aula(
+    'Teclado: setas e espaço',
+    'No computador e no Flutter Web, o jogador espera usar o teclado. Há dois jeitos de ler teclas, e jogos '
+    'usam os dois. Para ações de um toque só, como pular, o widget Focus com autofocus: true recebe cada tecla '
+    'em onKeyEvent: event is KeyDownEvent diz que a tecla acabou de descer, e event.logicalKey diz qual foi '
+    '(LogicalKeyboardKey.space). A função devolve KeyEventResult.handled quando usou a tecla. Para movimento '
+    'contínuo, enquanto a tecla está apertada, o laço pergunta a cada quadro: '
+    'HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.arrowLeft). Assim o personagem anda '
+    'macio, sem depender da repetição automática do teclado. Tudo isso vem de package:flutter/services.dart.',
+    'Em ▶ Testar, clique uma vez no celular e use ← → para andar e espaço para pular. Acrescente as teclas A e D '
+    'como alternativa às setas e faça a seta para cima também pular.',
+    r'''
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+
+void main() => runApp(const MaterialApp(home: Jogo()));
+
+const double largura = 360;
+const double altura = 520;
+const double chao = 440;
+const double gravidade = 1500;
+const double impulso = -620;
+
+class Cena extends CustomPainter {
+  final double x;
+  final double y;
+  Cena(this.x, this.y);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF7EC8F2));
+    canvas.drawRect(Rect.fromLTWH(0, chao, size.width, size.height - chao), Paint()..color = Colors.green.shade700);
+    final corpo = Rect.fromLTWH(x, y, 40, 48);
+    canvas.drawRRect(RRect.fromRectAndRadius(corpo, const Radius.circular(8)), Paint()..color = Colors.deepOrange);
+  }
+
+  @override
+  bool shouldRepaint(covariant Cena antiga) => true;
+}
+
+class Jogo extends StatefulWidget {
+  const Jogo({super.key});
+
+  @override
+  State<Jogo> createState() => _JogoState();
+}
+
+class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
+  late Ticker ticker;
+  double ultimo = 0;
+  double x = 160;
+  double y = chao - 48;
+  double vy = 0;
+  double velocidade = 220;
+  String ultimaTecla = 'nenhuma';
+
+  @override
+  void initState() {
+    super.initState();
+    ticker = createTicker(quadro);
+    ticker.start();
+  }
+
+  void quadro(Duration tempo) {
+    final agora = tempo.inMicroseconds / 1000000;
+    final dt = agora - ultimo;
+    ultimo = agora;
+    final teclado = HardwareKeyboard.instance;
+    setState(() {
+      if (teclado.isLogicalKeyPressed(LogicalKeyboardKey.arrowLeft)) x -= velocidade * dt;
+      if (teclado.isLogicalKeyPressed(LogicalKeyboardKey.arrowRight)) x += velocidade * dt;
+      if (x < 0) x = 0;
+      if (x > largura - 40) x = largura - 40;
+
+      vy += gravidade * dt;
+      y += vy * dt;
+      if (y > chao - 48) {
+        y = chao - 48;
+        vy = 0;
+      }
+    });
+  }
+
+  KeyEventResult tecla(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      ultimaTecla = event.logicalKey == LogicalKeyboardKey.space ? 'espaço' : 'outra';
+      if (event.logicalKey == LogicalKeyboardKey.space && y >= chao - 48) {
+        vy = impulso;
+      }
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  @override
+  void dispose() {
+    ticker.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(title: Text('← → andar · espaço pular · $ultimaTecla')),
+      body: Center(
+        child: Focus(
+          autofocus: true,
+          onKeyEvent: tecla,
+          child: CustomPaint(
+            size: const Size(largura, altura),
+            painter: Cena(x, y),
+          ),
+        ),
+      ),
+    );
+  }
+}
+''',
+    [
+        ['Andar com A e D', 'Nos dois if de movimento, acrescente || teclado.isLogicalKeyPressed(LogicalKeyboardKey.keyA) e o mesmo com keyD.', r'LogicalKeyboardKey\.keyA[\s\S]*LogicalKeyboardKey\.keyD|LogicalKeyboardKey\.keyD[\s\S]*LogicalKeyboardKey\.keyA'],
+        ['Seta para cima também pula', 'Na condição do pulo, aceite LogicalKeyboardKey.arrowUp além do espaço.', r'LogicalKeyboardKey\.arrowUp'],
+        ['Correr segurando Shift', 'No quadro, use uma velocidade maior quando teclado.isShiftPressed for verdadeiro.', r'isShiftPressed'],
+    ],
+    lim='Clique no celular antes de usar as teclas: com o cursor no editor de código, as teclas vão para o código. No celular de verdade não há teclado físico, então jogos para celular também precisam de controles por toque.',
+)
+
 PARTS = [
     ['O laço do jogo com Timer.periodic', 'Parte 1 · Fundamentos de jogos 2D'],
     ['Projeto · Pula-Caixa', 'Projeto 1 · Pula-Caixa'],
+    ['Arrastar: a raquete segue o dedo', 'Parte 2 · Entrada: arrastar e teclado'],
 ]
