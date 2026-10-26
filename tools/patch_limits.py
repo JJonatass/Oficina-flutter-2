@@ -39,7 +39,7 @@ window.OF_MUSIC=(function(){
     var it={id:id,name:name,loop:!!loop,c:c,out:out,step:0,next:c.currentTime+0.05,paused:false};it.timer=setInterval(function(){tick(it)},30);live[id]=it;tick(it);return id}
   function stop(id){var it=live[id];if(!it)return;clearInterval(it.timer);try{it.out.gain.setTargetAtTime(0,it.c.currentTime,0.02);setTimeout(function(){try{it.out.disconnect()}catch(e){}},200)}catch(e){}delete live[id];if(bgmId===id)bgmId=null}
   function playSfxLoop(name,vol){if(!window.OF_SFX)return null;var id=++ids;var it={id:id,timer:setInterval(function(){window.OF_SFX(name,vol)},700),out:{gain:{setTargetAtTime:function(){}},disconnect:function(){}},c:{currentTime:0}};window.OF_SFX(name,vol);live[id]=it;return id}
-  return{play:play,stop:stop,playSfxLoop:playSfxLoop,
+  return{play:play,stop:stop,playSfxLoop:playSfxLoop,tickAll:function(){Object.keys(live).forEach(function(k){if(live[k].name)tick(live[k])})},
     stopAll:function(){Object.keys(live).forEach(function(k){stop(+k)})},
     pause:function(id){if(live[id])live[id].paused=true},
     resume:function(id){var it=live[id];if(!it)return false;if(it.paused){it.paused=false;if(it.c&&it.c.currentTime!=null)it.next=it.c.currentTime+0.05}return true},

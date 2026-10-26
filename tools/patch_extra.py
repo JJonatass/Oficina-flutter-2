@@ -346,6 +346,46 @@ def patch(src):
     src = sub1(src, "  if(!((ST.re&&ST.re.test(raw))||/\\$|\\?|[*\\/%]|\\d\\s*[+-]\\s*\\d|\\[|\\bwidget\\b/.test(raw)))return raw;",
         "  if(!((ST.re&&ST.re.test(raw))||/\\$|\\?|[*\\/%]|\\d\\s*[+-]\\s*\\d|\\[|\\bwidget\\b|__flg\\d/.test(raw)))return raw;", 'subst flg')
     src = sub1(src, ".nd.gw{display:block}", ".nd.gw{display:block;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}", 'gw touch')
+    # ---- janela separada (⤢ Janela) com jogos: quadros do canvas, arrasto, teclado e laço que não para
+    src = sub1(src,
+        "  if(ch)try{patchRender()}catch(e2){}\n  animKick()}",
+        "  if(ch)try{patchRender()}catch(e2){}\n  window.__ofPasso=performance.now();if(typeof popFrame==='function')popFrame();\n  animKick()}",
+        'anim pop frame')
+    src = sub1(src,
+        "function popSched(){if(!popRaf)popRaf=requestAnimationFrame(popSync)}",
+        "function popSched(){if(!popRaf)popRaf=requestAnimationFrame(popSync)}\n"
+        "function popFrame(){if(!popW||popRaf)return;if(!popAlive()){popStop();return}var m=popW.document.getElementById('pmirror');"
+        "var ca=screen.querySelectorAll('canvas'),cb=m.querySelectorAll('canvas');if(ca.length!==cb.length){popSched();return}"
+        "for(var k=0;k<ca.length;k++){try{if(cb[k].width!==ca[k].width||cb[k].height!==ca[k].height){cb[k].width=ca[k].width;cb[k].height=ca[k].height}var g=cb[k].getContext('2d');g.clearRect(0,0,cb[k].width,cb[k].height);g.drawImage(ca[k],0,0)}catch(e){}}}\n"
+        "function popLaco(){if(!popAlive())return;var agora=performance.now();"
+        "if(ST.anims&&ST.anims.length&&agora-(window.__ofPasso||0)>45){if(animRaf){cancelAnimationFrame(animRaf);animRaf=0}animStep()}"
+        "if(window.OF_MUSIC&&OF_MUSIC.tickAll)OF_MUSIC.tickAll();popW.requestAnimationFrame(popLaco)}\n"
+        "OF.popKey=function(tipo,e){var n=kName(e);if(tipo==='keydown'){if(!(S.run&&ST.active))return false;ST.keys.add(n);var u=kDispatch(e.repeat?'KeyRepeatEvent':'KeyDownEvent',e);return !!(u||gLoop()||(ST.flameLive&&ST.flameLive()))}"
+        "ST.keys.delete(n);if(!(S.run&&ST.active))return false;kDispatch('KeyUpEvent',e);return true};",
+        'pop frame fn')
+    src = sub1(src,
+        "  if(t==='pointermove'){document.dispatchEvent(new PointerEvent(t,init));return}\n"
+        "  if(t==='pointerup'||t==='pointercancel'){popDown=false;(mp.el||document).dispatchEvent(new PointerEvent(t,init));return}",
+        "  if(t==='pointermove'){(screen.contains(mp.el)?mp.el:screen).dispatchEvent(new PointerEvent(t,init));return}\n"
+        "  if(t==='pointerup'||t==='pointercancel'){popDown=false;(screen.contains(mp.el)?mp.el:screen).dispatchEvent(new PointerEvent(t,init));return}",
+        'pop pointer fwd')
+    src = sub1(src,
+        "  if(t==='pointerdown'){if(!mp.el)return;popDown=true;mp.el.dispatchEvent(new PointerEvent(t,init));return}",
+        "  if(t==='pointerdown'){if(!mp.el)return;popDown=true;if(e.target&&e.target.closest&&e.target.closest('.gw'))e.preventDefault();mp.el.dispatchEvent(new PointerEvent(t,init));return}",
+        'pop pointerdown')
+    src = sub1(src,
+        "  ['input','change','keydown'].forEach(function(n){d.addEventListener(n,popField,true)});",
+        "  ['input','change','keydown'].forEach(function(n){d.addEventListener(n,popField,true)});\n"
+        "  ['keydown','keyup'].forEach(function(n){d.addEventListener(n,function(e){var a=d.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;"
+        "if(OF.popKey(n,e)&&/^(arrow\\w+|space)$/.test(kName(e)))e.preventDefault()})});\n"
+        "  w.addEventListener('blur',function(){ST.keys.clear()});\n"
+        "  try{if(window.OF_AC){var acx=OF_AC();if(acx&&acx.resume)acx.resume()}}catch(e){}\n"
+        "  w.requestAnimationFrame(popLaco);",
+        'pop keys')
+    src = sub1(src,
+        "  if(t==='wheel'){if(mp.el&&mp.el.closest('.ivw[data-iv]')){e.preventDefault();mp.el.dispatchEvent(new WheelEvent('wheel',init))}}}",
+        "  if(t==='wheel'){init.ctrlKey=e.ctrlKey;init.deltaX=e.deltaX||0;if(mp.el&&(mp.el.closest('.ivw[data-iv]')||(e.ctrlKey&&screen.contains(mp.el)))){e.preventDefault();mp.el.dispatchEvent(new WheelEvent('wheel',init))}}}",
+        'pop wheel')
     src = sub1(src, "window.OF_MUSICAS=", global_js() + "window.OF_MUSICAS=", 'global maps')
     return src
 

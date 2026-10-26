@@ -742,7 +742,7 @@ window.OF_MUSIC=(function(){
     var it={id:id,name:name,loop:!!loop,c:c,out:out,step:0,next:c.currentTime+0.05,paused:false};it.timer=setInterval(function(){tick(it)},30);live[id]=it;tick(it);return id}
   function stop(id){var it=live[id];if(!it)return;clearInterval(it.timer);try{it.out.gain.setTargetAtTime(0,it.c.currentTime,0.02);setTimeout(function(){try{it.out.disconnect()}catch(e){}},200)}catch(e){}delete live[id];if(bgmId===id)bgmId=null}
   function playSfxLoop(name,vol){if(!window.OF_SFX)return null;var id=++ids;var it={id:id,timer:setInterval(function(){window.OF_SFX(name,vol)},700),out:{gain:{setTargetAtTime:function(){}},disconnect:function(){}},c:{currentTime:0}};window.OF_SFX(name,vol);live[id]=it;return id}
-  return{play:play,stop:stop,playSfxLoop:playSfxLoop,
+  return{play:play,stop:stop,playSfxLoop:playSfxLoop,tickAll:function(){Object.keys(live).forEach(function(k){if(live[k].name)tick(live[k])})},
     stopAll:function(){Object.keys(live).forEach(function(k){stop(+k)})},
     pause:function(id){if(live[id])live[id].paused=true},
     resume:function(id){var it=live[id];if(!it)return false;if(it.paused){it.paused=false;if(it.c&&it.c.currentTime!=null)it.next=it.c.currentTime+0.05}return true},
@@ -9191,6 +9191,7 @@ function animStep(){animRaf=0;if(!ST.anims||!ST.anims.length)return;
   var ch=false;try{ch=ST.tick(ST.now())}catch(e){}
   if(ST.tickErr){var te=ST.tickErr;ST.tickErr=null;toast((te.exc?'Exceção no ':'Erro no ')+te.src+' (o laço parou): '+te.msg)}
   if(ch)try{patchRender()}catch(e2){}
+  window.__ofPasso=performance.now();if(typeof popFrame==='function')popFrame();
   animKick()}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){try{if(typeof renderCanvas==='function')renderCanvas()}catch(e){}});
 function animKick(){if(animRaf||!ST.anims||!ST.anims.length)return;animRaf=requestAnimationFrame(animStep)}
@@ -10109,6 +10110,9 @@ function popSync(){
   for(var j=0;j<ea.length&&j<eb.length;j++){if(ea[j].scrollTop||ea[j].scrollLeft){eb[j].scrollTop=ea[j].scrollTop;eb[j].scrollLeft=ea[j].scrollLeft}}
   if(fp){var f=elAt(m,fp);if(f){try{f.focus();if(sel&&f.setSelectionRange)f.setSelectionRange(sel[0],sel[1])}catch(e){}}}}
 function popSched(){if(!popRaf)popRaf=requestAnimationFrame(popSync)}
+function popFrame(){if(!popW||popRaf)return;if(!popAlive()){popStop();return}var m=popW.document.getElementById('pmirror');var ca=screen.querySelectorAll('canvas'),cb=m.querySelectorAll('canvas');if(ca.length!==cb.length){popSched();return}for(var k=0;k<ca.length;k++){try{if(cb[k].width!==ca[k].width||cb[k].height!==ca[k].height){cb[k].width=ca[k].width;cb[k].height=ca[k].height}var g=cb[k].getContext('2d');g.clearRect(0,0,cb[k].width,cb[k].height);g.drawImage(ca[k],0,0)}catch(e){}}}
+function popLaco(){if(!popAlive())return;var agora=performance.now();if(ST.anims&&ST.anims.length&&agora-(window.__ofPasso||0)>45){if(animRaf){cancelAnimationFrame(animRaf);animRaf=0}animStep()}if(window.OF_MUSIC&&OF_MUSIC.tickAll)OF_MUSIC.tickAll();popW.requestAnimationFrame(popLaco)}
+OF.popKey=function(tipo,e){var n=kName(e);if(tipo==='keydown'){if(!(S.run&&ST.active))return false;ST.keys.add(n);var u=kDispatch(e.repeat?'KeyRepeatEvent':'KeyDownEvent',e);return !!(u||gLoop()||(ST.flameLive&&ST.flameLive()))}ST.keys.delete(n);if(!(S.run&&ST.active))return false;kDispatch('KeyUpEvent',e);return true};
 OF.popSched=function(){if(popW)popSched()};
 function popStop(){
   if(popMO){popMO.disconnect();popMO=null}
@@ -10122,10 +10126,10 @@ function popFwd(e){
   var t=e.type,mp=popMap(e);
   var init={bubbles:true,cancelable:true,clientX:mp.x,clientY:mp.y,pointerId:e.pointerId||1,pointerType:e.pointerType||'mouse',button:e.button||0,buttons:e.buttons||0,isPrimary:true,view:window,deltaY:e.deltaY||0};
   if(t==='click'||t==='dblclick'||t==='contextmenu'){if(mp.el)mp.el.dispatchEvent(new MouseEvent(t,init));return}
-  if(t==='pointerdown'){if(!mp.el)return;popDown=true;mp.el.dispatchEvent(new PointerEvent(t,init));return}
-  if(t==='pointermove'){document.dispatchEvent(new PointerEvent(t,init));return}
-  if(t==='pointerup'||t==='pointercancel'){popDown=false;(mp.el||document).dispatchEvent(new PointerEvent(t,init));return}
-  if(t==='wheel'){if(mp.el&&mp.el.closest('.ivw[data-iv]')){e.preventDefault();mp.el.dispatchEvent(new WheelEvent('wheel',init))}}}
+  if(t==='pointerdown'){if(!mp.el)return;popDown=true;if(e.target&&e.target.closest&&e.target.closest('.gw'))e.preventDefault();mp.el.dispatchEvent(new PointerEvent(t,init));return}
+  if(t==='pointermove'){(screen.contains(mp.el)?mp.el:screen).dispatchEvent(new PointerEvent(t,init));return}
+  if(t==='pointerup'||t==='pointercancel'){popDown=false;(screen.contains(mp.el)?mp.el:screen).dispatchEvent(new PointerEvent(t,init));return}
+  if(t==='wheel'){init.ctrlKey=e.ctrlKey;init.deltaX=e.deltaX||0;if(mp.el&&(mp.el.closest('.ivw[data-iv]')||(e.ctrlKey&&screen.contains(mp.el)))){e.preventDefault();mp.el.dispatchEvent(new WheelEvent('wheel',init))}}}
 function popField(e){
   if(!popAlive())return;
   var m=popW.document.getElementById('pmirror'),t=e.target,p=t&&t.nodeType===1?elPath(m,t):null;if(!p)return;
@@ -10158,6 +10162,10 @@ function popOpen(){
   ['click','dblclick','contextmenu','pointerdown','pointermove','pointerup','pointercancel'].forEach(function(n){d.addEventListener(n,popFwd,true)});
   d.addEventListener('wheel',popFwd,{passive:false,capture:true});
   ['input','change','keydown'].forEach(function(n){d.addEventListener(n,popField,true)});
+  ['keydown','keyup'].forEach(function(n){d.addEventListener(n,function(e){var a=d.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;if(OF.popKey(n,e)&&/^(arrow\w+|space)$/.test(kName(e)))e.preventDefault()})});
+  w.addEventListener('blur',function(){ST.keys.clear()});
+  try{if(window.OF_AC){var acx=OF_AC();if(acx&&acx.resume)acx.resume()}}catch(e){}
+  w.requestAnimationFrame(popLaco);
   d.addEventListener('scroll',popScroll,true);
   w.addEventListener('resize',popFit);
   w.addEventListener('pagehide',function(){setTimeout(function(){if(!popAlive())popStop()},50)});
