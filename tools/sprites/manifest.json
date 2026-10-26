@@ -90,25 +90,33 @@
  {
   "nome": "ceu",
   "caminho": "assets/sprites/ceu.png",
-  "largura": 96,
-  "altura": 54,
+  "largura": 128,
+  "altura": 224,
   "quadros": 1,
-  "desc": "Fundo de céu para parallax (96×54)"
+  "desc": "Fundo de céu para parallax (128×224)"
  },
  {
   "nome": "montanhas",
   "caminho": "assets/sprites/montanhas.png",
-  "largura": 96,
-  "altura": 54,
+  "largura": 128,
+  "altura": 224,
   "quadros": 1,
-  "desc": "Montanhas com fundo transparente, para parallax (96×54)"
+  "desc": "Montanhas com fundo transparente, para parallax (128×224)"
  },
  {
   "nome": "colinas",
   "caminho": "assets/sprites/colinas.png",
-  "largura": 96,
-  "altura": 54,
+  "largura": 128,
+  "altura": 224,
   "quadros": 1,
-  "desc": "Colinas com árvores, fundo transparente, para parallax (96×54)"
+  "desc": "Colinas com árvores, fundo transparente, para parallax (128×224)"
+ },
+ {
+  "nome": "tiles",
+  "caminho": "assets/sprites/tiles.png",
+  "largura": 128,
+  "altura": 32,
+  "quadros": 1,
+  "desc": "Blocos para mapas do Tiled: 8 colunas × 2 linhas de 16×16"
  }
 ]

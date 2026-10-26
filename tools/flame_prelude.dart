@@ -90,6 +90,8 @@ class PositionComponent extends Component {
   double angle;
   Anchor anchor;
   double opacity = 1;
+  dynamic tintColor;
+  double tintAmount = 0;
 
   PositionComponent({Vector2? position, Vector2? size, Vector2? scale, double? angle, Anchor? anchor, List<Component>? children, int? priority})
       : position = position ?? Vector2.zero(),

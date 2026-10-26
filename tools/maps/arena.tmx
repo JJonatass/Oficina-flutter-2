@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="20" height="21" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="44">
+ <tileset firstgid="1" name="tiles" tilewidth="16" tileheight="16" tilecount="16" columns="8">
+  <image source="tiles.png" width="128" height="32"/>
+ </tileset>
+ <layer id="1" name="chao" width="20" height="21">
+  <data encoding="csv">
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,
+8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,
+8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,
+8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,
+8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,
+8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,
+8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,
+8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,
+8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,
+8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,
+8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,
+7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8,7,8
+</data>
+ </layer>
+ <layer id="2" name="paredes" width="20" height="21">
+  <data encoding="csv">
+3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
+3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+3,0,0,0,0,3,3,3,3,0,0,0,3,3,3,3,0,0,0,3,
+3,0,0,0,0,3,0,0,0,0,0,0,0,0,0,3,0,0,0,3,
+3,0,0,0,0,3,0,0,0,0,0,0,0,0,0,3,0,0,0,3,
+3,0,0,0,0,3,0,0,0,0,0,0,0,0,0,3,0,0,0,3,
+3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+3,3,3,3,0,0,0,3,3,3,3,3,3,3,3,0,0,3,3,3,
+3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+3,0,0,0,3,3,3,0,0,0,0,0,3,3,3,0,0,0,0,3,
+3,0,0,0,3,0,0,0,0,0,0,0,0,0,3,0,0,0,0,3,
+3,0,0,0,3,0,0,0,0,0,0,0,0,0,3,0,0,0,0,3,
+3,0,0,0,3,3,3,3,0,0,0,3,3,3,3,0,0,0,0,3,
+3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,
+3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3
+</data>
+ </layer>
+ <layer id="3" name="decoracao" width="20" height="21">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,
+0,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="4" name="solidos">
+  <object id="1" type="parede" x="0" y="0" width="320" height="16"/>
+  <object id="2" type="parede" x="0" y="16" width="16" height="128"/>
+  <object id="3" type="parede" x="304" y="16" width="16" height="128"/>
+  <object id="4" type="parede" x="80" y="48" width="64" height="16"/>
+  <object id="5" type="parede" x="192" y="48" width="64" height="16"/>
+  <object id="6" type="parede" x="80" y="64" width="16" height="48"/>
+  <object id="7" type="parede" x="240" y="64" width="16" height="48"/>
+  <object id="8" type="parede" x="0" y="144" width="64" height="16"/>
+  <object id="9" type="parede" x="112" y="144" width="128" height="16"/>
+  <object id="10" type="parede" x="272" y="144" width="48" height="16"/>
+  <object id="11" type="parede" x="0" y="160" width="16" height="160"/>
+  <object id="12" type="parede" x="304" y="160" width="16" height="160"/>
+  <object id="13" type="parede" x="64" y="208" width="48" height="16"/>
+  <object id="14" type="parede" x="192" y="208" width="48" height="16"/>
+  <object id="15" type="parede" x="64" y="224" width="16" height="32"/>
+  <object id="16" type="parede" x="224" y="224" width="16" height="32"/>
+  <object id="17" type="parede" x="64" y="256" width="64" height="16"/>
+  <object id="18" type="parede" x="176" y="256" width="64" height="16"/>
+  <object id="19" type="parede" x="0" y="320" width="320" height="16"/>
+  <object id="20" type="parede" x="114" y="36" width="12" height="12"/>
+  <object id="21" type="parede" x="130" y="196" width="12" height="12"/>
+ </objectgroup>
+ <objectgroup id="5" name="objetos">
+  <object id="22" name="moeda" type="moeda" x="168" y="24">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="23" name="moeda" type="moeda" x="40" y="40">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="24" name="moeda" type="moeda" x="248" y="40">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="25" name="moeda" type="moeda" x="280" y="72">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="26" name="moeda" type="moeda" x="40" y="88">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="27" name="moeda" type="moeda" x="136" y="88">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="28" name="moeda" type="moeda" x="200" y="88">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="29" name="slime" type="inimigo" x="168" y="104">
+   <point/>
+  </object>
+  <object id="30" name="moeda" type="moeda" x="136" y="136">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="31" name="moeda" type="moeda" x="200" y="136">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="32" name="moeda" type="moeda" x="40" y="184">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="33" name="slime" type="inimigo" x="88" y="184">
+   <point/>
+  </object>
+  <object id="34" name="moeda" type="moeda" x="248" y="184">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="35" name="moeda" type="moeda" x="280" y="216">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="36" name="moeda" type="moeda" x="88" y="232">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="37" name="moeda" type="moeda" x="216" y="232">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="38" name="inicio" type="inicio" x="152" y="248">
+   <point/>
+  </object>
+  <object id="39" name="moeda" type="moeda" x="40" y="280">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="40" name="moeda" type="moeda" x="216" y="280">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="41" name="slime" type="inimigo" x="152" y="296">
+   <point/>
+  </object>
+  <object id="42" name="moeda" type="moeda" x="88" y="312">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="43" name="moeda" type="moeda" x="248" y="312">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+ </objectgroup>
+</map>

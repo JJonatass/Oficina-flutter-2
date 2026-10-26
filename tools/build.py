@@ -11,7 +11,7 @@ import json, re, sys, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'tools'))
-import patch_engine, patch_input, patch_media, patch_flame, patch_limits, lessons  # noqa: E402
+import patch_engine, patch_input, patch_media, patch_flame, patch_limits, patch_extra, lessons  # noqa: E402
 
 
 def sub1(src, old, new, label):
@@ -53,6 +53,7 @@ def build():
     src = patch_media.patch(src)
     src = patch_flame.patch(src)
     src = patch_limits.patch(src)
+    src = patch_extra.patch(src)
 
     # marca e textos do cabeçalho
     src = sub1(src, '<title>Oficina Flutter</title>', '<title>Oficina Flutter 2</title>', 'title')
@@ -85,6 +86,7 @@ def build():
 
     src = patch_media.finish(src)
     src = patch_limits.finish(src)
+    src = src + patch_extra.SPRITES_UI_EXTRA
     (ROOT / 'index.html').write_text(src, encoding='utf-8')
     print(f'index.html: {len(src):,} bytes, {len(lessons.LESSONS)} aulas')
 

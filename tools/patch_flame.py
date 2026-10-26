@@ -291,7 +291,7 @@ screen.addEventListener('pointerup',gwEnd);screen.addEventListener('pointercance
 
 
 def prelude_js():
-    return json.dumps((ROOT / 'flame_prelude.dart').read_text() + '\n' + (ROOT / 'flame_prelude2.dart').read_text())
+    return json.dumps((ROOT / 'flame_prelude.dart').read_text() + '\n' + (ROOT / 'flame_prelude2.dart').read_text() + '\n' + (ROOT / 'flame_prelude3.dart').read_text())
 
 
 def patch(src):

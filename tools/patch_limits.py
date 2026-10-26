@@ -250,19 +250,28 @@ SPRITES_UI = r"""<style>
 <div class="modal" id="sprModal" hidden role="dialog" aria-modal="true" aria-label="Sprites"><div class="mbox">
   <div class="mh"><b>Sprites</b><button class="btn" id="sprClose" aria-label="Fechar">✕</button></div>
   <div class="mb">
-   <p class="mt">Use o caminho no código: rootBundle.load('assets/sprites/heroi.png'), Image.asset(...) ou, no Flame, só o nome do arquivo (loadSprite('heroi.png')).</p>
-   <h3>Suas imagens</h3>
-   <p class="mt">PNG, JPG, GIF ou WebP de até 400 KB. Elas ficam guardadas só neste navegador.</p>
-   <div class="mrow"><input type="file" id="sprFile" accept="image/png,image/jpeg,image/gif,image/webp" aria-label="Arquivo de imagem"><input id="sprName" placeholder="nome.png" maxlength="40" aria-label="Nome do sprite"><button class="btn pri" id="sprAdd">Adicionar</button></div>
+   <p class="mt">Use o caminho no código: rootBundle.load('assets/sprites/heroi.png'), Image.asset(...) ou, no Flame, só o nome do arquivo (loadSprite('heroi.png')). Mapas do Tiled (.tmx) entram aqui também e são abertos com TiledComponent.load('nome.tmx', ...).</p>
+   <h3>Suas imagens e mapas</h3>
+   <p class="mt">PNG, JPG, GIF ou WebP de até 400 KB, ou um mapa .tmx do Tiled (camadas em CSV e tileset incorporado; a imagem do tileset entra aqui também). Ficam guardados só neste navegador.</p>
+   <div class="mrow"><input type="file" id="sprFile" accept="image/png,image/jpeg,image/gif,image/webp,.tmx" aria-label="Arquivo de imagem ou mapa"><input id="sprName" placeholder="nome.png" maxlength="40" aria-label="Nome do sprite"><button class="btn pri" id="sprAdd">Adicionar</button></div>
    <div class="sprerr" id="sprErr" role="status"></div>
    <div class="sprlist" id="sprOwn"></div>
    <h3>Prontos do simulador</h3>
    <div class="sprlist" id="sprList"></div>
+   <h3>Mapas prontos (assets/tiles/)</h3>
+   <div class="sprlist" id="sprMaps"></div>
   </div></div></div>
 <script>
 (function(){
   var M=document.getElementById('sprModal'),B=document.getElementById('sprBtn');if(!M||!B)return;
   function own(){try{return JSON.parse(localStorage.getItem('oficina2.sprites')||'{}')}catch(e){return{}}}
+  function ownM(){try{return JSON.parse(localStorage.getItem('oficina2.mapas')||'{}')}catch(e){return{}}}
+  function mapCard(k,t,isOwn){var c=document.createElement('div');c.className='sprc';var cd=document.createElement('code');cd.textContent=k;c.appendChild(cd);
+    var m=document.createElement('div');m.className='sprm';var w=/\swidth="(\d+)"/.exec(t),h=/\sheight="(\d+)"/.exec(t),im=/<image[^>]*source="([^"]+)"/.exec(t);
+    m.textContent='Mapa '+(w?w[1]:'?')+'×'+(h?h[1]:'?')+' blocos'+(im?' · tileset '+im[1].split('/').pop():'');c.appendChild(m);
+    var bt=document.createElement('div');bt.className='sprb';var cp=document.createElement('button');cp.className='btn';cp.textContent='Copiar nome';cp.addEventListener('click',function(){try{navigator.clipboard.writeText(k.split('/').pop()).then(function(){cp.textContent='Copiado';setTimeout(function(){cp.textContent='Copiar nome'},1200)},function(){})}catch(e){}});bt.appendChild(cp);
+    if(isOwn){var del=document.createElement('button');del.className='btn';del.textContent='Apagar';del.addEventListener('click',function(){if(del.dataset.sure!=='1'){del.dataset.sure='1';del.textContent='Apagar mesmo?';return}
+      var o=ownM();delete o[k];try{localStorage.setItem('oficina2.mapas',JSON.stringify(o))}catch(e){}delete window.OF_MAPS[k];draw()});bt.appendChild(del)}c.appendChild(bt);return c}
   function save(o){localStorage.setItem('oficina2.sprites',JSON.stringify(o))}
   function card(k,s,isOwn){var c=document.createElement('div');c.className='sprc';
     var v=document.createElement('div');v.className='sprv';var im=document.createElement('img');im.src=s.uri;im.alt='';v.appendChild(im);c.appendChild(v);
@@ -275,16 +284,23 @@ SPRITES_UI = r"""<style>
       var o=own();delete o[k];try{save(o)}catch(e){}delete window.OF_SPRITES[k];delete window.OF_SPRITE_IMG[k];draw();if(window.OF&&OF.rerender)OF.rerender()});bt.appendChild(del)}
     c.appendChild(bt);return c}
   function draw(){var L=document.getElementById('sprList'),O=document.getElementById('sprOwn');L.innerHTML='';O.innerHTML='';var o=own(),n=0;
-    Object.keys(window.OF_SPRITES||{}).forEach(function(k){var s=window.OF_SPRITES[k];if(o[k]){O.appendChild(card(k,s,true));n++}else L.appendChild(card(k,s,false))});
+    var om=ownM(),MP=document.getElementById('sprMaps');MP.innerHTML='';Object.keys(window.OF_MAPS||{}).forEach(function(k){if(om[k]){O.appendChild(mapCard(k,window.OF_MAPS[k],true));n++}else MP.appendChild(mapCard(k,window.OF_MAPS[k],false))});
+    Object.keys(window.OF_SPRITES||{}).forEach(function(k){if(k.indexOf('__')===0)return;var s=window.OF_SPRITES[k];if(o[k]){O.appendChild(card(k,s,true));n++}else L.appendChild(card(k,s,false))});
     if(!n){var p=document.createElement('p');p.className='mt';p.textContent='Nenhuma imagem sua ainda. Escolha um arquivo acima.';O.appendChild(p)}}
   function err(t){document.getElementById('sprErr').textContent=t||''}
   B.addEventListener('click',function(){err('');draw();M.hidden=false});
   document.getElementById('sprClose').addEventListener('click',function(){M.hidden=true});
   M.addEventListener('click',function(e){if(e.target===M)M.hidden=true});
   document.getElementById('sprFile').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;var nm=document.getElementById('sprName');
-    if(!nm.value)nm.value=f.name.toLowerCase().replace(/\.[a-z0-9]+$/,'').replace(/[^a-z0-9_-]+/g,'_').replace(/^_+|_+$/g,'')+'.'+((/\.(png|jpe?g|gif|webp)$/i.exec(f.name)||[0,'png'])[1].toLowerCase())});
+    if(!nm.value)nm.value=f.name.toLowerCase().replace(/\.[a-z0-9]+$/,'').replace(/[^a-z0-9_-]+/g,'_').replace(/^_+|_+$/g,'')+'.'+((/\.(png|jpe?g|gif|webp|tmx)$/i.exec(f.name)||[0,'png'])[1].toLowerCase())});
   document.getElementById('sprAdd').addEventListener('click',function(){
     var f=document.getElementById('sprFile').files[0];if(!f){err('Escolha um arquivo de imagem primeiro.');return}
+    if(/\.tmx$/i.test(f.name)){if(f.size>400*1024){err('Esse mapa passa de 400 KB.');return}var nmm=(document.getElementById('sprName').value||f.name).trim().toLowerCase().replace(/[^a-z0-9_.-]+/g,'_');if(!/\.tmx$/.test(nmm))nmm+='.tmx';
+      var km='assets/tiles/'+nmm,om=ownM();if(window.OF_MAPS[km]&&!om[km]){err('Já existe um mapa pronto com o nome '+nmm+'. Escolha outro nome.');return}
+      var rt=new FileReader();rt.onload=function(){var t=String(rt.result);if(!/<map[\s>]/.test(t)){err('Esse arquivo não parece um mapa do Tiled (.tmx).');return}
+        if(/<tileset[^>]*source=/.test(t)){err('O tileset está num arquivo separado (.tsx). No Tiled, clique no tileset e use "Embed tileset" antes de salvar.');return}
+        om[km]=t;try{localStorage.setItem('oficina2.mapas',JSON.stringify(om))}catch(e){err('O navegador não tem mais espaço. Apague algo antes.');return}
+        window.OF_MAPS[km]=t;err('');document.getElementById('sprFile').value='';document.getElementById('sprName').value='';draw();if(window.OF&&OF.rerender)OF.rerender()};rt.readAsText(f);return}
     if(f.size>400*1024){err('Essa imagem tem '+Math.round(f.size/1024)+' KB. O limite é 400 KB: diminua a imagem ou salve como PNG menor.');return}
     var nome=(document.getElementById('sprName').value||'').trim().toLowerCase().replace(/[^a-z0-9_.-]+/g,'_');
     if(!/\.(png|jpe?g|gif|webp)$/.test(nome))nome=(nome||'imagem').replace(/\.+$/,'')+'.png';

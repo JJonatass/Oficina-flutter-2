@@ -240,41 +240,180 @@ for box in ([2, 7, 12, 15], [7, 2, 19, 14], [15, 4, 26, 15], [22, 8, 30, 15]):
 for box in ([3, 7, 12, 13], [8, 3, 18, 12], [16, 5, 25, 13], [23, 9, 29, 13]):
     dn.ellipse(box, fill=PAL['w'] + (255,))
 
-# ---- camadas de fundo para parallax (96x54, repetem na horizontal sem emenda)
-PW, PH = 96, 54
+# ---- camadas de fundo para parallax (128x224, em pé como a tela do celular; repetem na horizontal sem emenda)
+import random
+PW, PH = 128, 224
 ceu = Image.new('RGBA', (PW, PH))
 for y in range(PH):
     t = y / (PH - 1)
-    c = tuple(int(a + (b - a) * t) for a, b in zip((92, 156, 236), (196, 228, 250)))
+    c = tuple(int(a + (b - a) * t) for a, b in zip((78, 140, 226), (206, 234, 252)))
     for x in range(PW):
         ceu.putpixel((x, y), c + (255,))
-for cx, cy in ((14, 10), (52, 6), (80, 14)):
-    ceu.alpha_composite(nuvem.resize((16, 8), Image.NEAREST), (cx - 8, cy - 4))
+for cx, cy, esc in ((18, 30, 1), (70, 18, 1), (104, 62, 1), (40, 92, 1)):
+    n = nuvem if esc == 1 else nuvem
+    ceu.alpha_composite(n, ((cx - 16) % PW, cy - 8))
+    if cx - 16 + 32 > PW:
+        ceu.alpha_composite(n, (cx - 16 - PW, cy - 8))
 
 
-def silhueta(alturas, cor, cor2=None):
+def silhueta(alturas, cor, cor2=None, borda=2):
     img = Image.new('RGBA', (PW, PH), (0, 0, 0, 0))
     for x in range(PW):
         h = int(alturas(x))
         for y in range(PH - h, PH):
-            c = cor if (cor2 is None or y < PH - h + 2) else cor2
+            c = cor if (cor2 is None or y < PH - h + borda) else cor2
             img.putpixel((x, y), c + (255,))
     return img
 
 
-montanhas = silhueta(lambda x: 22 + 12 * abs(math.sin(math.pi * x / 48)) ** 0.8 + 3 * math.sin(2 * math.pi * x / 12),
-                     (120, 132, 190), (98, 108, 168))
-for x in range(PW):  # neve nos picos
-    for y in range(PH):
-        if montanhas.getpixel((x, y))[3] and y < 20:
-            montanhas.putpixel((x, y), (236, 240, 250, 255))
-colinas = silhueta(lambda x: 12 + 4 * math.sin(2 * math.pi * x / 96) + 2 * math.sin(2 * math.pi * x / 32), (70, 160, 90), (52, 128, 70))
+montanhas = silhueta(lambda x: 92 + 34 * abs(math.sin(math.pi * x / 64)) ** 0.8 + 7 * math.sin(2 * math.pi * x / 16),
+                     (122, 132, 196), (100, 108, 172))
+for x in range(PW):
+    topo = next(y for y in range(PH) if montanhas.getpixel((x, y))[3])
+    if topo < PH - 112:
+        for y in range(topo, min(PH, topo + 6 + (x % 3))):
+            montanhas.putpixel((x, y), (238, 242, 252, 255))
+colinas = silhueta(lambda x: 52 + 9 * math.sin(2 * math.pi * x / 128) + 4 * math.sin(2 * math.pi * x / 32), (82, 170, 96), (60, 140, 76), 3)
 dc = ImageDraw.Draw(colinas)
-for tx in (10, 40, 70):  # árvores
-    base = PH - int(12 + 4 * math.sin(2 * math.pi * tx / 96) + 2 * math.sin(2 * math.pi * tx / 32))
-    dc.rectangle([tx, base - 6, tx + 1, base + 1], fill=PAL['N'] + (255,))
-    dc.ellipse([tx - 4, base - 15, tx + 5, base - 4], fill=PAL['G'] + (255,))
-    dc.ellipse([tx - 2, base - 14, tx + 3, base - 8], fill=PAL['g'] + (255,))
+for tx in (14, 58, 96):
+    base = PH - int(52 + 9 * math.sin(2 * math.pi * tx / 128) + 4 * math.sin(2 * math.pi * tx / 32)) + 2
+    dc.rectangle([tx, base - 10, tx + 2, base + 2], fill=PAL['N'] + (255,))
+    dc.ellipse([tx - 7, base - 28, tx + 9, base - 7], fill=PAL['G'] + (255,))
+    dc.ellipse([tx - 4, base - 26, tx + 5, base - 15], fill=PAL['g'] + (255,))
+
+# ---- blocos para mapas do Tiled (8 colunas x 2 linhas de 16x16; o número do bloco no Tiled começa em 1)
+rnd = random.Random(7)
+
+
+def bloco(fundo, pontos=(), prob=0.0, transparente=False):
+    b = Image.new('RGBA', (16, 16), (0, 0, 0, 0) if transparente else fundo + (255,))
+    for y in range(16):
+        for x in range(16):
+            if pontos and rnd.random() < prob:
+                b.putpixel((x, y), rnd.choice(pontos) + (255,))
+    return b
+
+
+def grama_topo():
+    b = bloco(PAL['n'], (PAL['N'], PAL['m']), 0.12)
+    for x in range(16):
+        h = 4 + (1 if (x * 7) % 5 == 0 else 0)
+        for y in range(h):
+            b.putpixel((x, y), (PAL['g'] if y < h - 1 else PAL['G']) + (255,))
+    return b
+
+
+def pedra():
+    b = bloco((130, 136, 150), ((112, 118, 132), (150, 156, 170)), 0.2)
+    d = ImageDraw.Draw(b)
+    for y in (0, 8):
+        d.line([0, y, 15, y], fill=(90, 96, 110, 255))
+    for x, y0 in ((5, 0), (12, 0), (2, 8), (9, 8)):
+        d.line([x, y0, x, y0 + 7], fill=(90, 96, 110, 255))
+    return b
+
+
+def tijolo():
+    b = bloco((176, 82, 56), ((160, 70, 48), (190, 96, 66)), 0.15)
+    d = ImageDraw.Draw(b)
+    for y in (3, 7, 11, 15):
+        d.line([0, y, 15, y], fill=(226, 206, 180, 255))
+    for i, y in enumerate((0, 4, 8, 12)):
+        for x in ((7,) if i % 2 == 0 else (3, 11)):
+            d.line([x, y, x, y + 2], fill=(226, 206, 180, 255))
+    return b
+
+
+def tabua():
+    b = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(b)
+    d.rectangle([0, 0, 15, 6], fill=PAL['m'] + (255,))
+    d.line([0, 6, 15, 6], fill=PAL['N'] + (255,))
+    d.line([0, 0, 15, 0], fill=(222, 170, 110, 255))
+    for x in (4, 11):
+        d.point((x, 3), fill=PAL['N'] + (255,))
+    return b
+
+
+def agua():
+    b = bloco((52, 120, 220), ((70, 140, 230), (44, 104, 200)), 0.15)
+    d = ImageDraw.Draw(b)
+    d.line([0, 2, 3, 1, 7, 2, 11, 1, 15, 2], fill=(160, 210, 250, 255))
+    return b
+
+
+def piso(c1, c2):
+    b = Image.new('RGBA', (16, 16), c1 + (255,))
+    d = ImageDraw.Draw(b)
+    d.rectangle([0, 0, 15, 15], outline=c2 + (255,))
+    d.point((4, 4), fill=c2 + (255,))
+    d.point((11, 10), fill=c2 + (255,))
+    return b
+
+
+def arbusto():
+    b = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(b)
+    d.ellipse([1, 6, 9, 15], fill=PAL['G'] + (255,))
+    d.ellipse([6, 4, 15, 15], fill=PAL['G'] + (255,))
+    d.ellipse([3, 7, 8, 12], fill=PAL['g'] + (255,))
+    d.ellipse([8, 6, 13, 11], fill=PAL['g'] + (255,))
+    return b
+
+
+def flor():
+    b = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(b)
+    d.line([7, 8, 7, 15], fill=PAL['G'] + (255,))
+    d.ellipse([4, 3, 10, 9], fill=PAL['p'] + (255,))
+    d.point((7, 6), fill=PAL['y'] + (255,))
+    return b
+
+
+def placa():
+    b = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(b)
+    d.rectangle([7, 8, 8, 15], fill=PAL['N'] + (255,))
+    d.rectangle([2, 2, 13, 9], fill=PAL['m'] + (255,), outline=PAL['N'] + (255,))
+    d.line([4, 5, 11, 5], fill=PAL['N'] + (255,))
+    return b
+
+
+def porta():
+    b = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(b)
+    d.rectangle([2, 1, 13, 15], fill=PAL['N'] + (255,))
+    d.rectangle([4, 3, 11, 15], fill=PAL['n'] + (255,))
+    d.point((10, 9), fill=PAL['y'] + (255,))
+    return b
+
+
+def espinhos():
+    b = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(b)
+    for x0 in (0, 4, 8, 12):
+        d.polygon([(x0, 15), (x0 + 2, 7), (x0 + 3, 15)], fill=PAL['e'] + (255,))
+        d.line([x0 + 2, 8, x0 + 2, 14], fill=PAL['W'] + (255,))
+    return b
+
+
+def escada():
+    b = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(b)
+    d.line([3, 0, 3, 15], fill=PAL['N'] + (255,), width=2)
+    d.line([12, 0, 12, 15], fill=PAL['N'] + (255,), width=2)
+    for y in (2, 7, 12):
+        d.line([4, y, 11, y], fill=PAL['m'] + (255,))
+    return b
+
+
+tiles = sheet([grama_topo(), bloco(PAL['n'], (PAL['N'], PAL['m']), 0.12), pedra(), tijolo(), tabua(), agua(),
+               piso((214, 200, 168), (190, 174, 140)), piso((168, 176, 150), (146, 154, 128)),
+               arbusto(), flor(), placa(), porta(), espinhos(), escada(),
+               bloco((190, 230, 248), ((220, 244, 255), (160, 210, 236)), 0.15), bloco((236, 210, 140), ((220, 192, 120), (246, 226, 164)), 0.2)])
+tiles_img = Image.new('RGBA', (128, 32), (0, 0, 0, 0))
+tiles_img.paste(tiles.crop((0, 0, 128, 16)), (0, 0))
+tiles_img.paste(tiles.crop((128, 0, 256, 16)), (0, 16))
 
 SPRITES = [
     ('heroi', heroi, 4, 'Herói andando para a direita (4 quadros de 16×16)'),
@@ -288,9 +427,10 @@ SPRITES = [
     ('maca', maca, 1, 'Maçã (16×16)'),
     ('grama', grama, 1, 'Bloco de chão com grama (16×16)'),
     ('nuvem', nuvem, 1, 'Nuvem (32×16)'),
-    ('ceu', ceu, 1, 'Fundo de céu para parallax (96×54)'),
-    ('montanhas', montanhas, 1, 'Montanhas com fundo transparente, para parallax (96×54)'),
-    ('colinas', colinas, 1, 'Colinas com árvores, fundo transparente, para parallax (96×54)'),
+    ('ceu', ceu, 1, 'Fundo de céu para parallax (128×224)'),
+    ('montanhas', montanhas, 1, 'Montanhas com fundo transparente, para parallax (128×224)'),
+    ('colinas', colinas, 1, 'Colinas com árvores, fundo transparente, para parallax (128×224)'),
+    ('tiles', tiles_img, 1, 'Blocos para mapas do Tiled: 8 colunas × 2 linhas de 16×16'),
 ]
 
 manifest = []

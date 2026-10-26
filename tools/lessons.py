@@ -2571,7 +2571,7 @@ class Bola extends PositionComponent with HasGameReference<MeuJogo> {
         ['Terceira bola', 'Acrescente mais um add(Bola(...)) no onLoad, com outra posição, velocidade e cor.', r'(?:add\(\s*Bola\([\s\S]*?){3}'],
         ['Outro fundo', 'Em backgroundColor, troque Color(0xFF14213D) por outra cor.', r'^(?![\s\S]*0xFF14213D)'],
     ],
-    lim='O Flame do simulador é uma versão simplificada: tem os componentes, eventos, colisões, efeitos, partículas, paralaxe e overlays mais usados, mas não tem Forge2D (física) nem mapas do Tiled. O botão ⚠ Limites lista o que existe.',
+    lim='O Flame do simulador é uma versão simplificada: tem os componentes, eventos, colisões, efeitos, partículas, paralaxe, overlays, joystick, física do Forge2D e mapas do Tiled mais usados. O botão ⚠ Limites lista o que existe.',
     setup=SETUP_FLAME,
 )
 
@@ -4059,3 +4059,848 @@ class Inimigo extends SpriteAnimationComponent with CollisionCallbacks, HasGameR
 )
 
 PARTS.append(['Projeto · Céu Agitado', 'Projeto 4 · Céu Agitado'])
+
+
+# ---------------------------------------------------------------- Parte 6 · Celular, física e mapas
+SETUP_FORGE2D = (
+    'No terminal do projeto:\n'
+    '  flutter pub add flame flame_forge2d\n\n'
+    'flame_forge2d já traz o Flame junto. As medidas do Forge2D são em metros: com zoom 10, cada metro vira 10 pixels '
+    'na tela, e o ponto (0, 0) do mundo fica no centro.'
+)
+SETUP_TILED = (
+    'No terminal do projeto:\n'
+    '  flutter pub add flame flame_tiled\n\n'
+    'O flame_tiled procura os mapas em assets/tiles/ e as imagens dos blocos em assets/images/. No pubspec.yaml:\n'
+    '  assets:\n'
+    '    - assets/images/\n'
+    '    - assets/tiles/\n\n'
+    'No simulador já existem os mapas arena.tmx (vista de cima) e fase1.tmx (plataforma), com o tileset tiles.png '
+    'incorporado. Para usar um mapa seu, salve no Tiled com as camadas em CSV e o tileset incorporado, e acrescente o '
+    '.tmx e a imagem dos blocos pelo botão 🖼 Sprites.'
+)
+
+aula(
+    'Joystick e botões na tela',
+    'Celular não tem teclado: jogos de ação usam um joystick desenhado na tela. No Flame ele é o JoystickComponent, '
+    'feito de dois componentes: background, o círculo de fundo, e knob, a bolinha que segue o dedo. margin prende o '
+    'joystick a um canto da tela, como um widget com Padding. A cada quadro, joystick.relativeDelta diz para onde o '
+    'dedo está puxando, de -1 a 1 em cada eixo, e joystick.direction resume isso em oito direções. Multiplicar '
+    'relativeDelta pela velocidade e por dt faz o herói andar mais rápido quanto mais longe do centro estiver o dedo. '
+    'O HudButtonComponent é um botão de jogo: button é o desenho normal, buttonDown o desenho enquanto está apertado, '
+    'e onPressed e onReleased avisam quando o dedo encosta e quando solta. Joystick e botão funcionam ao mesmo tempo, '
+    'cada um com um dedo.',
+    'Em ▶ Testar, arraste a bolinha do joystick com o mouse ou o dedo e pegue as moedas. Segure o botão laranja para '
+    'correr. Mude a velocidade, troque as cores do joystick e mostre a direção no placar.',
+    r'''
+import 'dart:math';
+import 'package:flame/components.dart';
+import 'package:flame/game.dart';
+import 'package:flame/input.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(game: Passeio()));
+
+class Passeio extends FlameGame {
+  final sorteio = Random();
+  late JoystickComponent joystick;
+  late Heroi heroi;
+  late TextComponent placar;
+  int moedas = 0;
+  bool turbo = false;
+
+  @override
+  Future<void> onLoad() async {
+    heroi = Heroi();
+    add(heroi);
+    joystick = JoystickComponent(
+      knob: CircleComponent(radius: 22, paint: Paint()..color = Colors.white70),
+      background: CircleComponent(radius: 60, paint: Paint()..color = Colors.white24),
+      margin: const EdgeInsets.only(left: 30, bottom: 40),
+    );
+    add(joystick);
+    add(HudButtonComponent(
+      button: CircleComponent(radius: 32, paint: Paint()..color = Colors.orange),
+      buttonDown: CircleComponent(radius: 32, paint: Paint()..color = Colors.deepOrange),
+      margin: const EdgeInsets.only(right: 30, bottom: 64),
+      onPressed: () => turbo = true,
+      onReleased: () => turbo = false,
+    ));
+    placar = TextComponent(text: 'Moedas: 0', position: Vector2(16, 16));
+    add(placar);
+    novaMoeda();
+  }
+
+  void novaMoeda() {
+    add(Moeda(Vector2(40 + sorteio.nextDouble() * (size.x - 80), 80 + sorteio.nextDouble() * (size.y - 280))));
+  }
+
+  void pegou() {
+    moedas++;
+    placar.text = 'Moedas: $moedas';
+    FlameAudio.play('moeda.wav');
+    novaMoeda();
+  }
+
+  @override
+  Color backgroundColor() => const Color(0xFF3A6B35);
+}
+
+class Heroi extends SpriteAnimationComponent with HasGameReference<Passeio> {
+  Heroi() : super(size: Vector2.all(64), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'heroi.png',
+      SpriteAnimationData.sequenced(amount: 4, stepTime: 0.12, textureSize: Vector2.all(16)),
+    );
+    position = Vector2(game.size.x / 2, game.size.y / 2);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    final j = game.joystick;
+    playing = !j.isIdle;
+    if (j.isIdle) return;
+    final velocidade = game.turbo ? 260.0 : 140.0;
+    position.add(j.relativeDelta * velocidade * dt);
+    position.clamp(Vector2.all(32), game.size - Vector2.all(32));
+    if (j.relativeDelta.x < 0 && scale.x > 0) flipHorizontally();
+    if (j.relativeDelta.x > 0 && scale.x < 0) flipHorizontally();
+  }
+}
+
+class Moeda extends SpriteAnimationComponent with HasGameReference<Passeio> {
+  Moeda(Vector2 onde) : super(position: onde, size: Vector2.all(36), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'moeda.png',
+      SpriteAnimationData.sequenced(amount: 6, stepTime: 0.1, textureSize: Vector2.all(16)),
+    );
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (position.distanceTo(game.heroi.position) < 40) {
+      removeFromParent();
+      game.pegou();
+    }
+  }
+}
+''',
+    [
+        ['Mais rápido', 'No update do herói, troque 140.0 por 200.0.', r'turbo\s*\?\s*[\d.]+\s*:\s*(?!140(?:\.0)?\b)[\d.]+'],
+        ['Outras cores', 'Troque Colors.white70 do knob por outra cor, como Colors.amber.', r'knob:\s*CircleComponent\([^\n]*Colors\.(?!white70\b)\w+'],
+        ['Mostrar a direção', "No update do jogo (override void update(double dt)), escreva placar.text = 'Moedas: $moedas  ${joystick.direction.name}';", r'joystick\.direction'],
+    ],
+    lim='No computador, o joystick funciona arrastando com o mouse; numa tela de toque, dá para usar o joystick e o botão ao mesmo tempo, com dois dedos.',
+    setup=SETUP_FLAME,
+)
+
+aula(
+    'Efeitos de cor e de caminho',
+    'Dois efeitos completam a caixa de ferramentas da Parte 5. ColorEffect pinta o componente com uma cor por cima '
+    'do desenho: opacityTo diz quanto da cor entra (1 é tudo), e com alternate: true a cor vai e volta, o jeito '
+    'clássico de mostrar que o inimigo levou um golpe. MoveAlongPathEffect move o componente ao longo de um Path, o '
+    'mesmo Path do CustomPainter: moveTo, lineTo, quadraticBezierTo e addOval desenham a trilha, e o efeito anda por '
+    'ela do começo ao fim no tempo do EffectController. Sem absolute: true, o caminho é somado à posição em que o '
+    'componente estava. Com oriented: true, o componente gira para apontar na direção em que está andando. Aqui o '
+    'slime patrulha um caminho em forma de onda e a nave dá voltas num círculo. O desenho da nave aponta para cima, e '
+    'oriented gira o componente para a direção do eixo x; por isso o sprite fica dentro de um PositionComponent, já '
+    'girado 90 graus.',
+    'Em ▶ Testar, toque no slime para ver o efeito de cor. Troque a cor do golpe, aumente a onda do caminho e deixe a '
+    'nave mais rápida.',
+    r'''
+import 'dart:math';
+import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
+import 'package:flame/events.dart';
+import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(game: Patrulha()));
+
+class Patrulha extends FlameGame {
+  late TextComponent placar;
+  int golpes = 0;
+
+  @override
+  Future<void> onLoad() async {
+    placar = TextComponent(text: 'Golpes: 0', position: Vector2(16, 16));
+    add(placar);
+
+    final slime = Slime(Vector2(40, 260));
+    add(slime);
+    final onda = Path()
+      ..moveTo(0, 0)
+      ..quadraticBezierTo(70, -80, 140, 0)
+      ..quadraticBezierTo(210, 80, 280, 0);
+    slime.add(MoveAlongPathEffect(onda, EffectController(duration: 3, alternate: true, infinite: true)));
+
+    final nave = PositionComponent(size: Vector2.all(48), anchor: Anchor.center);
+    nave.add(SpriteAnimationComponent(
+      animation: await loadSpriteAnimation(
+        'nave.png',
+        SpriteAnimationData.sequenced(amount: 2, stepTime: 0.1, textureSize: Vector2.all(16)),
+      ),
+      size: Vector2.all(48),
+      position: Vector2.all(24),
+      anchor: Anchor.center,
+      angle: pi / 2,
+    ));
+    add(nave);
+    final volta = Path()..addOval(Rect.fromCircle(center: Offset(size.x / 2, 470), radius: 100));
+    nave.add(MoveAlongPathEffect(volta, EffectController(duration: 4, infinite: true), absolute: true, oriented: true));
+  }
+
+  @override
+  Color backgroundColor() => const Color(0xFF1B2A41);
+}
+
+class Slime extends SpriteAnimationComponent with TapCallbacks, HasGameReference<Patrulha> {
+  Slime(Vector2 inicio) : super(position: inicio, size: Vector2.all(56), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'slime.png',
+      SpriteAnimationData.sequenced(amount: 2, stepTime: 0.3, textureSize: Vector2.all(16)),
+    );
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    game.golpes++;
+    game.placar.text = 'Golpes: ${game.golpes}';
+    add(ColorEffect(Colors.red, EffectController(duration: 0.12, alternate: true, repeatCount: 2), opacityTo: 0.8));
+  }
+}
+''',
+    [
+        ['Outra cor de golpe', 'No ColorEffect, troque Colors.red por Colors.white (ou outra cor).', r'ColorEffect\(\s*Colors\.(?!red\b)\w+'],
+        ['Onda maior', 'No primeiro quadraticBezierTo, troque -80 por -140.', r'quadraticBezierTo\(\s*70\s*,\s*-(?!80\b)\d+'],
+        ['Nave mais rápida', 'No EffectController da volta, troque duration: 4 por duration: 2.', r'MoveAlongPathEffect\(\s*volta\s*,\s*EffectController\(\s*duration:\s*(?!4\b)[\d.]+'],
+    ],
+    setup=SETUP_FLAME,
+)
+
+aula(
+    'Forge2D: corpos, gravidade e quiques',
+    'Até aqui o próprio jogo calculava a queda e a batida. Um motor de física faz isso sozinho e com mais realismo: '
+    'objetos empilham, rolam, giram e quicam. O Forge2D é o Box2D, o motor de física 2D mais usado em jogos, escrito '
+    'em Dart. Cada objeto é um BodyComponent, e o método createBody monta seu corpo em três partes: o BodyDef diz onde '
+    'o corpo começa e de que tipo ele é (BodyType.dynamic cai e se mexe, static fica parado, como o chão); a forma '
+    '(CircleShape, PolygonShape ou EdgeShape, uma linha) diz o contorno; e o FixtureDef liga a forma ao corpo com '
+    'density (peso), friction (atrito) e restitution (quanto quica, de 0 a 1). As medidas são em metros, e o '
+    'Forge2DGame mostra 10 pixels por metro. camera.visibleWorldRect diz quais metros cabem na tela, o que serve para '
+    'pôr as paredes nas bordas. Cada toque solta uma bola nova onde o dedo encostou, convertida com screenToWorld.',
+    'Em ▶ Testar, toque na tela várias vezes e veja as bolas derrubarem a torre. Deixe as bolas mais saltitantes, '
+    'inverta a gravidade e faça a torre mais alta.',
+    r'''
+import 'dart:math';
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(game: Fisica()));
+
+class Fisica extends Forge2DGame with TapCallbacks {
+  Fisica() : super(gravity: Vector2(0, 10), zoom: 10);
+
+  final sorteio = Random();
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    final r = camera.visibleWorldRect;
+    world.add(Parede(Vector2(r.left, r.bottom - 1), Vector2(r.right, r.bottom - 1)));
+    world.add(Parede(Vector2(r.left + 0.5, r.top), Vector2(r.left + 0.5, r.bottom)));
+    world.add(Parede(Vector2(r.right - 0.5, r.top), Vector2(r.right - 0.5, r.bottom)));
+    for (int i = 0; i < 6; i++) {
+      world.add(Caixa(Vector2(4, r.bottom - 2 - i * 2)));
+    }
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    world.add(Bola(screenToWorld(event.localPosition), 0.8 + sorteio.nextDouble()));
+  }
+}
+
+class Parede extends BodyComponent {
+  final Vector2 inicio;
+  final Vector2 fim;
+
+  Parede(this.inicio, this.fim);
+
+  @override
+  Body createBody() {
+    final forma = EdgeShape()..set(inicio, fim);
+    final corpo = world.createBody(BodyDef(type: BodyType.static));
+    corpo.createFixture(FixtureDef(forma, friction: 0.6));
+    return corpo;
+  }
+}
+
+class Caixa extends BodyComponent {
+  final Vector2 inicio;
+
+  Caixa(this.inicio) : super(paint: Paint()..color = Colors.orange);
+
+  @override
+  Body createBody() {
+    final forma = PolygonShape()..setAsBoxXY(1, 1);
+    final corpo = world.createBody(BodyDef(position: inicio, type: BodyType.dynamic));
+    corpo.createFixture(FixtureDef(forma, density: 1, friction: 0.5));
+    return corpo;
+  }
+}
+
+class Bola extends BodyComponent {
+  final Vector2 inicio;
+  final double raio;
+
+  Bola(this.inicio, this.raio) : super(paint: Paint()..color = Colors.lightBlueAccent);
+
+  @override
+  Body createBody() {
+    final forma = CircleShape()..radius = raio;
+    final corpo = world.createBody(BodyDef(position: inicio, type: BodyType.dynamic));
+    corpo.createFixture(FixtureDef(forma, density: 2, restitution: 0.5, friction: 0.4));
+    return corpo;
+  }
+}
+''',
+    [
+        ['Bolas saltitantes', 'No FixtureDef da bola, troque restitution: 0.5 por 0.9.', r'restitution:\s*0?\.(?!5\b)\d+'],
+        ['Gravidade ao contrário', 'No construtor do jogo, troque Vector2(0, 10) por Vector2(0, -10). Toque e veja as bolas caírem para cima.', r'gravity:\s*Vector2\(\s*[-\d.]+\s*,\s*-\s*\d'],
+        ['Torre mais alta', 'No for das caixas, troque i < 6 por i < 10.', r'i\s*<\s*(?!6\b)\d+\s*;'],
+    ],
+    lim='O Forge2D do simulador é uma versão simplificada do Box2D: tem corpos estáticos, dinâmicos e cinemáticos, círculos, polígonos convexos, arestas e correntes, atrito, quique, impulsos, forças e contatos, mas não tem juntas (joints), raycast nem corpos dormindo.',
+    setup=SETUP_FORGE2D,
+)
+
+aula(
+    'Forge2D: impulsos e contatos',
+    'Para lançar um corpo, o Forge2D usa impulso: body.applyLinearImpulse(Vector2(...)) dá um empurrão de uma vez, '
+    'como um chute, e quanto mais pesado o corpo, menos ele acelera. Aqui é um estilingue: arraste a partir da bola '
+    'para trás, como quem estica um elástico, e solte. A linha mostra a mira, e o impulso é proporcional ao quanto '
+    'você puxou, na direção oposta. Para saber quando um corpo bate em outro, o componente usa o mixin '
+    'ContactCallbacks: beginContact(other, contact) é chamado quando os contornos se tocam, e other é o userData do '
+    'outro corpo, que aqui é o próprio componente (userData: this no BodyDef). Cada alvo atingido pela bola fica '
+    'verde e soma um ponto. Repare que os alvos também são dinâmicos: a batida derruba a pilha de verdade.',
+    'Em ▶ Testar, puxe a bola azul para trás e solte. Aumente a força do lançamento, deixe a bola mais pesada e faça '
+    'um alvo valer 2 pontos quando cair no chão.',
+    r'''
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(game: Estilingue()));
+
+class Estilingue extends Forge2DGame with DragCallbacks {
+  Estilingue() : super(gravity: Vector2(0, 10), zoom: 14);
+
+  late Bola bola;
+  late TextComponent placar;
+  late Vector2 base;
+  Vector2 puxao = Vector2.zero();
+  bool mirando = false;
+  int pontos = 0;
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    final r = camera.visibleWorldRect;
+    final chao = r.bottom - 4;
+    world.add(Chao(Vector2(r.left, chao), Vector2(r.right, chao)));
+    world.add(Chao(Vector2(r.left, r.top), Vector2(r.left, chao)));
+    world.add(Chao(Vector2(r.right, r.top), Vector2(r.right, chao)));
+    for (int i = 0; i < 4; i++) {
+      world.add(Alvo(Vector2(6, chao - 1 - i * 2.2)));
+    }
+    world.add(Alvo(Vector2(9.5, chao - 1)));
+    base = Vector2(r.left + 4, chao - 8);
+    bola = Bola(base.clone());
+    world.add(bola);
+    placar = TextComponent(text: 'Pontos: 0', position: Vector2(16, 16));
+    camera.viewport.add(placar);
+  }
+
+  @override
+  void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
+    mirando = true;
+    puxao = Vector2.zero();
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    puxao += event.localDelta / 10;
+    if (puxao.length > 6) {
+      puxao = puxao.normalized() * 6;
+    }
+  }
+
+  @override
+  void onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
+    mirando = false;
+    bola.lancar(-puxao * 30);
+    puxao = Vector2.zero();
+  }
+
+  void acertou() {
+    pontos++;
+    placar.text = 'Pontos: $pontos';
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    if (mirando) {
+      final inicio = worldToScreen(base);
+      final fim = worldToScreen(base + puxao);
+      canvas.drawLine(inicio.toOffset(), fim.toOffset(), Paint()
+        ..color = Colors.white
+        ..strokeWidth = 3);
+    }
+  }
+}
+
+class Chao extends BodyComponent {
+  final Vector2 a;
+  final Vector2 b;
+
+  Chao(this.a, this.b);
+
+  @override
+  Body createBody() {
+    final corpo = world.createBody(BodyDef());
+    corpo.createFixture(FixtureDef(EdgeShape()..set(a, b), friction: 0.8));
+    return corpo;
+  }
+}
+
+class Bola extends BodyComponent {
+  final Vector2 inicio;
+
+  Bola(this.inicio) : super(paint: Paint()..color = Colors.lightBlueAccent);
+
+  @override
+  Body createBody() {
+    final corpo = world.createBody(BodyDef(position: inicio, type: BodyType.static, userData: this));
+    corpo.createFixture(FixtureDef(CircleShape()..radius = 1, density: 3, restitution: 0.3, friction: 0.5));
+    return corpo;
+  }
+
+  void lancar(Vector2 impulso) {
+    body.setType(BodyType.dynamic);
+    body.applyLinearImpulse(impulso);
+  }
+}
+
+class Alvo extends BodyComponent with ContactCallbacks {
+  final Vector2 inicio;
+  bool atingido = false;
+
+  Alvo(this.inicio) : super(paint: Paint()..color = Colors.orange);
+
+  @override
+  Body createBody() {
+    final corpo = world.createBody(BodyDef(position: inicio, type: BodyType.dynamic, userData: this));
+    corpo.createFixture(FixtureDef(PolygonShape()..setAsBoxXY(1, 1), density: 1, friction: 0.6));
+    return corpo;
+  }
+
+  @override
+  void beginContact(Object other, Contact contact) {
+    if (other is Bola && !atingido) {
+      atingido = true;
+      paint = Paint()..color = Colors.greenAccent;
+      (game as Estilingue).acertou();
+    }
+  }
+}
+''',
+    [
+        ['Mais força', 'Em onDragEnd, troque -puxao * 30 por -puxao * 45.', r'lancar\(\s*-\s*puxao\s*\*\s*(?!30\b)[\d.]+'],
+        ['Bola pesada', 'No FixtureDef da bola, troque density: 3 por density: 8.', r'radius\s*=\s*1\s*,\s*density:\s*(?!3\b)[\d.]+'],
+        ['Ponto extra', 'No beginContact do alvo, se other for Chao, some mais um ponto com (game as Estilingue).acertou().', r'other\s+is\s+Chao'],
+    ],
+    setup=SETUP_FORGE2D,
+)
+
+aula(
+    'Tiled: mapas prontos',
+    'Montar fase bloco por bloco no código é trabalhoso. O Tiled é um editor de mapas gratuito: você pinta os blocos '
+    'numa grade, separa em camadas (chão, paredes, decoração) e marca objetos, como o ponto de partida e as moedas, '
+    'numa camada de objetos. O flame_tiled lê o arquivo .tmx: TiledComponent.load(\'arena.tmx\', Vector2.all(32)) '
+    'monta o mapa com cada bloco de 16 pixels desenhado com 32. Depois, mapa.tileMap.getLayer<ObjectGroup>(\'objetos\') '
+    'devolve uma camada de objetos, e cada objeto tem x, y, width, height, name, type e properties, em pixels do mapa '
+    '(por isso multiplicamos por 2). As paredes vêm da camada solidos: cada retângulo vira um Rect, e o herói desfaz '
+    'o passo se entrar num deles. O mapa é maior que a tela, e a câmera segue o herói.',
+    'Em ▶ Testar, ande pela arena com o joystick e pegue as moedas. Troque a escala dos blocos para 24, conte as moedas '
+    'que faltam e troque o mapa por fase1.tmx para ver como ele é.',
+    r'''
+import 'package:flame/components.dart';
+import 'package:flame/game.dart';
+import 'package:flame/input.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:flame_tiled/flame_tiled.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(game: Arena()));
+
+class Arena extends FlameGame {
+  late JoystickComponent joystick;
+  late Heroi heroi;
+  late TextComponent placar;
+  final List<Rect> paredes = [];
+  final double escala = 2;
+  int moedas = 0;
+
+  @override
+  Future<void> onLoad() async {
+    final mapa = await TiledComponent.load('arena.tmx', Vector2.all(16 * escala));
+    world.add(mapa);
+
+    final solidos = mapa.tileMap.getLayer<ObjectGroup>('solidos');
+    for (final o in solidos!.objects) {
+      paredes.add(Rect.fromLTWH(o.x * escala, o.y * escala, o.width * escala, o.height * escala));
+    }
+    final objetos = mapa.tileMap.getLayer<ObjectGroup>('objetos');
+    for (final o in objetos!.objects) {
+      final onde = Vector2(o.x * escala, o.y * escala);
+      if (o.type == 'moeda') {
+        world.add(Moeda(onde));
+      } else if (o.type == 'inicio') {
+        heroi = Heroi(onde);
+        world.add(heroi);
+      }
+    }
+    camera.follow(heroi);
+
+    joystick = JoystickComponent(
+      knob: CircleComponent(radius: 20, paint: Paint()..color = Colors.white70),
+      background: CircleComponent(radius: 55, paint: Paint()..color = Colors.black26),
+      margin: const EdgeInsets.only(left: 30, bottom: 40),
+    );
+    camera.viewport.add(joystick);
+    placar = TextComponent(text: 'Moedas: 0', position: Vector2(16, 16));
+    camera.viewport.add(placar);
+  }
+
+  bool bateu(Rect r) => paredes.any((p) => p.overlaps(r));
+
+  @override
+  Color backgroundColor() => const Color(0xFF4A5060);
+
+  void pegou() {
+    moedas++;
+    placar.text = 'Moedas: $moedas';
+    FlameAudio.play('moeda.wav');
+  }
+}
+
+class Heroi extends SpriteAnimationComponent with HasGameReference<Arena> {
+  Heroi(Vector2 inicio) : super(position: inicio, size: Vector2.all(40), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'heroi.png',
+      SpriteAnimationData.sequenced(amount: 4, stepTime: 0.12, textureSize: Vector2.all(16)),
+    );
+  }
+
+  Rect corpo() => Rect.fromCenter(center: position.toOffset(), width: 24, height: 28);
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    final j = game.joystick;
+    playing = !j.isIdle;
+    if (j.isIdle) return;
+    final passo = j.relativeDelta * 150 * dt;
+    position.x += passo.x;
+    if (game.bateu(corpo())) position.x -= passo.x;
+    position.y += passo.y;
+    if (game.bateu(corpo())) position.y -= passo.y;
+    if (passo.x < 0 && scale.x > 0) flipHorizontally();
+    if (passo.x > 0 && scale.x < 0) flipHorizontally();
+  }
+}
+
+class Moeda extends SpriteAnimationComponent with HasGameReference<Arena> {
+  Moeda(Vector2 onde) : super(position: onde, size: Vector2.all(24), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'moeda.png',
+      SpriteAnimationData.sequenced(amount: 6, stepTime: 0.1, textureSize: Vector2.all(16)),
+    );
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (position.distanceTo(game.heroi.position) < 24) {
+      removeFromParent();
+      game.pegou();
+    }
+  }
+}
+''',
+    [
+        ['Blocos menores', 'Troque final double escala = 2 por 1.5: o mapa inteiro encolhe, inclusive as paredes e as moedas.', r'double\s+escala\s*=\s*(?!2\b)[\d.]+'],
+        ['Quantas faltam', "No pegou, mostre também quantas faltam: world.children.query<Moeda>().length - 1 (a moeda que acabou de ser pega ainda está saindo).", r'children\.query<\s*Moeda\s*>\(\)'],
+        ['Outro mapa', "Troque 'arena.tmx' por 'fase1.tmx', a fase de plataforma vista de lado. O herói começa no objeto inicio dela, mas anda solto pelo ar: este código não tem gravidade. As paredes da camada solidos continuam valendo.", r"TiledComponent\.load\(\s*'(?!arena\.tmx')[\w.-]+\.tmx'"],
+    ],
+    lim='O simulador lê mapas ortogonais (blocos quadrados) com as camadas em CSV ou base64 sem compressão e o tileset incorporado no .tmx. Camadas de imagem, blocos animados e mapas infinitos não são desenhados.',
+    setup=SETUP_TILED,
+)
+
+PARTS.append(['Joystick e botões na tela', 'Parte 6 · Celular, física e mapas'])
+
+aula(
+    'Projeto · Caça-Moedas',
+    'O último projeto junta a Parte 6 num jogo completo para celular. A arena vem do Tiled: as paredes saem da camada '
+    'solidos, e as moedas, o ponto de partida e os slimes saem da camada objetos. O herói anda com o joystick, e cada '
+    'slime patrulha de um lado para o outro com um MoveEffect que vai e volta para sempre. Encostar num slime tira '
+    'uma vida, pinta o herói de vermelho com um ColorEffect e deixa ele um segundo sem levar dano. O placar é um '
+    'overlay do Flutter que se atualiza sozinho: moedas e vidas são ValueNotifier, e o ValueListenableBuilder redesenha '
+    'o texto quando o valor muda, sem setState. Quando as moedas acabam ou as vidas zeram, o jogo pausa e mostra o '
+    'overlay de fim; Jogar de novo apaga o mundo e monta o mapa outra vez.',
+    'Em ▶ Testar, pegue todas as moedas sem encostar nos slimes. Dê 5 vidas ao herói, deixe os slimes mais rápidos e '
+    'mostre quantas moedas faltam no placar.',
+    r'''
+import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
+import 'package:flame/game.dart';
+import 'package:flame/input.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:flame_tiled/flame_tiled.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(
+      game: CacaMoedas(),
+      overlayBuilderMap: {
+        'Placar': (BuildContext context, CacaMoedas game) => Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ValueListenableBuilder<int>(
+                      valueListenable: game.moedas,
+                      builder: (context, valor, child) => Text('Moedas: $valor', style: const TextStyle(color: Colors.white, fontSize: 20)),
+                    ),
+                    const SizedBox(width: 16),
+                    ValueListenableBuilder<int>(
+                      valueListenable: game.vidas,
+                      builder: (context, valor, child) => Text('Vidas: $valor', style: const TextStyle(color: Colors.white, fontSize: 20)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        'Fim': (BuildContext context, CacaMoedas game) => Center(
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(game.mensagem, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 16),
+                      ElevatedButton(onPressed: () => game.recomecar(), child: const Text('Jogar de novo')),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+      },
+      initialActiveOverlays: const ['Placar'],
+    ));
+
+class CacaMoedas extends FlameGame {
+  final moedas = ValueNotifier<int>(0);
+  final vidas = ValueNotifier<int>(3);
+  final List<Rect> paredes = [];
+  final double escala = 2;
+  late JoystickComponent joystick;
+  late Heroi heroi;
+  int total = 0;
+  String mensagem = '';
+
+  @override
+  Future<void> onLoad() async {
+    joystick = JoystickComponent(
+      knob: CircleComponent(radius: 20, paint: Paint()..color = Colors.white70),
+      background: CircleComponent(radius: 55, paint: Paint()..color = Colors.black26),
+      margin: const EdgeInsets.only(left: 30, bottom: 40),
+    );
+    camera.viewport.add(joystick);
+    await montar();
+    FlameAudio.bgm.play('musica_aventura.mp3', volume: 0.4);
+  }
+
+  Future<void> montar() async {
+    paredes.clear();
+    moedas.value = 0;
+    vidas.value = 3;
+    total = 0;
+    final mapa = await TiledComponent.load('arena.tmx', Vector2.all(16 * escala));
+    world.add(mapa);
+    for (final o in mapa.tileMap.getLayer<ObjectGroup>('solidos')!.objects) {
+      paredes.add(Rect.fromLTWH(o.x * escala, o.y * escala, o.width * escala, o.height * escala));
+    }
+    for (final o in mapa.tileMap.getLayer<ObjectGroup>('objetos')!.objects) {
+      final onde = Vector2(o.x * escala, o.y * escala);
+      if (o.type == 'moeda') {
+        world.add(Moeda(onde));
+        total++;
+      } else if (o.type == 'inimigo') {
+        world.add(Slime(onde));
+      } else if (o.type == 'inicio') {
+        heroi = Heroi(onde);
+        world.add(heroi);
+      }
+    }
+    camera.follow(heroi);
+  }
+
+  bool bateu(Rect r) => paredes.any((p) => p.overlaps(r));
+
+  void pegou() {
+    moedas.value++;
+    FlameAudio.play('moeda.wav');
+    if (moedas.value == total) terminar('Você venceu!', 'vitoria.wav');
+  }
+
+  void ferido() {
+    vidas.value--;
+    FlameAudio.play('dano.wav');
+    if (vidas.value <= 0) terminar('Fim de jogo', 'derrota.wav');
+  }
+
+  void terminar(String texto, String som) {
+    mensagem = texto;
+    FlameAudio.play(som);
+    pauseEngine();
+    overlays.add('Fim');
+  }
+
+  Future<void> recomecar() async {
+    overlays.remove('Fim');
+    world.removeAll(world.children.toList());
+    await montar();
+    resumeEngine();
+  }
+
+  @override
+  Color backgroundColor() => const Color(0xFF4A5060);
+}
+
+class Heroi extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
+  double protegido = 0;
+
+  Heroi(Vector2 inicio) : super(position: inicio, size: Vector2.all(40), anchor: Anchor.center, priority: 2);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'heroi.png',
+      SpriteAnimationData.sequenced(amount: 4, stepTime: 0.12, textureSize: Vector2.all(16)),
+    );
+  }
+
+  Rect corpo() => Rect.fromCenter(center: position.toOffset(), width: 24, height: 28);
+
+  void levarDano() {
+    if (protegido > 0) return;
+    protegido = 1;
+    add(ColorEffect(Colors.red, EffectController(duration: 0.1, alternate: true, repeatCount: 4), opacityTo: 0.8));
+    game.ferido();
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (protegido > 0) protegido -= dt;
+    final j = game.joystick;
+    playing = !j.isIdle;
+    if (j.isIdle) return;
+    final passo = j.relativeDelta * 150 * dt;
+    position.x += passo.x;
+    if (game.bateu(corpo())) position.x -= passo.x;
+    position.y += passo.y;
+    if (game.bateu(corpo())) position.y -= passo.y;
+    if (passo.x < 0 && scale.x > 0) flipHorizontally();
+    if (passo.x > 0 && scale.x < 0) flipHorizontally();
+  }
+}
+
+class Moeda extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
+  Moeda(Vector2 onde) : super(position: onde, size: Vector2.all(24), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'moeda.png',
+      SpriteAnimationData.sequenced(amount: 6, stepTime: 0.1, textureSize: Vector2.all(16)),
+    );
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (position.distanceTo(game.heroi.position) < 24) {
+      removeFromParent();
+      game.pegou();
+    }
+  }
+}
+
+class Slime extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
+  Slime(Vector2 onde) : super(position: onde, size: Vector2.all(36), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'slime.png',
+      SpriteAnimationData.sequenced(amount: 2, stepTime: 0.3, textureSize: Vector2.all(16)),
+    );
+    add(MoveEffect.by(Vector2(96, 0), EffectController(duration: 1.6, alternate: true, infinite: true, curve: Curves.easeInOut)));
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (position.distanceTo(game.heroi.position) < 30) {
+      game.heroi.levarDano();
+    }
+  }
+}
+''',
+    [
+        ['Cinco vidas', 'No montar, troque vidas.value = 3 por vidas.value = 5.', r'vidas\.value\s*=\s*(?!3\b)\d+\s*;'],
+        ['Slimes mais rápidos', 'No MoveEffect do slime, troque duration: 1.6 por 0.9.', r'MoveEffect\.by\([^;]*?duration:\s*(?!1\.6\b)[\d.]+'],
+        ['Moedas que faltam', "No overlay Placar, mostre 'Moedas: $valor de ${game.total}'.", r'game\.total'],
+    ],
+    lim='No simulador a música é sintetizada pelo navegador e só começa depois do primeiro toque. O joystick funciona com o mouse ou com o dedo.',
+    setup=SETUP_TILED,
+)
+
+PARTS.append(['Projeto · Caça-Moedas', 'Projeto 5 · Caça-Moedas'])
