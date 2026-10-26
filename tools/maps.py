@@ -125,7 +125,7 @@ for y in range(AH):
         if c == '$':
             objs.append({'id': nid, 'name': 'moeda', 'type': 'moeda', 'x': cx, 'y': cy, 'props': {'valor': 1}})
         elif c == 'S':
-            objs.append({'id': nid, 'name': 'slime', 'type': 'inimigo', 'x': cx, 'y': cy})
+            objs.append({'id': nid, 'name': 'gato', 'type': 'inimigo', 'x': cx, 'y': cy})
         elif c == 'I':
             objs.append({'id': nid, 'name': 'inicio', 'type': 'inicio', 'x': cx, 'y': cy})
         else:

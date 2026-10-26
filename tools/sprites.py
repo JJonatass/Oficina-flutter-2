@@ -89,30 +89,35 @@ def moeda(wd):
     return img
 moedas = sheet([moeda(w) for w in (12, 10, 6, 2, 6, 10)])
 
-# ---- slime (16x16, 2 quadros)
-SLIME = [
-    ['................'] * 6 + [
-     '.....GGGGGG.....',
-     '....GggggggG....',
-     '...GgwwggwwgG...',
-     '...GgwkggwkgG...',
-     '..GgggggggggggG.'[:16],
-     '..Ggggggggggggg.'[:16],
-     '..GgggkkkkgggggG'[:16],
-     '..GggggggggggggG'[:16],
-     '...GGGGGGGGGGGG.'[:16],
-     '................'],
-    ['................'] * 8 + [
-     '....GGGGGGGG....',
-     '..GGggwwggwwgGG.',
-     '.GgggwkggwkggggG',
-     '.GgggggggggggggG',
-     '.GggggkkkkgggggG',
-     '..GGGGGGGGGGGGG.',
-     '................',
-     '................'],
+# ---- inimigo: gato de rua cinza, de frente (16x16, 2 quadros: olhando e piscando, com o rabo balançando)
+# Cada linha tem só a metade esquerda; a direita é o espelho. O rabo entra depois, do lado direito.
+GATO = [
+    '........',
+    '.E......',
+    '.EE.....',
+    '.EtE....',
+    '.EttEEEE',
+    '.Eeeeeee',
+    '.EeEeeee',
+    '.Eegkeee',
+    '.Eeeeeet',
+    '.Eeeeeke',
+    '..EEeeee',
+    '..EeeWWW',
+    '.EeeeWWW',
+    '.EeeeWWW',
+    '.EeEeeWW',
+    '.EEEEEEE',
 ]
-slime = sheet([from_art([r.ljust(16, '.')[:16] for r in f]) for f in SLIME])
+def gato(piscando, rabo):
+    linhas = [m + m[::-1] for m in GATO]
+    if piscando:
+        linhas[7] = linhas[7].replace('gk', 'EE').replace('kg', 'EE')
+    linhas = [list(l) for l in linhas]
+    for y, x in rabo:
+        linhas[y][x] = 'E'
+    return from_art([''.join(l) for l in linhas])
+gato_img = sheet([gato(False, [(14, 15), (13, 15), (12, 15), (11, 14)]), gato(True, [(14, 15), (13, 15), (12, 14), (11, 14), (10, 15)])])
 
 # ---- caixa (16x16)
 caixa = from_art([
@@ -467,7 +472,7 @@ for i, t in enumerate([losango((96, 196, 86), (70, 150, 60), (50, 120, 46), Fals
 SPRITES = [
     ('heroi', heroi, 4, 'Herói: o vira-lata caramelo andando para a direita (4 quadros de 16×16)'),
     ('moeda', moedas, 6, 'Moeda girando (6 quadros de 16×16)'),
-    ('slime', slime, 2, 'Inimigo slime pulsando (2 quadros de 16×16)'),
+    ('gato', gato_img, 2, 'Inimigo: gato de rua cinza, piscando e balançando o rabo (2 quadros de 16×16)'),
     ('nave', nave, 2, 'Nave apontando para cima, com fogo (2 quadros de 16×16)'),
     ('explosao', explosoes, 5, 'Explosão (5 quadros de 16×16)'),
     ('tiro', tiro, 1, 'Tiro de laser (8×8)'),

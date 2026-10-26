@@ -125,7 +125,7 @@
   <object id="28" name="moeda" type="moeda" x="200" y="88">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="29" name="slime" type="inimigo" x="168" y="104">
+  <object id="29" name="gato" type="inimigo" x="168" y="104">
    <point/>
   </object>
   <object id="30" name="moeda" type="moeda" x="136" y="136">
@@ -137,7 +137,7 @@
   <object id="32" name="moeda" type="moeda" x="40" y="184">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="33" name="slime" type="inimigo" x="88" y="184">
+  <object id="33" name="gato" type="inimigo" x="88" y="184">
    <point/>
   </object>
   <object id="34" name="moeda" type="moeda" x="248" y="184">
@@ -161,7 +161,7 @@
   <object id="40" name="moeda" type="moeda" x="216" y="280">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="41" name="slime" type="inimigo" x="152" y="296">
+  <object id="41" name="gato" type="inimigo" x="152" y="296">
    <point/>
   </object>
   <object id="42" name="moeda" type="moeda" x="88" y="312">

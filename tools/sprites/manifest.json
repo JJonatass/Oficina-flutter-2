@@ -16,12 +16,12 @@
   "desc": "Moeda girando (6 quadros de 16×16)"
  },
  {
-  "nome": "slime",
-  "caminho": "assets/sprites/slime.png",
+  "nome": "gato",
+  "caminho": "assets/sprites/gato.png",
   "largura": 32,
   "altura": 16,
   "quadros": 2,
-  "desc": "Inimigo slime pulsando (2 quadros de 16×16)"
+  "desc": "Inimigo: gato de rua cinza, piscando e balançando o rabo (2 quadros de 16×16)"
  },
  {
   "nome": "nave",

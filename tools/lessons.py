@@ -1629,7 +1629,7 @@ SETUP_SPRITES = (
     '  assets:\n'
     '    - assets/sprites/\n\n'
     'Coloque os arquivos PNG em assets/sprites/ na raiz do projeto. O simulador já tem estes sprites prontos, '
-    'desenhados para a Oficina: heroi.png (o vira-lata caramelo, 4 quadros de 16×16), moeda.png (6), slime.png (2), nave.png (2), '
+    'desenhados para a Oficina: heroi.png (o vira-lata caramelo, 4 quadros de 16×16), moeda.png (6), gato.png (2), nave.png (2), '
     'explosao.png (5), tiro.png (8×8), caixa.png, coracao.png, maca.png, grama.png (16×16) e nuvem.png (32×16). '
     'Os arquivos estão na pasta tools/sprites do repositório da Oficina Flutter 2.'
 )
@@ -2207,15 +2207,15 @@ PARTS.append(['Sprites: imagens no Canvas', 'Parte 3 · Sprites, animação, som
 
 aula(
     'Projeto · Pega-Maçã',
-    'O segundo projeto junta as Partes 1, 2 e 3. Maçãs e slimes caem do céu; o herói anda pelo chão, arrastando o '
-    'dedo ou com as setas, e precisa pegar as maçãs e fugir dos slimes. Cada maçã vale um ponto e toca moeda.wav. '
-    'Cada slime tira um coração, toca dano.wav e deixa o herói piscando e invencível por 1 segundo (tempoInvencivel). '
+    'O segundo projeto junta as Partes 1, 2 e 3. Maçãs e gatos caem do céu; o herói anda pelo chão, arrastando o '
+    'dedo ou com as setas, e precisa pegar as maçãs e fugir dos gatos. Cada maçã vale um ponto e toca moeda.wav. '
+    'Cada gato tira um coração, toca dano.wav e deixa o herói piscando e invencível por 1 segundo (tempoInvencivel). '
     'Sem corações, a partida acaba, toca derrota.wav e o recorde é atualizado. Os itens caem cada vez mais rápido e '
     'mais seguido, porque a velocidade e o intervalo dependem do tempo de partida. A classe Item guarda o que é '
-    'comum às maçãs e aos slimes; o campo boa diz qual é qual. O HUD (corações e pontos) e as telas de começo e '
+    'comum às maçãs e aos gatos; o campo boa diz qual é qual. O HUD (corações e pontos) e as telas de começo e '
     'fim são desenhados no próprio Canvas, com sprites e TextPainter.',
     'Em ▶ Testar, jogue algumas partidas com o dedo (arrastando) e com as setas do teclado. Depois mude o jogo: '
-    'comece com 5 corações, faça uma maçã dourada (rara) valer 5 pontos e deixe os slimes mais lentos que as maçãs.',
+    'comece com 5 corações, faça uma maçã dourada (rara) valer 5 pontos e deixe os gatos mais lentos que as maçãs.',
     r'''
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -2246,10 +2246,10 @@ TextPainter escrever(String texto, TextStyle estilo) {
 class Sprites {
   final ui.Image heroi;
   final ui.Image maca;
-  final ui.Image slime;
+  final ui.Image gato;
   final ui.Image coracao;
   final ui.Image grama;
-  Sprites(this.heroi, this.maca, this.slime, this.coracao, this.grama);
+  Sprites(this.heroi, this.maca, this.gato, this.coracao, this.grama);
 }
 
 class Item {
@@ -2276,12 +2276,12 @@ class Cena extends CustomPainter {
     }
     canvas.drawRect(Rect.fromLTWH(0, chao + 32, size.width, size.height - chao - 32), Paint()..color = const Color(0xFF8B5A2B));
 
-    final quadroSlime = (jogo.tempoTotal * 4).floor() % 2;
+    final quadroGato = (jogo.tempoTotal * 4).floor() % 2;
     for (final item in jogo.itens) {
       if (item.boa) {
         canvas.drawImageRect(s.maca, bloco, item.area, tinta);
       } else {
-        canvas.drawImageRect(s.slime, Rect.fromLTWH(quadroSlime * 16.0, 0, 16, 16), item.area, tinta);
+        canvas.drawImageRect(s.gato, Rect.fromLTWH(quadroGato * 16.0, 0, 16, 16), item.area, tinta);
       }
     }
 
@@ -2362,10 +2362,10 @@ class _PegaMacaState extends State<PegaMaca> with SingleTickerProviderStateMixin
   Future<void> carregar() async {
     final heroi = await carregarImagem('assets/sprites/heroi.png');
     final maca = await carregarImagem('assets/sprites/maca.png');
-    final slime = await carregarImagem('assets/sprites/slime.png');
+    final gato = await carregarImagem('assets/sprites/gato.png');
     final coracao = await carregarImagem('assets/sprites/coracao.png');
     final grama = await carregarImagem('assets/sprites/grama.png');
-    setState(() => sprites = Sprites(heroi, maca, slime, coracao, grama));
+    setState(() => sprites = Sprites(heroi, maca, gato, coracao, grama));
   }
 
   void quadro(Duration tempo) {
@@ -2487,7 +2487,7 @@ class _PegaMacaState extends State<PegaMaca> with SingleTickerProviderStateMixin
     [
         ['Começar com 5 corações', 'Em comecar() e na declaração, troque vidas = 3 por 5.', r'int vidas\s*=\s*5\b[\s\S]*vidas\s*=\s*5\s*;|vidas\s*=\s*5\s*;[\s\S]*int vidas\s*=\s*5\b'],
         ['Maçã dourada que vale 5', 'Acrescente um campo dourada no Item (sorteado raramente), some 5 pontos quando pegar e pinte com Colors.amber por cima (Paint com colorFilter) ou desenhe um círculo dourado.', r'dourada'],
-        ['Slimes mais lentos', "No laço que faz os itens caírem, use velocidadeQueda * 0.6 quando o item não for boa.", r'boa\s*\?\s*velocidadeQueda\s*:\s*velocidadeQueda\s*\*|!\s*item\.boa[\s\S]{0,80}\*\s*0\.\d'],
+        ['Gatos mais lentos', "No laço que faz os itens caírem, use velocidadeQueda * 0.6 quando o item não for boa.", r'boa\s*\?\s*velocidadeQueda\s*:\s*velocidadeQueda\s*\*|!\s*item\.boa[\s\S]{0,80}\*\s*0\.\d'],
     ],
     lim="O painter recebe o próprio State (Cena(sprites!, this)) para ler os campos do jogo: é um atalho comum em protótipos. Em projetos maiores, separe o estado do jogo numa classe própria, como o Flame faz.",
     setup=SETUP_SPRITES + '\n\nSons: flutter pub add audioplayers e assets/sons/ (moeda.wav, dano.wav, derrota.wav, poder.wav).\nFonte: flutter pub add google_fonts.',
@@ -2504,7 +2504,7 @@ SETUP_FLAME = (
     '  assets:\n'
     '    - assets/images/\n'
     '    - assets/audio/\n\n'
-    'No simulador, os sprites prontos (heroi.png, moeda.png, slime.png, nave.png, explosao.png, tiro.png, caixa.png, '
+    'No simulador, os sprites prontos (heroi.png, moeda.png, gato.png, nave.png, explosao.png, tiro.png, caixa.png, '
     'coracao.png, maca.png, grama.png, nuvem.png, ceu.png, montanhas.png, colinas.png), os sons (pulo.wav, moeda.wav, '
     'batida.wav, explosao.wav, tiro.wav, vitoria.wav, derrota.wav, clique.wav, dano.wav, poder.wav) e as músicas '
     '(musica_aventura.mp3, musica_espaco.mp3, musica_menu.mp3) já existem com esses nomes. Imagens suas entram pelo botão 🖼 Sprites.'
@@ -2739,10 +2739,10 @@ aula(
     'hitbox como filho: RectangleHitbox ou CircleHitbox, que por padrão ocupam o tamanho do componente. O componente '
     'que quer saber da colisão usa CollisionCallbacks e escreve onCollisionStart(pontos, outro): o Flame chama uma vez, '
     'no primeiro quadro em que os dois se tocam, e "outro" é o componente do outro lado. Com is dá para saber o tipo '
-    '(if (other is Slime)). Aqui a nave atira sozinha a cada 0,3 segundo (TimerComponent), os slimes descem e, quando '
-    'um tiro acerta um slime, os dois somem e nasce uma explosão: uma SpriteAnimationComponent com loop: false e '
+    '(if (other is Gato)). Aqui a nave atira sozinha a cada 0,3 segundo (TimerComponent), os gatos descem e, quando '
+    'um tiro acerta um gato, os dois somem e nasce uma explosão: uma SpriteAnimationComponent com loop: false e '
     'removeOnFinish: true, que se apaga sozinha no último quadro. Ligue o debugMode para ver os hitboxes em amarelo.',
-    'Em ▶ Testar, arraste a nave e acerte os slimes. Ligue debugMode, troque o CircleHitbox do slime por um '
+    'Em ▶ Testar, arraste a nave e acerte os gatos. Ligue debugMode, troque o CircleHitbox do gato por um '
     'RectangleHitbox e faça a nave atirar mais rápido.',
     r'''
 import 'dart:math';
@@ -2765,7 +2765,7 @@ class Espaco extends FlameGame with HasCollisionDetection {
     nave = Nave();
     add(nave);
     add(TimerComponent(period: 0.3, repeat: true, onTick: () => add(Tiro(nave.position.clone()))));
-    add(TimerComponent(period: 0.9, repeat: true, onTick: () => add(Slime(Vector2(30 + sorteio.nextDouble() * (size.x - 60), -30)))));
+    add(TimerComponent(period: 0.9, repeat: true, onTick: () => add(Gato(Vector2(30 + sorteio.nextDouble() * (size.x - 60), -30)))));
   }
 
   @override
@@ -2807,13 +2807,13 @@ class Tiro extends SpriteComponent with HasGameReference<Espaco> {
   }
 }
 
-class Slime extends SpriteAnimationComponent with CollisionCallbacks, HasGameReference<Espaco> {
-  Slime(Vector2 inicio) : super(position: inicio, size: Vector2.all(48), anchor: Anchor.center);
+class Gato extends SpriteAnimationComponent with CollisionCallbacks, HasGameReference<Espaco> {
+  Gato(Vector2 inicio) : super(position: inicio, size: Vector2.all(48), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     animation = await game.loadSpriteAnimation(
-      'slime.png',
+      'gato.png',
       SpriteAnimationData.sequenced(amount: 2, stepTime: 0.3, textureSize: Vector2.all(16)),
     );
     add(CircleHitbox());
@@ -2852,7 +2852,7 @@ class Explosao extends SpriteAnimationComponent with HasGameReference<Espaco> {
 ''',
     [
         ['Ver os hitboxes', 'No onLoad do jogo, troque debugMode = false por true.', r'debugMode\s*=\s*true'],
-        ['Slime com RectangleHitbox', 'No onLoad do Slime, troque CircleHitbox() por RectangleHitbox().', r'class Slime[\s\S]*add\(\s*RectangleHitbox\(\s*\)\s*\)[\s\S]*class Explosao'],
+        ['Gato com RectangleHitbox', 'No onLoad do Gato, troque CircleHitbox() por RectangleHitbox().', r'class Gato[\s\S]*add\(\s*RectangleHitbox\(\s*\)\s*\)[\s\S]*class Explosao'],
         ['Tiro mais rápido', 'No primeiro TimerComponent, troque period: 0.3 por 0.15.', r'period:\s*0\.15\b'],
     ],
     setup=SETUP_FLAME,
@@ -3807,7 +3807,7 @@ aula(
     'O último projeto junta tudo da Parte 5 num jogo de nave com rolagem lateral. O céu, as montanhas e as colinas '
     'são um fundo em paralaxe. A nave é o sprite nave.png girado 90 graus (angle = pi / 2) para apontar para a '
     'direita; como ela está girada, o arrasto usa event.canvasDelta, que vem nas coordenadas da tela, e não '
-    'localDelta. Ela atira sozinha, e os inimigos chegam pela direita: slimes e caixas que giram, todos da mesma '
+    'localDelta. Ela atira sozinha, e os inimigos chegam pela direita: gatos e caixas que giram, todos da mesma '
     'classe Inimigo, e o hitbox da caixa gira junto com ela. Tiro em inimigo vira explosão de partículas e ponto; '
     'inimigo na nave tira uma vida e a nave pisca com um OpacityEffect. O menu inicial e a tela de fim são overlays, '
     'a música é do FlameAudio.bgm e, para recomeçar, o jogo usa children.query para remover os inimigos e tiros que '
@@ -3895,7 +3895,7 @@ class CeuAgitado extends FlameGame with HasCollisionDetection {
       relogio = 0;
       final y = 60 + sorteio.nextDouble() * (size.y - 120);
       if (sorteio.nextBool()) {
-        add(Inimigo('slime.png', 2, 0, Vector2(size.x + 30, y)));
+        add(Inimigo('gato.png', 2, 0, Vector2(size.x + 30, y)));
       } else {
         add(Inimigo('caixa.png', 1, 2.5, Vector2(size.x + 30, y)));
       }
@@ -4211,10 +4211,10 @@ aula(
     'mesmo Path do CustomPainter: moveTo, lineTo, quadraticBezierTo e addOval desenham a trilha, e o efeito anda por '
     'ela do começo ao fim no tempo do EffectController. Sem absolute: true, o caminho é somado à posição em que o '
     'componente estava. Com oriented: true, o componente gira para apontar na direção em que está andando. Aqui o '
-    'slime patrulha um caminho em forma de onda e a nave dá voltas num círculo. O desenho da nave aponta para cima, e '
+    'gato patrulha um caminho em forma de onda e a nave dá voltas num círculo. O desenho da nave aponta para cima, e '
     'oriented gira o componente para a direção do eixo x; por isso o sprite fica dentro de um PositionComponent, já '
     'girado 90 graus.',
-    'Em ▶ Testar, toque no slime para ver o efeito de cor. Troque a cor do golpe, aumente a onda do caminho e deixe a '
+    'Em ▶ Testar, toque no gato para ver o efeito de cor. Troque a cor do golpe, aumente a onda do caminho e deixe a '
     'nave mais rápida.',
     r'''
 import 'dart:math';
@@ -4235,13 +4235,13 @@ class Patrulha extends FlameGame {
     placar = TextComponent(text: 'Golpes: 0', position: Vector2(16, 16));
     add(placar);
 
-    final slime = Slime(Vector2(40, 260));
-    add(slime);
+    final gato = Gato(Vector2(40, 260));
+    add(gato);
     final onda = Path()
       ..moveTo(0, 0)
       ..quadraticBezierTo(70, -80, 140, 0)
       ..quadraticBezierTo(210, 80, 280, 0);
-    slime.add(MoveAlongPathEffect(onda, EffectController(duration: 3, alternate: true, infinite: true)));
+    gato.add(MoveAlongPathEffect(onda, EffectController(duration: 3, alternate: true, infinite: true)));
 
     final nave = PositionComponent(size: Vector2.all(48), anchor: Anchor.center);
     nave.add(SpriteAnimationComponent(
@@ -4263,13 +4263,13 @@ class Patrulha extends FlameGame {
   Color backgroundColor() => const Color(0xFF1B2A41);
 }
 
-class Slime extends SpriteAnimationComponent with TapCallbacks, HasGameReference<Patrulha> {
-  Slime(Vector2 inicio) : super(position: inicio, size: Vector2.all(56), anchor: Anchor.center);
+class Gato extends SpriteAnimationComponent with TapCallbacks, HasGameReference<Patrulha> {
+  Gato(Vector2 inicio) : super(position: inicio, size: Vector2.all(56), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     animation = await game.loadSpriteAnimation(
-      'slime.png',
+      'gato.png',
       SpriteAnimationData.sequenced(amount: 2, stepTime: 0.3, textureSize: Vector2.all(16)),
     );
   }
@@ -4969,13 +4969,13 @@ PARTS.append(['Joystick e botões na tela', 'Parte 6 · Celular, física e mapas
 aula(
     'Projeto · Caça-Moedas',
     'O último projeto junta a Parte 6 num jogo completo para celular. A arena vem do Tiled: as paredes saem da camada '
-    'solidos, e as moedas, o ponto de partida e os slimes saem da camada objetos. O herói anda com o joystick, e cada '
-    'slime patrulha de um lado para o outro com um MoveEffect que vai e volta para sempre. Encostar num slime tira '
+    'solidos, e as moedas, o ponto de partida e os gatos saem da camada objetos. O herói anda com o joystick, e cada '
+    'gato patrulha de um lado para o outro com um MoveEffect que vai e volta para sempre. Encostar num gato tira '
     'uma vida, pinta o herói de vermelho com um ColorEffect e deixa ele um segundo sem levar dano. O placar é um '
     'overlay do Flutter que se atualiza sozinho: moedas e vidas são ValueNotifier, e o ValueListenableBuilder redesenha '
     'o texto quando o valor muda, sem setState. Quando as moedas acabam ou as vidas zeram, o jogo pausa e mostra o '
     'overlay de fim; Jogar de novo apaga o mundo e monta o mapa outra vez.',
-    'Em ▶ Testar, pegue todas as moedas sem encostar nos slimes. Dê 5 vidas ao herói, deixe os slimes mais rápidos e '
+    'Em ▶ Testar, pegue todas as moedas sem encostar nos gatos. Dê 5 vidas ao herói, deixe os gatos mais rápidos e '
     'mostre quantas moedas faltam no placar.',
     r'''
 import 'package:flame/components.dart';
@@ -5066,7 +5066,7 @@ class CacaMoedas extends FlameGame {
         world.add(Moeda(onde));
         total++;
       } else if (o.type == 'inimigo') {
-        world.add(Slime(onde));
+        world.add(Gato(onde));
       } else if (o.type == 'inicio') {
         heroi = Heroi(onde);
         world.add(heroi);
@@ -5167,13 +5167,13 @@ class Moeda extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
   }
 }
 
-class Slime extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
-  Slime(Vector2 onde) : super(position: onde, size: Vector2.all(36), anchor: Anchor.center);
+class Gato extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
+  Gato(Vector2 onde) : super(position: onde, size: Vector2.all(36), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     animation = await game.loadSpriteAnimation(
-      'slime.png',
+      'gato.png',
       SpriteAnimationData.sequenced(amount: 2, stepTime: 0.3, textureSize: Vector2.all(16)),
     );
     add(MoveEffect.by(Vector2(96, 0), EffectController(duration: 1.6, alternate: true, infinite: true, curve: Curves.easeInOut)));
@@ -5190,7 +5190,7 @@ class Slime extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
 ''',
     [
         ['Cinco vidas', 'No montar, troque vidas.value = 3 por vidas.value = 5.', r'vidas\.value\s*=\s*(?!3\b)\d+\s*;'],
-        ['Slimes mais rápidos', 'No MoveEffect do slime, troque duration: 1.6 por 0.9.', r'MoveEffect\.by\([^;]*?duration:\s*(?!1\.6\b)[\d.]+'],
+        ['Gatos mais rápidos', 'No MoveEffect do gato, troque duration: 1.6 por 0.9.', r'MoveEffect\.by\([^;]*?duration:\s*(?!1\.6\b)[\d.]+'],
         ['Moedas que faltam', "No overlay Placar, mostre 'Moedas: $valor de ${game.total}'.", r'game\.total'],
     ],
     lim='No simulador a música é sintetizada pelo navegador e só começa depois do primeiro toque. O joystick funciona com o mouse ou com o dedo.',
