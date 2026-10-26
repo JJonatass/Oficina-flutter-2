@@ -76,6 +76,71 @@ def caramelo(i):
     return from_art(linhas + PATAS[i])
 heroi = sheet([caramelo(i) for i in range(4)])
 
+# ---- outras poses do caramelo (16x16)
+CABECA = [
+    '..........DD....',
+    '..........DCCC..',
+    '.........CCkCC..',
+    '.........CCCCLLk',
+    '.........CCCLLL.',
+]
+def sentado(rabo_alto):
+    linhas = ['................', '................'] + CABECA + [
+        '........CCCC.t..',
+        '.......CCCCC....',
+        '......CCCLCC....',
+        '.....CCCCLCC....',
+        '....CCCCCLCC....',
+        '...CCCCCCLCC....',
+        '...CCCCCCCCC....',
+        '....CCCC.CC.....',
+        '....DDDD.DD.....',
+    ]
+    linhas = [list(l) for l in linhas]
+    for y, x in ([(9, 2), (10, 2), (11, 2), (12, 3)] if rabo_alto else [(12, 1), (12, 2), (13, 2)]):
+        linhas[y][x] = 'D'
+    return from_art([''.join(l) for l in linhas])
+caramelo_sentado = sheet([sentado(True), sentado(False)])
+
+pulo = list(CORPO) + ['..C.........C...', '.C...........C..', 'D.............D.', '................']
+caramelo_pulo = from_art(pulo)
+
+def latindo(aberta):
+    linhas = list(CORPO) + PATAS[0]
+    if aberta:
+        linhas[6] = '...D.....CCC....'
+        linhas[7] = '...DC...CCCCLL..'
+    return from_art(linhas)
+caramelo_latindo = sheet([latindo(False), latindo(True)])
+
+# ---- pombo voando para a esquerda (16x16, 2 quadros: asa para cima e para baixo)
+POMBO = [
+    '................',
+    '................',
+    '................',
+    '................',
+    '..EE............',
+    '.EeeE...........',
+    'kEfeE...........',
+    '.EeegE..........',
+    '..EgpeeEEEEE....',
+    '..EeeeeeeeeeE...',
+    '...EeeeeeeeeeEEE',
+    '....EEeeeeeeEEEE',
+    '......EEEEEE....',
+    '.......f..f.....',
+    '................',
+    '................',
+]
+def pombo(asa_alta):
+    linhas = [list(l) for l in POMBO]
+    pontos = [(3, 11), (4, 10), (4, 11), (5, 9), (5, 10), (5, 11), (6, 8), (6, 9), (6, 10), (6, 11), (7, 7), (7, 8), (7, 9), (7, 10)] if asa_alta else \
+             [(11, 7), (11, 8), (12, 7), (12, 8), (12, 9), (13, 7), (13, 8), (13, 9), (14, 8)]
+    for y, x in pontos:
+        linhas[y][x] = 'E' if (y, x) in ((3, 11), (4, 11), (5, 11), (6, 11), (14, 8)) else 'e'
+    return from_art([''.join(l) for l in linhas])
+pombo_img = sheet([pombo(True), pombo(False)])
+
 # ---- osso (16x16, 6 quadros: flutua para cima e para baixo e dá uma brilhada)
 OSSO = [
     '.NN..........NN.',
@@ -95,6 +160,13 @@ def osso(dy, brilho):
             img.putpixel((x, y + dy), PAL['y'] + (255,))
     return img
 ossos = sheet([osso(0, None), osso(-1, None), osso(-1, [(4, 6), (3, 7), (5, 7), (4, 8)]), osso(0, [(4, 7)]), osso(1, None), osso(1, None)])
+def osso_ouro(dy, brilho):
+    img = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    img.paste(from_art([r.replace('O', 'y').replace('Q', 'Y') for r in OSSO]), (0, 4 + dy))
+    for x, y in brilho or []:
+        img.putpixel((x, y + dy), PAL['w'] + (255,))
+    return img
+ossos_dourados = sheet([osso_ouro(0, None), osso_ouro(-1, None), osso_ouro(-1, [(4, 6), (3, 7), (5, 7), (4, 8)]), osso_ouro(0, [(4, 7)]), osso_ouro(1, [(11, 7)]), osso_ouro(1, None)])
 
 # ---- inimigo: gato de rua cinza, de frente (16x16, 2 quadros: olhando e piscando, com o rabo balançando)
 # Cada linha tem só a metade esquerda; a direita é o espelho. O rabo entra depois, do lado direito.
@@ -478,7 +550,12 @@ for i, t in enumerate([losango((96, 196, 86), (70, 150, 60), (50, 120, 46), Fals
 
 SPRITES = [
     ('heroi', heroi, 4, 'Herói: o vira-lata caramelo andando para a direita (4 quadros de 16×16)'),
+    ('osso_dourado', ossos_dourados, 6, 'Osso dourado brilhando (6 quadros de 16×16)'),
     ('osso', ossos, 6, 'Osso flutuando e brilhando (6 quadros de 16×16)'),
+    ('caramelo_sentado', caramelo_sentado, 2, 'Caramelo sentado abanando o rabo (2 quadros de 16×16)'),
+    ('caramelo_pulo', caramelo_pulo, 1, 'Caramelo pulando (16×16)'),
+    ('caramelo_latindo', caramelo_latindo, 2, 'Caramelo latindo, boca fechada e aberta (2 quadros de 16×16)'),
+    ('pombo', pombo_img, 2, 'Pombo voando para a esquerda (2 quadros de 16×16)'),
     ('gato', gato_img, 2, 'Inimigo: gato de rua cinza, piscando e balançando o rabo (2 quadros de 16×16)'),
     ('nave', nave, 2, 'Nave apontando para cima, com fogo (2 quadros de 16×16)'),
     ('explosao', explosoes, 5, 'Explosão (5 quadros de 16×16)'),

@@ -83,7 +83,7 @@ ARENA = [
     'P..f......$.....f..P',
     'P.$....A.......$.S.P',
     'P....PPPP...PPPP...P',
-    'P....P.........P.$.P',
+    'P....P....G....P.$.P',
     'P.$..P..$...$..P...P',
     'P....P....S....P...P',
     'P..................P',
@@ -101,38 +101,72 @@ ARENA = [
     'P.f..$.........$...P',
     'PPPPPPPPPPPPPPPPPPPP',
 ]
-AW, AH = len(ARENA[0]), len(ARENA)
-chao = [[7 if (x + y) % 2 == 0 else 8 for x in range(AW)] for y in range(AH)]
-paredes = [[3 if ARENA[y][x] == 'P' else 0 for x in range(AW)] for y in range(AH)]
-deco = [[10 if ARENA[y][x] == 'f' else (9 if ARENA[y][x] == 'A' else 0) for x in range(AW)] for y in range(AH)]
-for (tx, ty) in ((5, 3), (14, 3), (4, 13), (14, 13), (7, 9), (12, 9)):
-    deco[ty][tx] = 19
-nid = 1
-sol = []
-for r in rects(paredes, {3}):
-    sol.append({'id': nid, 'type': 'parede', 'x': r[0] * T, 'y': r[1] * T, 'w': r[2] * T, 'h': r[3] * T})
-    nid += 1
-for y in range(AH):
-    for x in range(AW):
-        if ARENA[y][x] == 'A':
-            sol.append({'id': nid, 'type': 'parede', 'x': x * T + 2, 'y': y * T + 4, 'w': 12, 'h': 12})
-            nid += 1
-objs = []
-for y in range(AH):
-    for x in range(AW):
-        c = ARENA[y][x]
-        cx, cy = x * T + T // 2, y * T + T // 2
-        if c == '$':
-            objs.append({'id': nid, 'name': 'osso', 'type': 'osso', 'x': cx, 'y': cy, 'props': {'valor': 1}})
-        elif c == 'S':
-            objs.append({'id': nid, 'name': 'gato', 'type': 'inimigo', 'x': cx, 'y': cy})
-        elif c == 'I':
-            objs.append({'id': nid, 'name': 'inicio', 'type': 'inicio', 'x': cx, 'y': cy})
-        else:
-            continue
+
+
+def arena_tmx(nome, mapa, tochas, pisos=(7, 8)):
+    """Gera uma arena vista de cima: P parede, A arbusto, f flor, $ osso, G osso dourado, S gato, I início."""
+    aw, ah = len(mapa[0]), len(mapa)
+    chao = [[pisos[0] if (x + y) % 2 == 0 else pisos[1] for x in range(aw)] for y in range(ah)]
+    paredes = [[3 if mapa[y][x] == 'P' else 0 for x in range(aw)] for y in range(ah)]
+    deco = [[10 if mapa[y][x] == 'f' else (9 if mapa[y][x] == 'A' else 0) for x in range(aw)] for y in range(ah)]
+    for (tx, ty) in tochas:
+        deco[ty][tx] = 19
+    nid = 1
+    sol = []
+    for r in rects(paredes, {3}):
+        sol.append({'id': nid, 'type': 'parede', 'x': r[0] * T, 'y': r[1] * T, 'w': r[2] * T, 'h': r[3] * T})
         nid += 1
-(OUT / 'arena.tmx').write_text(tmx(AW, AH, [layer(1, 'chao', chao), layer(2, 'paredes', paredes), layer(3, 'decoracao', deco),
-                                              objgroup(4, 'solidos', sol), objgroup(5, 'objetos', objs)], nid))
+    for y in range(ah):
+        for x in range(aw):
+            if mapa[y][x] == 'A':
+                sol.append({'id': nid, 'type': 'parede', 'x': x * T + 2, 'y': y * T + 4, 'w': 12, 'h': 12})
+                nid += 1
+    objs = []
+    for y in range(ah):
+        for x in range(aw):
+            c = mapa[y][x]
+            cx, cy = x * T + T // 2, y * T + T // 2
+            if c == '$':
+                objs.append({'id': nid, 'name': 'osso', 'type': 'osso', 'x': cx, 'y': cy, 'props': {'valor': 1}})
+            elif c == 'G':
+                objs.append({'id': nid, 'name': 'dourado', 'type': 'dourado', 'x': cx, 'y': cy, 'props': {'valor': 5}})
+            elif c == 'S':
+                objs.append({'id': nid, 'name': 'gato', 'type': 'inimigo', 'x': cx, 'y': cy})
+            elif c == 'I':
+                objs.append({'id': nid, 'name': 'inicio', 'type': 'inicio', 'x': cx, 'y': cy})
+            else:
+                continue
+            nid += 1
+    (OUT / nome).write_text(tmx(aw, ah, [layer(1, 'chao', chao), layer(2, 'paredes', paredes), layer(3, 'decoracao', deco),
+                                          objgroup(4, 'solidos', sol), objgroup(5, 'objetos', objs)], nid))
+
+
+arena_tmx('arena.tmx', ARENA, ((5, 3), (14, 3), (4, 13), (14, 13), (7, 9), (12, 9)))
+
+ARENA2 = [
+    'PPPPPPPPPPPPPPPPPPPP',
+    'P$.....S.....f...G.P',
+    'P.PPP.....PPP...PP.P',
+    'P.P$....$...P...P..P',
+    'P.P..PPPPP..P.$.P.SP',
+    'P......$..........$P',
+    'PPP..A.......A..PPPP',
+    'P$...S...PP....$...P',
+    'P.....$..PP..S.....P',
+    'P.PPPPP......PPPPP.P',
+    'P..f.....I.........P',
+    'P.PPPPP......PPPPP.P',
+    'P...$....PP...$....P',
+    'P..S.....PP.....S..P',
+    'PPPP..$......$..PPPP',
+    'P..A..........A..$.P',
+    'P.PPP..PPPPPP..PPP.P',
+    'P$.......$S........P',
+    'P...f.........G..f.P',
+    'PPPPPPPPPPPPPPPPPPPP',
+]
+arena_tmx('arena2.tmx', ARENA2, ((2, 6), (17, 6), (2, 14), (17, 14), (9, 9), (9, 11)), pisos=(16, 7))
+
 
 # ---------------------------------------------------------------- fase de plataforma (vista de lado)
 FASE = [

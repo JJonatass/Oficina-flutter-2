@@ -208,8 +208,9 @@ aula(
     'estado do jogo pelo construtor (aqui, x e direcao) e o método paint pinta, de trás para a frente: céu, '
     'sol, chão e personagem. O que é pintado depois fica por cima. O tamanho do mundo fica em constantes '
     '(largura, altura e chao), assim o desenho e as regras usam os mesmos números. O shouldRepaint compara a '
-    'cena antiga com a nova e só redesenha quando algo mudou. O olho segue a direcao: +1 olha para a direita, '
-    '-1 para a esquerda.',
+    'cena antiga com a nova e só redesenha quando algo mudou. O personagem é o vira-lata caramelo, montado com '
+    'retângulos e círculos na função desenharCaramelo, no fim do arquivo: translate leva o desenho até o lugar dele '
+    'e scale(direcao, 1) espelha o cachorro, então +1 olha para a direita e -1 para a esquerda.',
     'Em ▶ Testar, veja o personagem ir e voltar. Troque a cor do céu, desenhe uma nuvem (três drawCircle '
     'brancos juntos) e mude a altura do chão para 400.',
     r'''
@@ -234,10 +235,7 @@ class Cena extends CustomPainter {
     canvas.drawRect(Rect.fromLTWH(0, chao, size.width, size.height - chao), Paint()..color = Colors.green.shade700);
 
     final corpo = Rect.fromLTWH(x, chao - 48, 40, 48);
-    canvas.drawRRect(RRect.fromRectAndRadius(corpo, const Radius.circular(8)), Paint()..color = Colors.deepOrange);
-    final olho = Offset(x + 20 + direcao * 8, chao - 34);
-    canvas.drawCircle(olho, 6, Paint()..color = Colors.white);
-    canvas.drawCircle(olho + Offset(direcao * 2, 0), 3, Paint()..color = Colors.black);
+    desenharCaramelo(canvas, corpo, const Color(0xFFD68C3E), direcao);
   }
 
   @override
@@ -301,6 +299,30 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
     );
   }
 }
+
+/// O vira-lata caramelo desenhado com retângulos e círculos, dentro do retângulo r (40 × 48).
+/// direcao 1 olha para a direita e -1 para a esquerda.
+void desenharCaramelo(Canvas canvas, Rect r, Color pelo, double direcao) {
+  canvas.save();
+  canvas.translate(r.center.dx, r.center.dy);
+  canvas.scale(direcao * r.width / 40, r.height / 48);
+  final cor = Paint()..color = pelo;
+  final escuro = Paint()..color = const Color(0xFF9C5E28);
+  final claro = Paint()..color = const Color(0xFFF6CE96);
+  final preto = Paint()..color = Colors.black;
+  canvas.drawLine(const Offset(-14, 0), const Offset(-19, -12), Paint()..color = const Color(0xFF9C5E28)..strokeWidth = 4..strokeCap = StrokeCap.round);
+  canvas.drawRect(const Rect.fromLTWH(-14, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(-5, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(6, 14, 6, 10), cor);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-17, -2, 31, 18), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(-12, 11, 22, 4), claro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(1, -22, 18, 20), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(3, -26, 6, 9), escuro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(13, -12, 8, 7), const Radius.circular(3)), claro);
+  canvas.drawCircle(const Offset(20, -11), 2, preto);
+  canvas.drawCircle(const Offset(10, -15), 2.5, preto);
+  canvas.restore();
+}
 ''',
     [
         ['Céu de outra cor', 'No primeiro drawRect, troque Color(0xFF7EC8F2) por outra cor, como Colors.indigo.shade200.', r'^(?![\s\S]*0xFF7EC8F2)'],
@@ -347,7 +369,7 @@ class Cena extends CustomPainter {
     canvas.drawCircle(Offset(alvo + 20, chao + 12), 8, marca);
 
     final corpo = Rect.fromLTWH(x, chao - 48, 40, 48);
-    canvas.drawRRect(RRect.fromRectAndRadius(corpo, const Radius.circular(8)), Paint()..color = Colors.deepOrange);
+    desenharCaramelo(canvas, corpo, const Color(0xFFD68C3E), 1);
   }
 
   @override
@@ -421,11 +443,35 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
     );
   }
 }
+
+/// O vira-lata caramelo desenhado com retângulos e círculos, dentro do retângulo r (40 × 48).
+/// direcao 1 olha para a direita e -1 para a esquerda.
+void desenharCaramelo(Canvas canvas, Rect r, Color pelo, double direcao) {
+  canvas.save();
+  canvas.translate(r.center.dx, r.center.dy);
+  canvas.scale(direcao * r.width / 40, r.height / 48);
+  final cor = Paint()..color = pelo;
+  final escuro = Paint()..color = const Color(0xFF9C5E28);
+  final claro = Paint()..color = const Color(0xFFF6CE96);
+  final preto = Paint()..color = Colors.black;
+  canvas.drawLine(const Offset(-14, 0), const Offset(-19, -12), Paint()..color = const Color(0xFF9C5E28)..strokeWidth = 4..strokeCap = StrokeCap.round);
+  canvas.drawRect(const Rect.fromLTWH(-14, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(-5, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(6, 14, 6, 10), cor);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-17, -2, 31, 18), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(-12, 11, 22, 4), claro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(1, -22, 18, 20), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(3, -26, 6, 9), escuro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(13, -12, 8, 7), const Radius.circular(3)), claro);
+  canvas.drawCircle(const Offset(20, -11), 2, preto);
+  canvas.drawCircle(const Offset(10, -15), 2.5, preto);
+  canvas.restore();
+}
 ''',
     [
         ['Velocidade de 400 px/s', 'Troque double velocidade = 180 por 400.', r'double velocidade\s*=\s*400\b'],
         ['Marca amarela', 'No Paint da marca, troque Colors.white por Colors.yellow.', r'marca\s*=\s*Paint\(\)\s*\.\.color\s*=\s*Colors\.yellow'],
-        ['Cor diferente enquanto anda', 'Passe para a Cena se x != alvo e use um operador ternário na cor do corpo.', r'\?\s*Colors\.\w+[\s\S]{0,40}:\s*Colors\.deepOrange|\?\s*Colors\.deepOrange[\s\S]{0,40}:\s*Colors\.\w+'],
+        ['Cor diferente enquanto anda', 'Passe para a Cena se x != alvo e use um operador ternário na cor que vai para o desenharCaramelo, como andando ? Colors.amber : const Color(0xFFD68C3E).', r'desenharCaramelo\(\s*canvas\s*,\s*corpo\s*,\s*\w+\s*\?'],
     ],
 )
 
@@ -467,7 +513,7 @@ class Cena extends CustomPainter {
       Paint()..color = Colors.black26,
     );
     final corpo = Rect.fromLTWH(140, y, 40, 48);
-    canvas.drawRRect(RRect.fromRectAndRadius(corpo, const Radius.circular(8)), Paint()..color = Colors.deepOrange);
+    desenharCaramelo(canvas, corpo, const Color(0xFFD68C3E), 1);
   }
 
   @override
@@ -540,6 +586,30 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
       ),
     );
   }
+}
+
+/// O vira-lata caramelo desenhado com retângulos e círculos, dentro do retângulo r (40 × 48).
+/// direcao 1 olha para a direita e -1 para a esquerda.
+void desenharCaramelo(Canvas canvas, Rect r, Color pelo, double direcao) {
+  canvas.save();
+  canvas.translate(r.center.dx, r.center.dy);
+  canvas.scale(direcao * r.width / 40, r.height / 48);
+  final cor = Paint()..color = pelo;
+  final escuro = Paint()..color = const Color(0xFF9C5E28);
+  final claro = Paint()..color = const Color(0xFFF6CE96);
+  final preto = Paint()..color = Colors.black;
+  canvas.drawLine(const Offset(-14, 0), const Offset(-19, -12), Paint()..color = const Color(0xFF9C5E28)..strokeWidth = 4..strokeCap = StrokeCap.round);
+  canvas.drawRect(const Rect.fromLTWH(-14, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(-5, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(6, 14, 6, 10), cor);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-17, -2, 31, 18), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(-12, 11, 22, 4), claro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(1, -22, 18, 20), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(3, -26, 6, 9), escuro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(13, -12, 8, 7), const Radius.circular(3)), claro);
+  canvas.drawCircle(const Offset(20, -11), 2, preto);
+  canvas.drawCircle(const Offset(10, -15), 2.5, preto);
+  canvas.restore();
 }
 ''',
     [
@@ -710,10 +780,7 @@ class Cena extends CustomPainter {
       canvas.drawRect(c.area, Paint()..color = Colors.brown);
     }
     final corpo = Rect.fromLTWH(jogadorX, y, 40, 48);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(corpo, const Radius.circular(8)),
-      Paint()..color = vermelho ? Colors.red : Colors.deepOrange,
-    );
+    desenharCaramelo(canvas, corpo, vermelho ? Colors.red : const Color(0xFFD68C3E), 1);
   }
 
   @override
@@ -811,6 +878,30 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
     );
   }
 }
+
+/// O vira-lata caramelo desenhado com retângulos e círculos, dentro do retângulo r (40 × 48).
+/// direcao 1 olha para a direita e -1 para a esquerda.
+void desenharCaramelo(Canvas canvas, Rect r, Color pelo, double direcao) {
+  canvas.save();
+  canvas.translate(r.center.dx, r.center.dy);
+  canvas.scale(direcao * r.width / 40, r.height / 48);
+  final cor = Paint()..color = pelo;
+  final escuro = Paint()..color = const Color(0xFF9C5E28);
+  final claro = Paint()..color = const Color(0xFFF6CE96);
+  final preto = Paint()..color = Colors.black;
+  canvas.drawLine(const Offset(-14, 0), const Offset(-19, -12), Paint()..color = const Color(0xFF9C5E28)..strokeWidth = 4..strokeCap = StrokeCap.round);
+  canvas.drawRect(const Rect.fromLTWH(-14, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(-5, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(6, 14, 6, 10), cor);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-17, -2, 31, 18), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(-12, 11, 22, 4), claro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(1, -22, 18, 20), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(3, -26, 6, 9), escuro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(13, -12, 8, 7), const Radius.circular(3)), claro);
+  canvas.drawCircle(const Offset(20, -11), 2, preto);
+  canvas.drawCircle(const Offset(10, -15), 2.5, preto);
+  canvas.restore();
+}
 ''',
     [
         ['Colisão sem folga', 'Apague o .deflate(4) do retângulo do jogador.', r'final jogador\s*=\s*Rect\.fromLTWH\(\s*jogadorX,\s*y,\s*40,\s*48\s*\);'],
@@ -868,7 +959,7 @@ class Cena extends CustomPainter {
       canvas.drawRect(c.area, Paint()..color = Colors.brown);
     }
     final corpo = Rect.fromLTWH(jogadorX, y, 40, 48);
-    canvas.drawRRect(RRect.fromRectAndRadius(corpo, const Radius.circular(8)), Paint()..color = Colors.deepOrange);
+    desenharCaramelo(canvas, corpo, const Color(0xFFD68C3E), 1);
   }
 
   @override
@@ -990,6 +1081,30 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
     );
   }
 }
+
+/// O vira-lata caramelo desenhado com retângulos e círculos, dentro do retângulo r (40 × 48).
+/// direcao 1 olha para a direita e -1 para a esquerda.
+void desenharCaramelo(Canvas canvas, Rect r, Color pelo, double direcao) {
+  canvas.save();
+  canvas.translate(r.center.dx, r.center.dy);
+  canvas.scale(direcao * r.width / 40, r.height / 48);
+  final cor = Paint()..color = pelo;
+  final escuro = Paint()..color = const Color(0xFF9C5E28);
+  final claro = Paint()..color = const Color(0xFFF6CE96);
+  final preto = Paint()..color = Colors.black;
+  canvas.drawLine(const Offset(-14, 0), const Offset(-19, -12), Paint()..color = const Color(0xFF9C5E28)..strokeWidth = 4..strokeCap = StrokeCap.round);
+  canvas.drawRect(const Rect.fromLTWH(-14, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(-5, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(6, 14, 6, 10), cor);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-17, -2, 31, 18), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(-12, 11, 22, 4), claro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(1, -22, 18, 20), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(3, -26, 6, 9), escuro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(13, -12, 8, 7), const Radius.circular(3)), claro);
+  canvas.drawCircle(const Offset(20, -11), 2, preto);
+  canvas.drawCircle(const Offset(10, -15), 2.5, preto);
+  canvas.restore();
+}
 ''',
     [
         ['Nova mensagem de game over', 'Troque o texto Fim de jogo! por outra frase.', r'^(?![\s\S]*Fim de jogo!)'],
@@ -1067,12 +1182,7 @@ class Cena extends CustomPainter {
     }
 
     final corpo = Rect.fromLTWH(jogadorX, y, 40, 48);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(corpo, const Radius.circular(8)),
-      Paint()..color = perdeu ? Colors.red : Colors.deepOrange,
-    );
-    canvas.drawCircle(Offset(jogadorX + 28, y + 14), 6, Paint()..color = Colors.white);
-    canvas.drawCircle(Offset(jogadorX + 30, y + 14), 3, Paint()..color = Colors.black);
+    desenharCaramelo(canvas, corpo, perdeu ? Colors.red : const Color(0xFFD68C3E), 1);
   }
 
   @override
@@ -1202,6 +1312,30 @@ class _PulaCaixaState extends State<PulaCaixa> with SingleTickerProviderStateMix
       ),
     );
   }
+}
+
+/// O vira-lata caramelo desenhado com retângulos e círculos, dentro do retângulo r (40 × 48).
+/// direcao 1 olha para a direita e -1 para a esquerda.
+void desenharCaramelo(Canvas canvas, Rect r, Color pelo, double direcao) {
+  canvas.save();
+  canvas.translate(r.center.dx, r.center.dy);
+  canvas.scale(direcao * r.width / 40, r.height / 48);
+  final cor = Paint()..color = pelo;
+  final escuro = Paint()..color = const Color(0xFF9C5E28);
+  final claro = Paint()..color = const Color(0xFFF6CE96);
+  final preto = Paint()..color = Colors.black;
+  canvas.drawLine(const Offset(-14, 0), const Offset(-19, -12), Paint()..color = const Color(0xFF9C5E28)..strokeWidth = 4..strokeCap = StrokeCap.round);
+  canvas.drawRect(const Rect.fromLTWH(-14, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(-5, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(6, 14, 6, 10), cor);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-17, -2, 31, 18), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(-12, 11, 22, 4), claro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(1, -22, 18, 20), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(3, -26, 6, 9), escuro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(13, -12, 8, 7), const Radius.circular(3)), claro);
+  canvas.drawCircle(const Offset(20, -11), 2, preto);
+  canvas.drawCircle(const Offset(10, -15), 2.5, preto);
+  canvas.restore();
 }
 ''',
     [
@@ -1522,7 +1656,7 @@ class Cena extends CustomPainter {
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF7EC8F2));
     canvas.drawRect(Rect.fromLTWH(0, chao, size.width, size.height - chao), Paint()..color = Colors.green.shade700);
     final corpo = Rect.fromLTWH(x, y, 40, 48);
-    canvas.drawRRect(RRect.fromRectAndRadius(corpo, const Radius.circular(8)), Paint()..color = Colors.deepOrange);
+    desenharCaramelo(canvas, corpo, const Color(0xFFD68C3E), 1);
   }
 
   @override
@@ -1607,6 +1741,30 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
     );
   }
 }
+
+/// O vira-lata caramelo desenhado com retângulos e círculos, dentro do retângulo r (40 × 48).
+/// direcao 1 olha para a direita e -1 para a esquerda.
+void desenharCaramelo(Canvas canvas, Rect r, Color pelo, double direcao) {
+  canvas.save();
+  canvas.translate(r.center.dx, r.center.dy);
+  canvas.scale(direcao * r.width / 40, r.height / 48);
+  final cor = Paint()..color = pelo;
+  final escuro = Paint()..color = const Color(0xFF9C5E28);
+  final claro = Paint()..color = const Color(0xFFF6CE96);
+  final preto = Paint()..color = Colors.black;
+  canvas.drawLine(const Offset(-14, 0), const Offset(-19, -12), Paint()..color = const Color(0xFF9C5E28)..strokeWidth = 4..strokeCap = StrokeCap.round);
+  canvas.drawRect(const Rect.fromLTWH(-14, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(-5, 14, 6, 10), cor);
+  canvas.drawRect(const Rect.fromLTWH(6, 14, 6, 10), cor);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-17, -2, 31, 18), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(-12, 11, 22, 4), claro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(1, -22, 18, 20), const Radius.circular(6)), cor);
+  canvas.drawRect(const Rect.fromLTWH(3, -26, 6, 9), escuro);
+  canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(13, -12, 8, 7), const Radius.circular(3)), claro);
+  canvas.drawCircle(const Offset(20, -11), 2, preto);
+  canvas.drawCircle(const Offset(10, -15), 2.5, preto);
+  canvas.restore();
+}
 ''',
     [
         ['Andar com A e D', 'Nos dois if de movimento, acrescente || teclado.isLogicalKeyPressed(LogicalKeyboardKey.keyA) e o mesmo com keyD.', r'LogicalKeyboardKey\.keyA[\s\S]*LogicalKeyboardKey\.keyD|LogicalKeyboardKey\.keyD[\s\S]*LogicalKeyboardKey\.keyA'],
@@ -1629,7 +1787,7 @@ SETUP_SPRITES = (
     '  assets:\n'
     '    - assets/sprites/\n\n'
     'Coloque os arquivos PNG em assets/sprites/ na raiz do projeto. O simulador já tem estes sprites prontos, '
-    'desenhados para a Oficina: heroi.png (o vira-lata caramelo, 4 quadros de 16×16), osso.png (6), gato.png (2), nave.png (2), '
+    'desenhados para a Oficina: heroi.png (o vira-lata caramelo, 4 quadros de 16×16), osso.png (6), osso_dourado.png (6), gato.png (2), pombo.png (2), caramelo_sentado.png (2), caramelo_pulo.png, caramelo_latindo.png (2), nave.png (2), '
     'explosao.png (5), tiro.png (8×8), caixa.png, coracao.png, maca.png, grama.png (16×16) e nuvem.png (32×16). '
     'Os arquivos estão na pasta tools/sprites do repositório da Oficina Flutter 2.'
 )
@@ -1739,7 +1897,7 @@ class _VitrineState extends State<Vitrine> {
     [
         ['Outro quadro do herói', 'No drawImageRect do herói ampliado, troque a origem bloco por Rect.fromLTWH(32, 0, 16, 16).', r'drawImageRect\(\s*s\.heroi\s*,\s*(?:const\s+)?Rect\.fromLTWH\(\s*(?:16|32|48)\b'],
         ['Caixa de 64×64', 'No destino da caixa, use largura e altura 64 (e suba o top para chao - 64).', r'drawImageRect\(\s*s\.caixa[^;]*Rect\.fromLTWH\([^;]*,\s*64\s*,\s*64\s*\)'],
-        ['Uma maçã em cima da caixa', "Carregue 'assets/sprites/maca.png' como as outras (um campo novo em Sprites) e desenhe acima da caixa.", r"assets/sprites/maca\.png[\s\S]*drawImageRect\(\s*s\.maca"],
+        ['Uma maçã em cima da caixa', "Carregue 'assets/sprites/maca.png' como as outras (um campo novo em Sprites) e desenhe acima da caixa.", r"^(?=[\s\S]*assets/sprites/maca\.png)(?=[\s\S]*drawImageRect\(\s*s\.maca)"],
     ],
     lim='Aqui a escolha fica dentro do Scaffold, com ?:. Um if (...) return antes do return final também funciona no simulador. rootBundle lê os sprites prontos e as imagens que você acrescentar no botão 🖼 Sprites.',
     setup=SETUP_SPRITES,
@@ -2073,7 +2231,7 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
         ['Ossos que duram menos', 'Na classe Osso, troque double vida = 2 por 1.2.', r'double vida\s*=\s*1\.2\b'],
         ['Som quando um osso some', "Quando perdidas aumentar, toque AssetSource('sons/dano.wav') no somErro.", r"sons/dano\.wav"],
     ],
-    lim="No simulador os sons são sintetizados pelo navegador, com timbre de videogame antigo. Os nomes disponíveis são pulo, osso, batida, explosao, tiro, vitoria, derrota, clique, dano e poder (em sons/NOME.wav). O navegador só libera som depois do primeiro toque ou tecla.",
+    lim="No simulador os sons são sintetizados pelo navegador, com timbre de videogame antigo. Os nomes disponíveis são pulo, osso, latido, batida, explosao, tiro, vitoria, derrota, clique, dano e poder (em sons/NOME.wav). O navegador só libera som depois do primeiro toque ou tecla.",
     setup='No terminal do projeto:\n  flutter pub add audioplayers\n\npubspec.yaml (dentro de flutter:):\n  assets:\n    - assets/sprites/\n    - assets/sons/\n\nColoque seus arquivos .wav ou .mp3 em assets/sons/. Sites como freesound.org e opengameart.org têm efeitos livres (confira a licença de cada um).',
 )
 
@@ -2204,6 +2362,144 @@ class _AberturaState extends State<Abertura> with SingleTickerProviderStateMixin
 )
 
 PARTS.append(['Sprites: imagens no Canvas', 'Parte 3 · Sprites, animação, som e texto'])
+
+aula(
+    'Efeitos visuais: degradê, brilho e sombra',
+    'Três truques do Paint deixam a cena muito mais bonita. O degradê é um shader: ui.Gradient.linear(de, até, cores) '
+    'pinta o céu indo do azul-escuro ao roxo, e ui.Gradient.radial(centro, raio, cores, paradas) faz um círculo que '
+    'vai mudando de cor do centro para fora. O brilho é desfoque: maskFilter = MaskFilter.blur(BlurStyle.normal, 24) '
+    'espalha a cor do círculo atrás da lua, e blendMode = BlendMode.plus soma a luz do osso com o que já está '
+    'embaixo, em vez de cobrir. A sombra vem de canvas.drawShadow(caminho, cor, elevação, false), que desenha a sombra '
+    'de um Path como se ele estivesse flutuando. A escuridão da noite é um degradê radial em cima de tudo: '
+    'transparente perto do dedo e quase preto nas bordas, como uma lanterna. A ordem importa: a lua e o brilho do osso '
+    'são pintados depois da escuridão, por isso aparecem mesmo no escuro.',
+    'Em ▶ Testar, arraste o dedo para mover a lanterna e encoste a luz no osso que brilha. Aumente o raio da luz, '
+    'deixe o brilho da lua mais espalhado e troque o céu por um pôr do sol.',
+    r'''
+import 'dart:math';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+
+void main() => runApp(const MaterialApp(home: Lanterna()));
+
+const double largura = 360;
+const double altura = 600;
+
+class Lanterna extends StatefulWidget {
+  const Lanterna({super.key});
+  @override
+  State<Lanterna> createState() => _LanternaState();
+}
+
+class _LanternaState extends State<Lanterna> with SingleTickerProviderStateMixin {
+  final sorteio = Random();
+  late Ticker ticker;
+  double tempo = 0;
+  Offset luz = const Offset(180, 300);
+  Offset osso = const Offset(90, 420);
+  int achados = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    ticker = createTicker((t) => setState(() => tempo = t.inMilliseconds / 1000))..start();
+  }
+
+  @override
+  void dispose() {
+    ticker.dispose();
+    super.dispose();
+  }
+
+  void mover(Offset p) {
+    setState(() {
+      luz = p;
+      if ((luz - osso).distance < 30) {
+        achados++;
+        osso = Offset(40 + sorteio.nextDouble() * (largura - 80), 300 + sorteio.nextDouble() * (altura - 340));
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GestureDetector(
+        onPanDown: (d) => mover(d.localPosition),
+        onPanUpdate: (d) => mover(d.localPosition),
+        child: CustomPaint(
+          size: const Size(largura, altura),
+          painter: Noite(tempo, luz, osso, achados),
+        ),
+      ),
+    );
+  }
+}
+
+class Noite extends CustomPainter {
+  final double tempo;
+  final Offset luz;
+  final Offset osso;
+  final int achados;
+  Noite(this.tempo, this.luz, this.osso, this.achados);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // céu com degradê: do azul-escuro ao roxo
+    final ceu = Paint()
+      ..shader = ui.Gradient.linear(Offset.zero, Offset(0, size.height * 0.6), [const Color(0xFF0B1026), const Color(0xFF4B2A6B)]);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceu);
+
+    // chão
+    canvas.drawRect(Rect.fromLTWH(0, 280, size.width, size.height - 280), Paint()..color = const Color(0xFF1F3B22));
+
+    // osso com sombra
+    final forma = Path()
+      ..addRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: osso, width: 34, height: 8), const Radius.circular(4)))
+      ..addOval(Rect.fromCircle(center: osso + const Offset(-17, -4), radius: 6))
+      ..addOval(Rect.fromCircle(center: osso + const Offset(-17, 4), radius: 6))
+      ..addOval(Rect.fromCircle(center: osso + const Offset(17, -4), radius: 6))
+      ..addOval(Rect.fromCircle(center: osso + const Offset(17, 4), radius: 6));
+    canvas.drawShadow(forma, Colors.black, 6, false);
+    canvas.drawPath(forma, Paint()..color = const Color(0xFFFAF4E2));
+
+    // a escuridão: um degradê radial transparente no centro da luz e preto nas bordas
+    final escuro = Paint()
+      ..shader = ui.Gradient.radial(luz, 140, [Colors.transparent, Colors.black.withOpacity(0.92)], [0.45, 1]);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), escuro);
+
+    // a lua vem depois da escuridão, então ela fica sempre acesa; o brilho é um círculo desfocado
+    const lua = Offset(280, 90);
+    canvas.drawCircle(lua, 46, Paint()
+      ..color = const Color(0x88FFF4C2)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 24));
+    canvas.drawCircle(lua, 30, Paint()..color = const Color(0xFFFFF4C2));
+
+    // o brilho do osso também vem depois: com BlendMode.plus ele soma luz ao que está embaixo
+    final pulso = 0.5 + 0.5 * sin(tempo * 4);
+    canvas.drawCircle(osso, 22 + 6 * pulso, Paint()
+      ..color = Colors.amber.withOpacity(0.35)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12)
+      ..blendMode = BlendMode.plus);
+    final texto = TextPainter(
+      text: TextSpan(text: 'Ossos achados: $achados', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    texto.paint(canvas, const Offset(16, 16));
+  }
+
+  @override
+  bool shouldRepaint(covariant Noite antiga) => true;
+}
+''',
+    [
+        ['Lanterna maior', 'No Paint escuro, troque o raio 140 do ui.Gradient.radial por 200.', r'ui\.Gradient\.radial\(\s*luz\s*,\s*(?!140\b)\d+'],
+        ['Lua mais brilhante', 'No círculo desfocado da lua, troque MaskFilter.blur(BlurStyle.normal, 24) por 40.', r'BlurStyle\.normal,\s*(?!24\b|12\b)\d+'],
+        ['Pôr do sol', 'No degradê do céu, troque a cor de baixo (0xFF4B2A6B) por um laranja, como const Color(0xFFFF8A3D).', r'^(?![\s\S]*0xFF4B2A6B)'],
+    ],
+    lim='No simulador o desfoque usa o filtro do navegador, então o raio pode parecer um pouco diferente do celular. BlendMode tem os modos mais comuns (plus, multiply, screen, overlay, darken, lighten, difference e outros).',
+)
 
 aula(
     'Projeto · Pega-Maçã',
@@ -2504,8 +2800,8 @@ SETUP_FLAME = (
     '  assets:\n'
     '    - assets/images/\n'
     '    - assets/audio/\n\n'
-    'No simulador, os sprites prontos (heroi.png, osso.png, gato.png, nave.png, explosao.png, tiro.png, caixa.png, '
-    'coracao.png, maca.png, grama.png, nuvem.png, ceu.png, montanhas.png, colinas.png), os sons (pulo.wav, osso.wav, '
+    'No simulador, os sprites prontos (heroi.png, osso.png, gato.png, pombo.png, nave.png, explosao.png, tiro.png, caixa.png, '
+    'coracao.png, maca.png, grama.png, nuvem.png, ceu.png, montanhas.png, colinas.png), os sons (pulo.wav, osso.wav, latido.wav, '
     'batida.wav, explosao.wav, tiro.wav, vitoria.wav, derrota.wav, clique.wav, dano.wav, poder.wav) e as músicas '
     '(musica_aventura.mp3, musica_espaco.mp3, musica_menu.mp3) já existem com esses nomes. Imagens suas entram pelo botão 🖼 Sprites.'
 )
@@ -2739,10 +3035,10 @@ aula(
     'hitbox como filho: RectangleHitbox ou CircleHitbox, que por padrão ocupam o tamanho do componente. O componente '
     'que quer saber da colisão usa CollisionCallbacks e escreve onCollisionStart(pontos, outro): o Flame chama uma vez, '
     'no primeiro quadro em que os dois se tocam, e "outro" é o componente do outro lado. Com is dá para saber o tipo '
-    '(if (other is Gato)). Aqui a nave atira sozinha a cada 0,3 segundo (TimerComponent), os gatos descem e, quando '
-    'um tiro acerta um gato, os dois somem e nasce uma explosão: uma SpriteAnimationComponent com loop: false e '
+    '(if (other is Pombo)). Aqui a nave atira sozinha a cada 0,3 segundo (TimerComponent), os pombos descem e, quando '
+    'um tiro acerta um pombo, os dois somem e nasce uma explosão: uma SpriteAnimationComponent com loop: false e '
     'removeOnFinish: true, que se apaga sozinha no último quadro. Ligue o debugMode para ver os hitboxes em amarelo.',
-    'Em ▶ Testar, arraste a nave e acerte os gatos. Ligue debugMode, troque o CircleHitbox do gato por um '
+    'Em ▶ Testar, arraste a nave e acerte os pombos. Ligue debugMode, troque o CircleHitbox do pombo por um '
     'RectangleHitbox e faça a nave atirar mais rápido.',
     r'''
 import 'dart:math';
@@ -2765,7 +3061,7 @@ class Espaco extends FlameGame with HasCollisionDetection {
     nave = Nave();
     add(nave);
     add(TimerComponent(period: 0.3, repeat: true, onTick: () => add(Tiro(nave.position.clone()))));
-    add(TimerComponent(period: 0.9, repeat: true, onTick: () => add(Gato(Vector2(30 + sorteio.nextDouble() * (size.x - 60), -30)))));
+    add(TimerComponent(period: 0.9, repeat: true, onTick: () => add(Pombo(Vector2(30 + sorteio.nextDouble() * (size.x - 60), -30)))));
   }
 
   @override
@@ -2807,13 +3103,13 @@ class Tiro extends SpriteComponent with HasGameReference<Espaco> {
   }
 }
 
-class Gato extends SpriteAnimationComponent with CollisionCallbacks, HasGameReference<Espaco> {
-  Gato(Vector2 inicio) : super(position: inicio, size: Vector2.all(48), anchor: Anchor.center);
+class Pombo extends SpriteAnimationComponent with CollisionCallbacks, HasGameReference<Espaco> {
+  Pombo(Vector2 inicio) : super(position: inicio, size: Vector2.all(48), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     animation = await game.loadSpriteAnimation(
-      'gato.png',
+      'pombo.png',
       SpriteAnimationData.sequenced(amount: 2, stepTime: 0.3, textureSize: Vector2.all(16)),
     );
     add(CircleHitbox());
@@ -2852,7 +3148,7 @@ class Explosao extends SpriteAnimationComponent with HasGameReference<Espaco> {
 ''',
     [
         ['Ver os hitboxes', 'No onLoad do jogo, troque debugMode = false por true.', r'debugMode\s*=\s*true'],
-        ['Gato com RectangleHitbox', 'No onLoad do Gato, troque CircleHitbox() por RectangleHitbox().', r'class Gato[\s\S]*add\(\s*RectangleHitbox\(\s*\)\s*\)[\s\S]*class Explosao'],
+        ['Pombo com RectangleHitbox', 'No onLoad do Pombo, troque CircleHitbox() por RectangleHitbox().', r'class Pombo[\s\S]*add\(\s*RectangleHitbox\(\s*\)\s*\)[\s\S]*class Explosao'],
         ['Tiro mais rápido', 'No primeiro TimerComponent, troque period: 0.3 por 0.15.', r'period:\s*0\.15\b'],
     ],
     setup=SETUP_FLAME,
@@ -3807,7 +4103,7 @@ aula(
     'O último projeto junta tudo da Parte 5 num jogo de nave com rolagem lateral. O céu, as montanhas e as colinas '
     'são um fundo em paralaxe. A nave é o sprite nave.png girado 90 graus (angle = pi / 2) para apontar para a '
     'direita; como ela está girada, o arrasto usa event.canvasDelta, que vem nas coordenadas da tela, e não '
-    'localDelta. Ela atira sozinha, e os inimigos chegam pela direita: gatos e caixas que giram, todos da mesma '
+    'localDelta. Ela atira sozinha, e os inimigos chegam pela direita: pombos e caixas que giram, todos da mesma '
     'classe Inimigo, e o hitbox da caixa gira junto com ela. Tiro em inimigo vira explosão de partículas e ponto; '
     'inimigo na nave tira uma vida e a nave pisca com um OpacityEffect. O menu inicial e a tela de fim são overlays, '
     'a música é do FlameAudio.bgm e, para recomeçar, o jogo usa children.query para remover os inimigos e tiros que '
@@ -3895,7 +4191,7 @@ class CeuAgitado extends FlameGame with HasCollisionDetection {
       relogio = 0;
       final y = 60 + sorteio.nextDouble() * (size.y - 120);
       if (sorteio.nextBool()) {
-        add(Inimigo('gato.png', 2, 0, Vector2(size.x + 30, y)));
+        add(Inimigo('pombo.png', 2, 0, Vector2(size.x + 30, y)));
       } else {
         add(Inimigo('caixa.png', 1, 2.5, Vector2(size.x + 30, y)));
       }
@@ -4967,82 +5263,32 @@ class Osso extends SpriteAnimationComponent with HasGameReference<Arena> {
 PARTS.append(['Joystick e botões na tela', 'Parte 6 · Celular, física e mapas'])
 
 aula(
-    'Projeto · Caça-Ossos',
-    'O último projeto junta a Parte 6 num jogo completo para celular. A arena vem do Tiled: as paredes saem da camada '
-    'solidos, e os ossos, o ponto de partida e os gatos saem da camada objetos. O herói anda com o joystick, e cada '
-    'gato anda de parede em parede até ver o caramelo: a menos de 150 pixels (visao), ele corre atrás. O rumo é o '
-    'vetor alvo - position com normalize(), que vira um passo de tamanho 1 apontando para o herói; multiplicado pela '
-    'velocidade e por dt, vira o passo do quadro, e as paredes valem para o gato também. O gato é mais lento que o '
-    'herói, então dá para fugir, mas não dá para passar perto. Encostar num gato tira uma vida, pinta o herói de '
-    'vermelho com um ColorEffect e deixa ele um segundo sem levar dano; cada osso pego devolve uma vida (até maxVidas), '
-    'pisca o herói de verde e toca poder.wav, e o gato descansa 1,5 segundo antes de voltar '
-    'a perseguir (no começo, descanso = 2 dá dois segundos para o herói se afastar). O placar é um '
-    'overlay do Flutter que se atualiza sozinho: ossos e vidas são ValueNotifier, e o ValueListenableBuilder redesenha '
-    'o texto quando o valor muda, sem setState. Quando os ossos acabam ou as vidas zeram, o jogo pausa e mostra o '
-    'overlay de fim; Jogar de novo apaga o mundo e monta o mapa outra vez.',
-    'Em ▶ Testar, pegue todos os ossos sem encostar nos gatos. Dê 5 vidas ao herói, deixe os gatos mais rápidos e '
-    'mostre quantos ossos faltam no placar.',
+    'Inimigos que pensam: estados',
+    'Um inimigo interessante não faz sempre a mesma coisa: ele dorme, percebe o jogador, corre atrás e desiste. Cada '
+    'jeito de agir é um estado, e o jeito mais claro de organizar isso é uma máquina de estados: um enum com os '
+    'estados possíveis (dormindo, alerta, perseguindo, voltando), um campo com o estado atual e um switch no update '
+    'que decide o que fazer em cada um e quando trocar. O gato dormindo só olha a distância; quando o caramelo chega '
+    'perto, ele fica em alerta (o balão mostra !) e espera um pouco, contando o tempo em relogio. Depois persegue e, '
+    'se arranhar ou se o caramelo fugir para longe, volta para casa e dorme de novo. O método mudar troca o estado, '
+    'zera o relógio e atualiza o balão, que é um TextComponent filho do gato e por isso anda junto com ele. No '
+    'switch do Dart 3, cada case termina sozinho, sem break.',
+    'Em ▶ Testar, ande com o joystick perto dos gatos e veja os balões: Zzz, !, perseguição e ? na volta. Deixe o sono '
+    'mais leve, encurte o susto e faça o gato desistir mais cedo.',
     r'''
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/game.dart';
-import 'package:flame/input.dart';
-import 'package:flame_audio/flame_audio.dart';
-import 'package:flame_tiled/flame_tiled.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(GameWidget(
-      game: CacaOssos(),
-      overlayBuilderMap: {
-        'Placar': (BuildContext context, CacaOssos game) => Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ValueListenableBuilder<int>(
-                      valueListenable: game.ossos,
-                      builder: (context, valor, child) => Text('Ossos: $valor', style: const TextStyle(color: Colors.white, fontSize: 20)),
-                    ),
-                    const SizedBox(width: 16),
-                    ValueListenableBuilder<int>(
-                      valueListenable: game.vidas,
-                      builder: (context, valor, child) => Text('Vidas: $valor', style: const TextStyle(color: Colors.white, fontSize: 20)),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        'Fim': (BuildContext context, CacaOssos game) => Center(
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(game.mensagem, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
-                      ElevatedButton(onPressed: () => game.recomecar(), child: const Text('Jogar de novo')),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-      },
-      initialActiveOverlays: const ['Placar'],
-    ));
+void main() => runApp(GameWidget(game: Quintal()));
 
-class CacaOssos extends FlameGame {
-  final ossos = ValueNotifier<int>(0);
-  final vidas = ValueNotifier<int>(3);
-  int maxVidas = 3;
-  final List<Rect> paredes = [];
-  final double escala = 2;
+enum EstadoGato { dormindo, alerta, perseguindo, voltando }
+
+class Quintal extends FlameGame {
   late JoystickComponent joystick;
   late Heroi heroi;
-  int total = 0;
-  String mensagem = '';
+  late TextComponent placar;
+  int arranhoes = 0;
 
   @override
   Future<void> onLoad() async {
@@ -5052,25 +5298,527 @@ class CacaOssos extends FlameGame {
       margin: const EdgeInsets.only(left: 30, bottom: 40),
     );
     camera.viewport.add(joystick);
+    placar = TextComponent(
+      text: 'Arranhões: 0',
+      position: Vector2(12, 12),
+      textRenderer: TextPaint(style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+    );
+    camera.viewport.add(placar);
+    heroi = Heroi(Vector2(0, 160));
+    world.add(heroi);
+    world.add(Gato(Vector2(-110, -150)));
+    world.add(Gato(Vector2(110, -40)));
+    world.add(Gato(Vector2(-90, 60)));
+  }
+
+  void arranhado() {
+    arranhoes++;
+    placar.text = 'Arranhões: $arranhoes';
+  }
+
+  @override
+  Color backgroundColor() => const Color(0xFF3E6B3A);
+}
+
+class Heroi extends SpriteAnimationComponent with HasGameReference<Quintal> {
+  Heroi(Vector2 inicio) : super(position: inicio, size: Vector2.all(40), anchor: Anchor.center, priority: 2);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'heroi.png',
+      SpriteAnimationData.sequenced(amount: 4, stepTime: 0.12, textureSize: Vector2.all(16)),
+    );
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    final j = game.joystick;
+    playing = !j.isIdle;
+    if (j.isIdle) return;
+    position += j.relativeDelta * 150 * dt;
+    if (j.relativeDelta.x < -0.1 && scale.x > 0) flipHorizontally();
+    if (j.relativeDelta.x > 0.1 && scale.x < 0) flipHorizontally();
+  }
+}
+
+class Gato extends SpriteAnimationComponent with HasGameReference<Quintal> {
+  final Vector2 casa;
+  EstadoGato estado = EstadoGato.dormindo;
+  double relogio = 0;
+  late TextComponent balao;
+
+  Gato(Vector2 onde)
+      : casa = onde.clone(),
+        super(position: onde, size: Vector2.all(36), anchor: Anchor.center);
+
+  @override
+  Future<void> onLoad() async {
+    animation = await game.loadSpriteAnimation(
+      'gato.png',
+      SpriteAnimationData.sequenced(amount: 2, stepTime: 0.4, textureSize: Vector2.all(16)),
+    );
+    balao = TextComponent(
+      text: 'Zzz',
+      position: Vector2(18, -4),
+      anchor: Anchor.bottomCenter,
+      textRenderer: TextPaint(style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+    );
+    add(balao);
+  }
+
+  void mudar(EstadoGato novo) {
+    estado = novo;
+    relogio = 0;
+    switch (novo) {
+      case EstadoGato.dormindo:
+        balao.text = 'Zzz';
+      case EstadoGato.alerta:
+        balao.text = '!';
+      case EstadoGato.perseguindo:
+        balao.text = '';
+      case EstadoGato.voltando:
+        balao.text = '?';
+    }
+  }
+
+  void irPara(Vector2 alvo, double velocidade, double dt) {
+    final rumo = alvo - position;
+    if (rumo.length < 2) return;
+    rumo.normalize();
+    position += rumo * velocidade * dt;
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    relogio += dt;
+    final distancia = position.distanceTo(game.heroi.position);
+    switch (estado) {
+      case EstadoGato.dormindo:
+        if (distancia < 120) mudar(EstadoGato.alerta);
+      case EstadoGato.alerta:
+        if (relogio > 0.6) mudar(EstadoGato.perseguindo);
+      case EstadoGato.perseguindo:
+        irPara(game.heroi.position, 95, dt);
+        if (distancia < 28) {
+          game.arranhado();
+          game.heroi.add(ColorEffect(Colors.red, EffectController(duration: 0.1, alternate: true, repeatCount: 3), opacityTo: 0.8));
+          mudar(EstadoGato.voltando);
+        } else if (distancia > 240) {
+          mudar(EstadoGato.voltando);
+        }
+      case EstadoGato.voltando:
+        irPara(casa, 60, dt);
+        if (position.distanceTo(casa) < 3) mudar(EstadoGato.dormindo);
+    }
+  }
+}
+''',
+    [
+        ['Sono mais leve', 'No estado dormindo, troque distancia < 120 por 180: o gato acorda de mais longe.', r'distancia\s*<\s*(?!120\b)\d+\)\s*mudar\(\s*EstadoGato\.alerta'],
+        ['Susto mais curto', 'No estado alerta, troque relogio > 0.6 por 0.2.', r'relogio\s*>\s*(?!0\.6\b)[\d.]+'],
+        ['Gato que desiste', 'No estado perseguindo, troque distancia > 240 por 160.', r'distancia\s*>\s*(?!240\b)\d+'],
+    ],
+)
+
+aula(
+    'Salvar o jogo: recorde com Hive',
+    'Quando o app fecha, as variáveis somem. Para guardar o recorde, o jogo precisa gravar no aparelho. O Hive é um '
+    'banco simples de chave e valor: Hive.initFlutter() prepara o armazenamento, Hive.openBox(\'jogo\') abre (ou '
+    'cria) uma caixa, e depois Hive.box(\'jogo\') devolve a mesma caixa em qualquer lugar. caixa.get(\'recorde\', '
+    'defaultValue: 0) lê o valor, com 0 quando ainda não existe, e caixa.put(\'recorde\', recorde) grava. O jogo é '
+    'rápido: em 10 segundos, toque no maior número de ossos. No initState o recorde é lido da caixa; no fim da '
+    'partida, se os pontos passaram do recorde, ele é gravado. Feche e abra o app, ou mude de aula e volte: o '
+    'recorde continua lá.',
+    'Em ▶ Testar, jogue duas partidas e veja o recorde ficar guardado. Deixe a partida com 15 segundos, conte quantas '
+    'partidas já foram jogadas e crie um botão que apaga o recorde.',
+    r'''
+import 'dart:async';
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+Future<void> main() async {
+  await Hive.initFlutter();
+  await Hive.openBox('jogo');
+  runApp(const MaterialApp(home: Relampago()));
+}
+
+class Relampago extends StatefulWidget {
+  const Relampago({super.key});
+  @override
+  State<Relampago> createState() => _RelampagoState();
+}
+
+class _RelampagoState extends State<Relampago> {
+  final caixa = Hive.box('jogo');
+  final sorteio = Random();
+  Timer? relogio;
+  int pontos = 0;
+  int restante = 0;
+  int recorde = 0;
+  bool novoRecorde = false;
+  Offset osso = const Offset(150, 300);
+
+  @override
+  void initState() {
+    super.initState();
+    recorde = caixa.get('recorde', defaultValue: 0);
+  }
+
+  void comecar() {
+    setState(() {
+      pontos = 0;
+      restante = 10;
+      novoRecorde = false;
+      sortear();
+    });
+    relogio = Timer.periodic(const Duration(seconds: 1), (t) {
+      setState(() => restante--);
+      if (restante == 0) terminar();
+    });
+  }
+
+  void sortear() {
+    osso = Offset(20 + sorteio.nextDouble() * 280, 120 + sorteio.nextDouble() * 380);
+  }
+
+  void pegou() {
+    if (restante == 0) return;
+    setState(() {
+      pontos++;
+      sortear();
+    });
+  }
+
+  void terminar() {
+    relogio?.cancel();
+    if (pontos > recorde) {
+      recorde = pontos;
+      novoRecorde = true;
+      caixa.put('recorde', recorde);
+    }
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    relogio?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final jogando = restante > 0;
+    return Scaffold(
+      backgroundColor: const Color(0xFF3E6B3A),
+      body: Stack(children: [
+        Positioned(
+          left: 16,
+          top: 16,
+          child: Text('Pontos: $pontos   Tempo: $restante   Recorde: $recorde',
+              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        ),
+        if (jogando)
+          Positioned(
+            left: osso.dx,
+            top: osso.dy,
+            child: GestureDetector(
+              onTapDown: (_) => pegou(),
+              child: const Text('🦴', style: TextStyle(fontSize: 44)),
+            ),
+          ),
+        if (!jogando)
+          Center(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text(novoRecorde ? 'Novo recorde: $recorde!' : 'Recorde: $recorde',
+                  style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              ElevatedButton(onPressed: comecar, child: const Text('Jogar')),
+            ]),
+          ),
+      ]),
+    );
+  }
+}
+''',
+    [
+        ['Partida de 15 segundos', 'No comecar, troque restante = 10 por 15.', r'pontos\s*=\s*0;\s*restante\s*=\s*(?!10\b)\d+\s*;'],
+        ['Contar partidas', "No terminar, leia caixa.get('partidas', defaultValue: 0), some 1 e grave com caixa.put('partidas', ...).", r"caixa\.put\(\s*'partidas'"],
+        ['Apagar o recorde', "Crie um TextButton que chama caixa.delete('recorde') e zera recorde dentro do setState.", r"caixa\.delete\(\s*'recorde'\s*\)"],
+    ],
+    setup='No terminal do projeto:\n  flutter pub add hive_flutter\n\nO Hive guarda os dados num arquivo do próprio celular, sem servidor. No simulador as caixas ficam guardadas neste navegador, e ↺ Reiniciar apaga tudo.',
+)
+
+aula(
+    'Ranking online com Supabase',
+    'O Hive guarda o recorde só no aparelho. Para comparar com os colegas, os pontos precisam ir para um servidor. O '
+    'Supabase é um banco Postgres na nuvem com um pacote para Flutter: Supabase.initialize liga o app ao projeto, e '
+    'supabase.from(\'placar\') aponta para a tabela. insert({...}) grava uma linha nova, com o nome e os pontos; '
+    'como pode falhar (sem internet, por exemplo), ele fica num try com on PostgrestException. O ranking usa '
+    'stream(primaryKey: [\'id\']): é um Stream que manda a lista inteira de novo sempre que a tabela muda, então o '
+    'StreamBuilder redesenha sozinho quando alguém joga. order(\'pontos\', ascending: false) deixa os maiores primeiro '
+    'e limit(5) pega só os cinco melhores.',
+    'Em ▶ Testar, escreva seu nome, jogue algumas partidas e veja o ranking mudar. Mostre os dez melhores, impeça '
+    'enviar sem nome e crie um filtro que mostra só as suas partidas.',
+    r'''
+import 'dart:async';
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+Future<void> main() async {
+  await Supabase.initialize(url: 'https://SEU-PROJETO.supabase.co', anonKey: 'SUA-CHAVE-ANON');
+  runApp(const MaterialApp(home: Ranking()));
+}
+
+final supabase = Supabase.instance.client;
+
+class Ranking extends StatefulWidget {
+  const Ranking({super.key});
+  @override
+  State<Ranking> createState() => _RankingState();
+}
+
+class _RankingState extends State<Ranking> {
+  final sorteio = Random();
+  final nome = TextEditingController(text: 'Caramelo');
+  Timer? relogio;
+  int pontos = 0;
+  int restante = 0;
+  String aviso = '';
+  Offset osso = const Offset(150, 300);
+
+  void comecar() {
+    setState(() {
+      pontos = 0;
+      restante = 10;
+      aviso = '';
+      sortear();
+    });
+    relogio = Timer.periodic(const Duration(seconds: 1), (t) {
+      setState(() => restante--);
+      if (restante == 0) terminar();
+    });
+  }
+
+  void sortear() {
+    osso = Offset(20 + sorteio.nextDouble() * 280, 160 + sorteio.nextDouble() * 300);
+  }
+
+  void pegou() {
+    if (restante == 0) return;
+    setState(() {
+      pontos++;
+      sortear();
+    });
+  }
+
+  Future<void> terminar() async {
+    relogio?.cancel();
+    try {
+      await supabase.from('placar').insert({'nome': nome.text, 'pontos': pontos});
+      setState(() => aviso = 'Enviado: $pontos pontos');
+    } on PostgrestException catch (e) {
+      setState(() => aviso = 'Erro: ${e.message}');
+    }
+  }
+
+  @override
+  void dispose() {
+    relogio?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final jogando = restante > 0;
+    return Scaffold(
+      backgroundColor: const Color(0xFF14213D),
+      body: Stack(children: [
+        Positioned(
+          left: 16,
+          top: 16,
+          child: Text('Pontos: $pontos   Tempo: $restante', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        ),
+        if (jogando)
+          Positioned(
+            left: osso.dx,
+            top: osso.dy,
+            child: GestureDetector(onTapDown: (_) => pegou(), child: const Text('🦴', style: TextStyle(fontSize: 44))),
+          ),
+        if (!jogando)
+          Positioned(
+            left: 24,
+            right: 24,
+            top: 60,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              TextField(controller: nome, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Seu nome', labelStyle: TextStyle(color: Colors.white70))),
+              const SizedBox(height: 12),
+              ElevatedButton(onPressed: comecar, child: const Text('Jogar')),
+              const SizedBox(height: 8),
+              Text(aviso, style: const TextStyle(color: Colors.amber)),
+              const SizedBox(height: 16),
+              const Text('Ranking', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+              StreamBuilder<List<Map<String, dynamic>>>(
+                stream: supabase.from('placar').stream(primaryKey: ['id']).order('pontos', ascending: false).limit(5),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const Text('Carregando...', style: TextStyle(color: Colors.white70));
+                  final linhas = snapshot.data!;
+                  if (linhas.isEmpty) return const Text('Ninguém jogou ainda.', style: TextStyle(color: Colors.white70));
+                  return Column(children: [
+                    for (final linha in linhas)
+                      ListTile(
+                        leading: Text('${linhas.indexOf(linha) + 1}º', style: const TextStyle(color: Colors.amber, fontSize: 18)),
+                        title: Text('${linha['nome']}', style: const TextStyle(color: Colors.white)),
+                        trailing: Text('${linha['pontos']}', style: const TextStyle(color: Colors.white, fontSize: 18)),
+                      ),
+                  ]);
+                },
+              ),
+            ]),
+          ),
+      ]),
+    );
+  }
+}
+''',
+    [
+        ['Top 10', 'No stream do ranking, troque limit(5) por limit(10).', r'\.limit\(\s*(?!5\b)\d+\s*\)'],
+        ['Nome obrigatório', "No terminar, se nome.text.trim().isEmpty, mostre o aviso 'Escreva seu nome' e não envie.", r'nome\.text\.trim\(\)\.isEmpty'],
+        ['Só as suas partidas', "No stream, acrescente .eq('nome', nome.text) logo depois de stream(primaryKey: ['id']).", r"\.eq\(\s*'nome'"],
+    ],
+    lim='No simulador o Supabase é de mentira: a tabela placar fica guardada neste navegador e o stream só mostra as partidas jogadas aqui. Com o pacote de verdade e o seu projeto do Supabase, o ranking é o mesmo para todo mundo.',
+    setup='No terminal do projeto:\n  flutter pub add supabase_flutter\n\nNo painel do Supabase (supabase.com), crie um projeto e rode no SQL Editor:\n  create table placar (id bigint generated always as identity primary key, nome text, pontos int, created_at timestamptz default now());\n  alter table placar enable row level security;\n  create policy "todos leem" on placar for select using (true);\n  create policy "todos gravam" on placar for insert with check (true);\n  alter publication supabase_realtime add table placar;\n\nDepois troque url e anonKey no main pelos do seu projeto (Project Settings > API). No simulador o Supabase é de mentira: a tabela fica neste navegador e já funciona sem configurar nada.',
+)
+
+aula(
+    'Projeto · Caça-Ossos',
+    'O último projeto junta a Parte 6 num jogo completo para celular. O caramelo anda pela arena com o joystick e '
+    'precisa pegar todos os ossos de duas fases, arena.tmx e arena2.tmx, que vêm do Tiled: as paredes saem da camada '
+    'solidos, e os ossos, o ponto de partida e os gatos saem da camada objetos. Cada osso vale 1 ponto e devolve uma '
+    'vida (até maxVidas); o osso dourado vale 5 e enche todas as vidas. Quando faltam chega a zero, proximaFase limpa '
+    'o mundo e monta o próximo mapa. Os gatos são uma máquina de estados (enum EstadoGato): descansando, patrulhando '
+    'de parede em parede, perseguindo quando o caramelo chega a menos de 150 pixels (o rumo é alvo - position com '
+    'normalize) e assustados. O botão do cachorro latindo é um HudButtonComponent: latir assusta os gatos a menos de '
+    '170 pixels, que fogem por 2,5 segundos, e depois espera 3 segundos para latir de novo. Encostar num gato tira '
+    'uma vida e pinta o caramelo de vermelho. O placar é um overlay com ValueListenableBuilder, e o recorde fica '
+    'guardado com Hive: no fim, se os pontos passaram do recorde, caixa.put grava o valor novo.',
+    'Em ▶ Testar, pegue todos os ossos das duas fases. Use o latido quando um gato chegar perto. Dê 5 vidas ao '
+    'caramelo, deixe os gatos mais rápidos, aumente o alcance do latido e faça o osso dourado valer 10.',
+    r'''
+import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
+import 'package:flame/game.dart';
+import 'package:flame/input.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:flame_tiled/flame_tiled.dart';
+import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+Future<void> main() async {
+  await Hive.initFlutter();
+  await Hive.openBox('caca_ossos');
+  runApp(GameWidget(
+    game: CacaOssos(),
+    overlayBuilderMap: {
+      'Placar': (BuildContext context, CacaOssos game) => Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ValueListenableBuilder<int>(
+                    valueListenable: game.pontos,
+                    builder: (context, valor, child) => Text('Pontos: $valor', style: const TextStyle(color: Colors.white, fontSize: 18)),
+                  ),
+                  const SizedBox(width: 12),
+                  ValueListenableBuilder<int>(
+                    valueListenable: game.vidas,
+                    builder: (context, valor, child) => Text('Vidas: $valor', style: const TextStyle(color: Colors.white, fontSize: 18)),
+                  ),
+                  const SizedBox(width: 12),
+                  ValueListenableBuilder<int>(
+                    valueListenable: game.fase,
+                    builder: (context, valor, child) => Text('Fase: $valor', style: const TextStyle(color: Colors.white, fontSize: 18)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      'Fim': (BuildContext context, CacaOssos game) => Center(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(game.mensagem, textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    ElevatedButton(onPressed: () => game.recomecar(), child: const Text('Jogar de novo')),
+                  ],
+                ),
+              ),
+            ),
+          ),
+    },
+    initialActiveOverlays: const ['Placar'],
+  ));
+}
+
+class CacaOssos extends FlameGame {
+  final caixa = Hive.box('caca_ossos');
+  final pontos = ValueNotifier<int>(0);
+  final vidas = ValueNotifier<int>(3);
+  final fase = ValueNotifier<int>(1);
+  final mapas = ['arena.tmx', 'arena2.tmx'];
+  final List<Rect> paredes = [];
+  final double escala = 2;
+  int maxVidas = 3;
+  int recorde = 0;
+  int faltam = 0;
+  double esperaLatido = 0;
+  String mensagem = '';
+  late JoystickComponent joystick;
+  late Heroi heroi;
+
+  @override
+  Future<void> onLoad() async {
+    recorde = caixa.get('recorde', defaultValue: 0);
+    joystick = JoystickComponent(
+      knob: CircleComponent(radius: 20, paint: Paint()..color = Colors.white70),
+      background: CircleComponent(radius: 55, paint: Paint()..color = Colors.black26),
+      margin: const EdgeInsets.only(left: 30, bottom: 40),
+    );
+    camera.viewport.add(joystick);
+    final icone = await loadSprite('caramelo_latindo.png', srcPosition: Vector2(16, 0), srcSize: Vector2.all(16));
+    camera.viewport.add(HudButtonComponent(
+      button: SpriteComponent(sprite: icone, size: Vector2.all(64)),
+      buttonDown: SpriteComponent(sprite: icone, size: Vector2.all(56)),
+      margin: const EdgeInsets.only(right: 30, bottom: 50),
+      onPressed: latir,
+    ));
+    vidas.value = maxVidas;
     await montar();
     FlameAudio.bgm.play('musica_aventura.mp3', volume: 0.4);
   }
 
   Future<void> montar() async {
     paredes.clear();
-    ossos.value = 0;
-    vidas.value = maxVidas;
-    total = 0;
-    final mapa = await TiledComponent.load('arena.tmx', Vector2.all(16 * escala));
+    faltam = 0;
+    final mapa = await TiledComponent.load(mapas[fase.value - 1], Vector2.all(16 * escala));
     world.add(mapa);
     for (final o in mapa.tileMap.getLayer<ObjectGroup>('solidos')!.objects) {
       paredes.add(Rect.fromLTWH(o.x * escala, o.y * escala, o.width * escala, o.height * escala));
     }
     for (final o in mapa.tileMap.getLayer<ObjectGroup>('objetos')!.objects) {
       final onde = Vector2(o.x * escala, o.y * escala);
-      if (o.type == 'osso') {
-        world.add(Osso(onde));
-        total++;
+      if (o.type == 'osso' || o.type == 'dourado') {
+        world.add(Osso(onde, o.type == 'dourado'));
+        faltam++;
       } else if (o.type == 'inimigo') {
         world.add(Gato(onde));
       } else if (o.type == 'inicio') {
@@ -5083,16 +5831,42 @@ class CacaOssos extends FlameGame {
 
   bool bateu(Rect r) => paredes.any((p) => p.overlaps(r));
 
-  void pegou() {
-    ossos.value++;
-    if (vidas.value < maxVidas) {
+  void latir() {
+    if (esperaLatido > 0) return;
+    esperaLatido = 3;
+    heroi.latir();
+    FlameAudio.play('latido.wav');
+    for (final gato in world.children.query<Gato>()) {
+      if (gato.position.distanceTo(heroi.position) < 170) gato.mudar(EstadoGato.assustado);
+    }
+  }
+
+  void pegou(Osso osso) {
+    pontos.value += osso.dourado ? 5 : 1;
+    if (osso.dourado) {
+      vidas.value = maxVidas;
+      heroi.curar();
+      FlameAudio.play('poder.wav');
+    } else if (vidas.value < maxVidas) {
       vidas.value++;
       heroi.curar();
       FlameAudio.play('poder.wav');
     } else {
       FlameAudio.play('osso.wav');
     }
-    if (ossos.value == total) terminar('Você venceu!', 'vitoria.wav');
+    faltam--;
+    if (faltam == 0) proximaFase();
+  }
+
+  Future<void> proximaFase() async {
+    if (fase.value == mapas.length) {
+      terminar('Você venceu!', 'vitoria.wav');
+      return;
+    }
+    FlameAudio.play('vitoria.wav');
+    fase.value++;
+    world.removeAll(world.children.toList());
+    await montar();
   }
 
   void ferido() {
@@ -5102,7 +5876,12 @@ class CacaOssos extends FlameGame {
   }
 
   void terminar(String texto, String som) {
-    mensagem = texto;
+    if (pontos.value > recorde) {
+      recorde = pontos.value;
+      caixa.put('recorde', recorde);
+      texto = '$texto\nNovo recorde!';
+    }
+    mensagem = '$texto\nPontos: ${pontos.value}   Recorde: $recorde';
     FlameAudio.play(som);
     pauseEngine();
     overlays.add('Fim');
@@ -5110,9 +5889,18 @@ class CacaOssos extends FlameGame {
 
   Future<void> recomecar() async {
     overlays.remove('Fim');
+    pontos.value = 0;
+    vidas.value = maxVidas;
+    fase.value = 1;
     world.removeAll(world.children.toList());
     await montar();
     resumeEngine();
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (esperaLatido > 0) esperaLatido -= dt;
   }
 
   @override
@@ -5121,18 +5909,31 @@ class CacaOssos extends FlameGame {
 
 class Heroi extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
   double protegido = 0;
+  double latindo = 0;
+  late SpriteAnimation andando;
+  late SpriteAnimation latido;
 
   Heroi(Vector2 inicio) : super(position: inicio, size: Vector2.all(40), anchor: Anchor.center, priority: 2);
 
   @override
   Future<void> onLoad() async {
-    animation = await game.loadSpriteAnimation(
+    andando = await game.loadSpriteAnimation(
       'heroi.png',
       SpriteAnimationData.sequenced(amount: 4, stepTime: 0.12, textureSize: Vector2.all(16)),
     );
+    latido = await game.loadSpriteAnimation(
+      'caramelo_latindo.png',
+      SpriteAnimationData.sequenced(amount: 2, stepTime: 0.1, textureSize: Vector2.all(16)),
+    );
+    animation = andando;
   }
 
   Rect corpo() => Rect.fromCenter(center: position.toOffset(), width: 24, height: 28);
+
+  void latir() {
+    latindo = 0.5;
+    animation = latido;
+  }
 
   void levarDano() {
     if (protegido > 0) return;
@@ -5149,26 +5950,31 @@ class Heroi extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
   void update(double dt) {
     super.update(dt);
     if (protegido > 0) protegido -= dt;
+    if (latindo > 0) {
+      latindo -= dt;
+      if (latindo <= 0) animation = andando;
+    }
     final j = game.joystick;
-    playing = !j.isIdle;
+    playing = latindo > 0 || !j.isIdle;
     if (j.isIdle) return;
     final passo = j.relativeDelta * 150 * dt;
     position.x += passo.x;
     if (game.bateu(corpo())) position.x -= passo.x;
     position.y += passo.y;
     if (game.bateu(corpo())) position.y -= passo.y;
-    if (passo.x < 0 && scale.x > 0) flipHorizontally();
-    if (passo.x > 0 && scale.x < 0) flipHorizontally();
+    if (passo.x < -0.1 && scale.x > 0) flipHorizontally();
+    if (passo.x > 0.1 && scale.x < 0) flipHorizontally();
   }
 }
 
 class Osso extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
-  Osso(Vector2 onde) : super(position: onde, size: Vector2.all(24), anchor: Anchor.center);
+  final bool dourado;
+  Osso(Vector2 onde, this.dourado) : super(position: onde, size: Vector2.all(24), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     animation = await game.loadSpriteAnimation(
-      'osso.png',
+      dourado ? 'osso_dourado.png' : 'osso.png',
       SpriteAnimationData.sequenced(amount: 6, stepTime: 0.1, textureSize: Vector2.all(16)),
     );
   }
@@ -5178,16 +5984,20 @@ class Osso extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
     super.update(dt);
     if (position.distanceTo(game.heroi.position) < 24) {
       removeFromParent();
-      game.pegou();
+      game.pegou(this);
     }
   }
 }
+
+enum EstadoGato { descansando, patrulhando, perseguindo, assustado }
 
 class Gato extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
   double velocidade = 90;
   double visao = 150;
   double direcao = 1;
-  double descanso = 2;
+  EstadoGato estado = EstadoGato.descansando;
+  double relogio = 0;
+  late TextComponent balao;
 
   Gato(Vector2 onde) : super(position: onde, size: Vector2.all(36), anchor: Anchor.center);
 
@@ -5197,9 +6007,31 @@ class Gato extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
       'gato.png',
       SpriteAnimationData.sequenced(amount: 2, stepTime: 0.3, textureSize: Vector2.all(16)),
     );
+    balao = TextComponent(
+      text: 'Zzz',
+      position: Vector2(18, -2),
+      anchor: Anchor.bottomCenter,
+      textRenderer: TextPaint(style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+    );
+    add(balao);
   }
 
   Rect corpo() => Rect.fromCenter(center: position.toOffset(), width: 24, height: 24);
+
+  void mudar(EstadoGato novo) {
+    estado = novo;
+    relogio = 0;
+    switch (novo) {
+      case EstadoGato.descansando:
+        balao.text = 'Zzz';
+      case EstadoGato.patrulhando:
+        balao.text = '';
+      case EstadoGato.perseguindo:
+        balao.text = '!';
+      case EstadoGato.assustado:
+        balao.text = 'Fsss!';
+    }
+  }
 
   void andar(Vector2 passo) {
     position.x += passo.x;
@@ -5214,32 +6046,39 @@ class Gato extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
   @override
   void update(double dt) {
     super.update(dt);
-    if (descanso > 0) {
-      descanso -= dt;
-      return;
-    }
+    relogio += dt;
     final alvo = game.heroi.position;
     final distancia = position.distanceTo(alvo);
-    if (distancia < visao) {
-      final rumo = (alvo - position)..normalize();
-      andar(rumo * velocidade * dt);
-    } else {
-      andar(Vector2(direcao * velocidade * 0.6 * dt, 0));
-    }
-    if (distancia < 30) {
-      game.heroi.levarDano();
-      descanso = 1.5;
+    switch (estado) {
+      case EstadoGato.descansando:
+        if (relogio > 2) mudar(EstadoGato.patrulhando);
+      case EstadoGato.patrulhando:
+        andar(Vector2(direcao * velocidade * 0.6 * dt, 0));
+        if (distancia < visao) mudar(EstadoGato.perseguindo);
+      case EstadoGato.perseguindo:
+        final rumo = (alvo - position)..normalize();
+        andar(rumo * velocidade * dt);
+        if (distancia > visao * 1.6) mudar(EstadoGato.patrulhando);
+        if (distancia < 30) {
+          game.heroi.levarDano();
+          mudar(EstadoGato.descansando);
+        }
+      case EstadoGato.assustado:
+        final fuga = (position - alvo)..normalize();
+        andar(fuga * velocidade * 1.3 * dt);
+        if (relogio > 2.5) mudar(EstadoGato.patrulhando);
     }
   }
 }
 ''',
     [
         ['Cinco vidas', 'No CacaOssos, troque int maxVidas = 3 por 5: o jogo começa com 5 vidas e cada osso recupera até 5.', r'int\s+maxVidas\s*=\s*(?!3\b)\d+\s*;'],
-        ['Gatos mais rápidos', 'Na classe Gato, troque double velocidade = 90 por 120: quase a velocidade do herói.', r'double\s+velocidade\s*=\s*(?!90\b)[\d.]+'],
-        ['Ossos que faltam', "No overlay Placar, mostre 'Ossos: $valor de ${game.total}'.", r'game\.total'],
+        ['Gatos mais rápidos', 'Na classe Gato, troque double velocidade = 90 por 120: quase a velocidade do caramelo.', r'double\s+velocidade\s*=\s*(?!90\b)[\d.]+'],
+        ['Latido mais forte', 'No latir, troque o alcance 170 por 250.', r'distanceTo\(\s*heroi\.position\s*\)\s*<\s*(?!170\b)\d+'],
+        ['Dourado vale 10', 'No pegou, troque osso.dourado ? 5 : 1 por osso.dourado ? 10 : 1.', r'osso\.dourado\s*\?\s*(?!5\b)\d+'],
     ],
-    lim='No simulador a música é sintetizada pelo navegador e só começa depois do primeiro toque. O joystick funciona com o mouse ou com o dedo.',
-    setup=SETUP_TILED,
+    lim='No simulador a música e o latido são sintetizados pelo navegador e só tocam depois do primeiro toque. O joystick e o botão funcionam com o mouse ou com o dedo, ao mesmo tempo no celular. O recorde fica guardado neste navegador (↺ Reiniciar apaga).',
+    setup=SETUP_TILED + '\n\nRecorde: flutter pub add hive_flutter.',
 )
 
 PARTS.append(['Projeto · Caça-Ossos', 'Projeto 5 · Caça-Ossos'])

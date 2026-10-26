@@ -11,7 +11,7 @@ import json, re, sys, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'tools'))
-import patch_engine, patch_input, patch_media, patch_flame, patch_limits, patch_extra, patch_draw, patch_dart, patch_sens, patch_ui, patch_widgets, patch_data, lessons  # noqa: E402
+import patch_engine, patch_input, patch_media, patch_flame, patch_limits, patch_extra, patch_draw, patch_dart, patch_sens, patch_ui, patch_widgets, patch_data, patch_plat, solucoes, lessons  # noqa: E402
 
 
 def sub1(src, old, new, label):
@@ -61,6 +61,7 @@ def build():
     src = patch_widgets.patch(src)
     src = patch_data.patch(src)
     src = patch_data.patch_limits(src)
+    src = patch_plat.patch(src)
 
     # marca e textos do cabeçalho
     src = sub1(src, '<title>Oficina Flutter</title>', '<title>Oficina Flutter 2</title>', 'title')
@@ -80,7 +81,11 @@ def build():
     src = re.sub(r"var NOSTATE=\[[^\]]*\];", 'var NOSTATE=[];', src, count=1)
     src = cut(src, '/*PARTS-BEGIN*/', '/*PARTS-END*/',
               '/*PARTS-BEGIN*/\nwindow.OF.PARTS=' + js(lessons.PARTS) + ';\n/*PARTS-END*/', 'PARTS')
-    ex = ''.join('add(' + js(k) + ',' + js(v) + ');\n' for k, v in lessons.EXERCISES.items())
+    def com_resposta(k, v):
+        L = next(L for L in lessons.LESSONS if k in L['t'])
+        code = L['code'].lstrip('\n')
+        return [list(st) + [solucoes.resposta(L['t'], i, code, st[1], st[2])] for i, st in enumerate(v)]
+    ex = ''.join('add(' + js(k) + ',' + js(com_resposta(k, v)) + ');\n' for k, v in lessons.EXERCISES.items())
     src = cut(src, 'function add(sub,steps){EX[sub]=steps}\n', 'OF.EX=EX;',
               'function add(sub,steps){EX[sub]=steps}\n' + ex + 'OF.EX=EX;', 'EX')
     for k, v in lessons.EXERCISES.items():
@@ -94,7 +99,10 @@ def build():
     src = patch_media.finish(src)
     src = patch_limits.finish(src)
     src = src + patch_extra.SPRITES_UI_EXTRA + patch_sens.PAD + patch_widgets.CSS + patch_data.CSS
+    src = patch_plat.finish(src)
     (ROOT / 'index.html').write_text(src, encoding='utf-8')
+    import hashlib
+    patch_plat.write_pwa(ROOT, hashlib.sha1(src.encode()).hexdigest()[:10])
     print(f'index.html: {len(src):,} bytes, {len(lessons.LESSONS)} aulas')
 
 

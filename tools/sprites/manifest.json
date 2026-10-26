@@ -8,12 +8,52 @@
   "desc": "Herói: o vira-lata caramelo andando para a direita (4 quadros de 16×16)"
  },
  {
+  "nome": "osso_dourado",
+  "caminho": "assets/sprites/osso_dourado.png",
+  "largura": 96,
+  "altura": 16,
+  "quadros": 6,
+  "desc": "Osso dourado brilhando (6 quadros de 16×16)"
+ },
+ {
   "nome": "osso",
   "caminho": "assets/sprites/osso.png",
   "largura": 96,
   "altura": 16,
   "quadros": 6,
   "desc": "Osso flutuando e brilhando (6 quadros de 16×16)"
+ },
+ {
+  "nome": "caramelo_sentado",
+  "caminho": "assets/sprites/caramelo_sentado.png",
+  "largura": 32,
+  "altura": 16,
+  "quadros": 2,
+  "desc": "Caramelo sentado abanando o rabo (2 quadros de 16×16)"
+ },
+ {
+  "nome": "caramelo_pulo",
+  "caminho": "assets/sprites/caramelo_pulo.png",
+  "largura": 16,
+  "altura": 16,
+  "quadros": 1,
+  "desc": "Caramelo pulando (16×16)"
+ },
+ {
+  "nome": "caramelo_latindo",
+  "caminho": "assets/sprites/caramelo_latindo.png",
+  "largura": 32,
+  "altura": 16,
+  "quadros": 2,
+  "desc": "Caramelo latindo, boca fechada e aberta (2 quadros de 16×16)"
+ },
+ {
+  "nome": "pombo",
+  "caminho": "assets/sprites/pombo.png",
+  "largura": 32,
+  "altura": 16,
+  "quadros": 2,
+  "desc": "Pombo voando para a esquerda (2 quadros de 16×16)"
  },
  {
   "nome": "gato",

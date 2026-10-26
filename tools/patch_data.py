@@ -226,6 +226,16 @@ def patch(src):
         "  ST.stStatics={};(info.states||[]).forEach(function(sx){var ss=sx.ci&&sx.ci.statics||{};Object.keys(ss).forEach(function(k){ss[k].done=false;ST.stStatics[k]=ss[k]})});Object.keys(info.classes||{}).forEach(function(cn){var c=info.classes[cn];if(c.kind!=='data'&&c.ci&&c.ci.statics)Object.keys(c.ci.statics).forEach(function(k){if(!ST.stStatics[k]){c.ci.statics[k].done=false;ST.stStatics[k]=c.ci.statics[k]}})});\n"
         "  ST.exts=info.exts||[];ST.routes=info.routes||[];", 'state statics load')
     src = sub1(src, "  if(n==='context')return{nat:'#ctx',f:{},src:'context'};", "  if(ST.stStatics&&hasOwn(ST.stStatics,n))return staticGet(ST.stStatics[n]);\n  if(n==='context')return{nat:'#ctx',f:{},src:'context'};", 'state statics lookup')
+    # switch do Dart 3: um case com corpo não cai no próximo (sem precisar de break)
+    src = sub1(src, "p.need(')');p.need('{');var matched=false;\n        while(!p.is('}')){", "p.need(')');p.need('{');var matched=false,swFim=false;\n        while(!p.is('}')){", 'switch fim decl')
+    src = sub1(src, "            while(!p.is('}')&&!p.isId('case')&&!p.isId('default')){if(p.end())throw new Error('fim inesperado');stmt(p,env,run&&matched&&!env.returned&&!env.brk&&!env.cont)}",
+        "            var swN=0;while(!p.is('}')&&!p.isId('case')&&!p.isId('default')){if(p.end())throw new Error('fim inesperado');swN++;stmt(p,env,run&&matched&&!swFim&&!env.returned&&!env.brk&&!env.cont)}if(matched&&swN)swFim=true;", 'switch sem queda')
+    src = sub1(src, "function stackFill(n){var ch=n.slots.children||[];return !ch.some(function(c){return c.type!=='Positioned'&&c.type!=='AnimatedPositioned'})||ch.some(function(c){return c.type==='DraggableScrollableSheet'})}",
+        "function stkTipo(c){if(!c)return '';if(!c.unknown)return c.type;var r=String(c.raw||'').trim(),m=/^(?:if|for)\\s*\\(/.exec(r);if(!m)return '';var d=0,i=m[0].length-1;for(;i<r.length;i++){if(r[i]==='(')d++;else if(r[i]===')'){d--;if(d===0)break}}var t=/^\\s*(?:const\\s+)?([A-Z][\\w.]*)/.exec(r.slice(i+1));return t?t[1]:''}\n"
+        "function stackFill(n){var ch=n.slots.children||[];if(ch.some(function(c){return c.type==='DraggableScrollableSheet'}))return true;if(!ch.length)return false;return ch.every(function(c){var t=stkTipo(c);return /^(Positioned|AnimatedPositioned|Positioned\\.fill|Positioned\\.directional|Center|Align|SizedBox\\.expand)$/.test(t)})}", 'stackFill if')
+    src = sub1(src, "  else{var ast=pTern(p);p.eat(';');val=ev(ast,env);if(lastSusp)fx=lastSusp}", "  else{var ast=pTern(p);p.eat(';');val=sbVal(ev(ast,env));sbFlush();if(lastSusp)fx=lastSusp}", 'await stmt sb')
+    # Stack só com Positioned ocupa todo o espaço, como no Flutter
+    src = sub1(src, "    case 'Stack':{d.className+=' stack';", "    case 'Stack':{d.className+=' stack';if(stackFill(n)&&!(n.slots.children||[]).some(function(c){return c.type==='DraggableScrollableSheet'})){d.style.flex='1 1 0';d.style.alignSelf='stretch';d.style.minHeight='0';d.style.minWidth='0'}", 'stack cheio')
     assert src.count("(FirebaseAuth|FirebaseFirestore)")==3
     src = src.replace("(FirebaseAuth|FirebaseFirestore)", "(FirebaseAuth|FirebaseFirestore|Supabase)")
     return src

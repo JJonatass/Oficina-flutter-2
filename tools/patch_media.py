@@ -8,7 +8,7 @@ from patch_engine import sub1
 
 ROOT = pathlib.Path(__file__).resolve().parent
 
-SONS = ['pulo', 'osso', 'batida', 'explosao', 'tiro', 'vitoria', 'derrota', 'clique', 'dano', 'poder']
+SONS = ['pulo', 'osso', 'latido', 'batida', 'explosao', 'tiro', 'vitoria', 'derrota', 'clique', 'dano', 'poder']
 
 
 def sprites_js():
@@ -36,6 +36,7 @@ window.OF_SONS=__SONS__;
     g.gain.setValueAtTime(vol,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);s.connect(fl);fl.connect(g);g.connect(c.destination);s.start(t0);s.stop(t0+dur)}
   var SFX={
     pulo:function(t,v){tom(t,'square',260,720,0.16,0.18*v)},
+    latido:function(t,v){[0,0.16].forEach(function(d){tom(t+d,'sawtooth',540,260,0.11,0.16*v);ruido(t+d,0.08,0.12*v,2200,600)})},
     osso:function(t,v){tom(t,'square',988,988,0.07,0.15*v);tom(t+0.07,'square',1319,1319,0.22,0.15*v)},
     moeda:function(t,v){tom(t,'square',988,988,0.07,0.15*v);tom(t+0.07,'square',1319,1319,0.22,0.15*v)},
     batida:function(t,v){ruido(t,0.12,0.5*v,1800,300);tom(t,'sine',160,60,0.12,0.4*v)},
