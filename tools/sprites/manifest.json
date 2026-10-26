@@ -86,5 +86,29 @@
   "altura": 16,
   "quadros": 1,
   "desc": "Nuvem (32×16)"
+ },
+ {
+  "nome": "ceu",
+  "caminho": "assets/sprites/ceu.png",
+  "largura": 96,
+  "altura": 54,
+  "quadros": 1,
+  "desc": "Fundo de céu para parallax (96×54)"
+ },
+ {
+  "nome": "montanhas",
+  "caminho": "assets/sprites/montanhas.png",
+  "largura": 96,
+  "altura": 54,
+  "quadros": 1,
+  "desc": "Montanhas com fundo transparente, para parallax (96×54)"
+ },
+ {
+  "nome": "colinas",
+  "caminho": "assets/sprites/colinas.png",
+  "largura": 96,
+  "altura": 54,
+  "quadros": 1,
+  "desc": "Colinas com árvores, fundo transparente, para parallax (96×54)"
  }
 ]

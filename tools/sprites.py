@@ -240,6 +240,42 @@ for box in ([2, 7, 12, 15], [7, 2, 19, 14], [15, 4, 26, 15], [22, 8, 30, 15]):
 for box in ([3, 7, 12, 13], [8, 3, 18, 12], [16, 5, 25, 13], [23, 9, 29, 13]):
     dn.ellipse(box, fill=PAL['w'] + (255,))
 
+# ---- camadas de fundo para parallax (96x54, repetem na horizontal sem emenda)
+PW, PH = 96, 54
+ceu = Image.new('RGBA', (PW, PH))
+for y in range(PH):
+    t = y / (PH - 1)
+    c = tuple(int(a + (b - a) * t) for a, b in zip((92, 156, 236), (196, 228, 250)))
+    for x in range(PW):
+        ceu.putpixel((x, y), c + (255,))
+for cx, cy in ((14, 10), (52, 6), (80, 14)):
+    ceu.alpha_composite(nuvem.resize((16, 8), Image.NEAREST), (cx - 8, cy - 4))
+
+
+def silhueta(alturas, cor, cor2=None):
+    img = Image.new('RGBA', (PW, PH), (0, 0, 0, 0))
+    for x in range(PW):
+        h = int(alturas(x))
+        for y in range(PH - h, PH):
+            c = cor if (cor2 is None or y < PH - h + 2) else cor2
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
+montanhas = silhueta(lambda x: 22 + 12 * abs(math.sin(math.pi * x / 48)) ** 0.8 + 3 * math.sin(2 * math.pi * x / 12),
+                     (120, 132, 190), (98, 108, 168))
+for x in range(PW):  # neve nos picos
+    for y in range(PH):
+        if montanhas.getpixel((x, y))[3] and y < 20:
+            montanhas.putpixel((x, y), (236, 240, 250, 255))
+colinas = silhueta(lambda x: 12 + 4 * math.sin(2 * math.pi * x / 96) + 2 * math.sin(2 * math.pi * x / 32), (70, 160, 90), (52, 128, 70))
+dc = ImageDraw.Draw(colinas)
+for tx in (10, 40, 70):  # árvores
+    base = PH - int(12 + 4 * math.sin(2 * math.pi * tx / 96) + 2 * math.sin(2 * math.pi * tx / 32))
+    dc.rectangle([tx, base - 6, tx + 1, base + 1], fill=PAL['N'] + (255,))
+    dc.ellipse([tx - 4, base - 15, tx + 5, base - 4], fill=PAL['G'] + (255,))
+    dc.ellipse([tx - 2, base - 14, tx + 3, base - 8], fill=PAL['g'] + (255,))
+
 SPRITES = [
     ('heroi', heroi, 4, 'Herói andando para a direita (4 quadros de 16×16)'),
     ('moeda', moedas, 6, 'Moeda girando (6 quadros de 16×16)'),
@@ -252,6 +288,9 @@ SPRITES = [
     ('maca', maca, 1, 'Maçã (16×16)'),
     ('grama', grama, 1, 'Bloco de chão com grama (16×16)'),
     ('nuvem', nuvem, 1, 'Nuvem (32×16)'),
+    ('ceu', ceu, 1, 'Fundo de céu para parallax (96×54)'),
+    ('montanhas', montanhas, 1, 'Montanhas com fundo transparente, para parallax (96×54)'),
+    ('colinas', colinas, 1, 'Colinas com árvores, fundo transparente, para parallax (96×54)'),
 ]
 
 manifest = []

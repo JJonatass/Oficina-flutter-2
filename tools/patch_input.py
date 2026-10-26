@@ -152,18 +152,18 @@ def patch(src):
         'render Focus')
     src = sub1(src,
         "var HANDLERS=['onPressed','onTap','onLongPress','onDoubleTap','onChanged','onSelected','onTapDown','onTapUp'];",
-        "var HANDLERS=['onPressed','onTap','onLongPress','onDoubleTap','onChanged','onSelected','onTapDown','onTapUp','onPanDown','onPanStart','onPanUpdate','onPanEnd','onHorizontalDragStart','onHorizontalDragUpdate','onHorizontalDragEnd','onVerticalDragStart','onVerticalDragUpdate','onVerticalDragEnd'];",
+        "var HANDLERS=['onPressed','onTap','onLongPress','onDoubleTap','onChanged','onSelected','onTapDown','onTapUp','onPanDown','onPanStart','onPanUpdate','onPanEnd','onHorizontalDragStart','onHorizontalDragUpdate','onHorizontalDragEnd','onVerticalDragStart','onVerticalDragUpdate','onVerticalDragEnd','onScaleStart','onScaleUpdate','onScaleEnd'];",
         'HANDLERS')
     src = sub1(src,
         "  if(n.type==='Listener'||n.type==='MouseRegion'){d.classList.add('ptr');d.style.alignSelf='stretch'}\n",
         "  if(n.type==='Listener'||n.type==='MouseRegion'){d.classList.add('ptr');d.style.alignSelf='stretch'}\n"
         "  if((n.type==='Focus'||n.type==='KeyboardListener')&&M.rawProp(n,'onKeyEvent'))d.classList.add('kbd');\n"
-        "  if(/^\\s*\\S/.test(M.rawProp(n,'onPanUpdate')||M.rawProp(n,'onHorizontalDragUpdate')||M.rawProp(n,'onVerticalDragUpdate')||M.rawProp(n,'onPanStart')||''))d.style.touchAction='none';\n",
+        "  if(/^\\s*\\S/.test(M.rawProp(n,'onPanUpdate')||M.rawProp(n,'onHorizontalDragUpdate')||M.rawProp(n,'onVerticalDragUpdate')||M.rawProp(n,'onPanStart')||M.rawProp(n,'onScaleUpdate')||M.rawProp(n,'onScaleStart')||''))d.style.touchAction='none';\n",
         'bindRun kbd/touch')
     # o clique genérico não executa onTapDown/onTapUp nem os de arrasto (eles têm detalhes próprios)
     src = sub1(src,
         "  if(h==='onTapDown'||h==='onTapUp')return;",
-        "  if(h==='onTapDown'||h==='onTapUp'||/^on(Pan|HorizontalDrag|VerticalDrag)/.test(h))return;",
+        "  if(h==='onTapDown'||h==='onTapUp'||/^on(Pan|HorizontalDrag|VerticalDrag|Scale)/.test(h))return;",
         'click skip drag')
     # o antigo onTapDown no clique sai; entra o código novo de gestos e teclado
     src = sub1(src,

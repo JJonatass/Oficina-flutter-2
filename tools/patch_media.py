@@ -47,7 +47,8 @@ window.OF_SONS=__SONS__;
     poder:function(t,v){[392,523,659,784,1047,1319].forEach(function(f,i){tom(t+i*0.05,'triangle',f,f,0.09,0.2*v)})}
   };
   window.OF_SFX=function(nome,vol){if(mudo||!SFX[nome])return;var c=ac();if(!c)return;try{SFX[nome](c.currentTime+0.005,vol==null?1:Math.max(0,Math.min(1,vol)))}catch(e){}};
-  window.OF_SFX_MUDO=function(m){if(m!==undefined){mudo=!!m;try{localStorage.setItem('oficina2.mudo',mudo?'1':'0')}catch(e){}}return mudo};
+  window.OF_SFX_MUDO=function(m){if(m!==undefined){mudo=!!m;try{localStorage.setItem('oficina2.mudo',mudo?'1':'0')}catch(e){}if(mudo&&window.OF_MUSIC)window.OF_MUSIC.stopAll()}return mudo};
+  window.OF_AC=ac;window.OF_EH_MUDO=function(){return mudo};
   /* o navegador só libera áudio depois de um gesto: o primeiro toque ou tecla destrava o contexto */
   ['pointerdown','keydown'].forEach(function(n){window.addEventListener(n,function(){if(!mudo)ac()},{capture:true})});
 })();
@@ -58,9 +59,11 @@ function spriteOf(path){var s=window.OF_SPRITES&&window.OF_SPRITES[String(path)]
   if(!s)throw exc('Unable to load asset: "'+path+'". O simulador tem estes sprites: '+Object.keys(window.OF_SPRITES||{}).join(', '));return s}
 function mkImg(path){var s=spriteOf(path);return{nat:'Img',path:String(path),f:{width:s.w,height:s.h},src:"Image('"+path+"')"}}
 function somOf(path){var p=String(path==null?'':path),m=/([\w-]+)\.(?:wav|mp3|ogg|m4a|aac)$/i.exec(p),n=m?m[1]:p;
-  if((window.OF_SONS||[]).indexOf(n)<0)throw exc('Unable to load asset: "'+p+'". O simulador tem estes sons: '+(window.OF_SONS||[]).map(function(s){return 'sons/'+s+'.wav'}).join(', '));return n}
+  if((window.OF_SONS||[]).indexOf(n)<0&&(window.OF_MUSICAS||[]).indexOf(n)<0)throw exc('Unable to load asset: "'+p+'". O simulador tem estes sons: '+(window.OF_SONS||[]).map(function(s){return 'sons/'+s+'.wav'}).join(', ')+' e estas músicas: '+(window.OF_MUSICAS||[]).map(function(s){return 'sons/'+s+'.mp3'}).join(', '));return n}
+function isMusica(n){return (window.OF_MUSICAS||[]).indexOf(n)>=0}
+function audioPlay(v,n,vol){if(v.au.h!=null&&window.OF_MUSIC){window.OF_MUSIC.stop(v.au.h);v.au.h=null}if(isMusica(n)){if(window.OF_MUSIC)v.au.h=window.OF_MUSIC.play(n,vol,!!v.au.loop);return}if(v.au.loop&&window.OF_MUSIC){v.au.h=window.OF_MUSIC.playSfxLoop(n,vol);return}sfx(n,vol)}
 function assetOk(path){var p=String(path);if(window.OF_SPRITES&&window.OF_SPRITES[p])return true;try{somOf(p);return true}catch(e){return false}}
-function sfx(n,v){if(window.OF_SFX)window.OF_SFX(n,v)}
+function sfx(n,v){if((window.OF_MUSICAS||[]).indexOf(n)>=0){if(window.OF_MUSIC)window.OF_MUSIC.play(n,v,false);return}if(window.OF_SFX)window.OF_SFX(n,v)}
 """
 
 NAT = r"""  if(v.nat==='#vsync'){
@@ -88,12 +91,15 @@ NAT = r"""  if(v.nat==='#vsync'){
     var an2=ARGN||[],nm2={};args.forEach(function(x,i){if(an2[i])nm2[an2[i]]=x});
     switch(name){
       case 'play':{var srcA=args[0];if(!srcA||srcA.nat!=='AssetSource')throw exc('No simulador, play() toca só AssetSource com os sons prontos (por exemplo AssetSource(\'sons/pulo.wav\')).');
-        var vol=nm2.volume!==undefined?nn(nm2.volume):v.au.vol;sfx(somOf(srcA.path),vol);v.au.src=srcA;return null}
+        var vol=nm2.volume!==undefined?nn(nm2.volume):v.au.vol;v.au.src=srcA;audioPlay(v,somOf(srcA.path),vol);return null}
       case 'setSource':case 'setSourceAsset':{var s2=args[0];if(s2&&s2.nat==='AssetSource'){somOf(s2.path);v.au.src=s2}else if(typeof s2==='string'){somOf(s2);v.au.src={nat:'AssetSource',path:s2}}return null}
-      case 'resume':if(v.au.src)sfx(somOf(v.au.src.path),v.au.vol);return null;
-      case 'setVolume':v.au.vol=Math.max(0,Math.min(1,nn(args[0])));return null;
+      case 'resume':if(v.au.h!=null&&window.OF_MUSIC&&window.OF_MUSIC.resume(v.au.h))return null;if(v.au.src)audioPlay(v,somOf(v.au.src.path),v.au.vol);return null;
+      case 'setVolume':v.au.vol=Math.max(0,Math.min(1,nn(args[0])));if(v.au.h!=null&&window.OF_MUSIC)window.OF_MUSIC.setVolume(v.au.h,v.au.vol);return null;
+      case 'setReleaseMode':v.au.loop=/loop/.test(pcol(args[0])||'');return null;
+      case 'pause':if(v.au.h!=null&&window.OF_MUSIC)window.OF_MUSIC.pause(v.au.h);return null;
+      case 'stop':case 'dispose':case 'release':if(v.au.h!=null&&window.OF_MUSIC){window.OF_MUSIC.stop(v.au.h);v.au.h=null}return null;
       case 'volume':return new Dbl(v.au.vol);
-      case 'stop':case 'pause':case 'dispose':case 'release':case 'seek':case 'setReleaseMode':case 'setPlaybackRate':case 'setPlayerMode':case 'setBalance':return null}}
+      case 'seek':case 'setPlaybackRate':case 'setPlayerMode':case 'setBalance':return null}}
 """
 
 CANVAS_IMG = r"""        case 'drawImage':{var im=args[0];if(!im||im.nat!=='Img')throw exc('drawImage precisa de um ui.Image carregado');

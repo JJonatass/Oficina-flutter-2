@@ -89,6 +89,7 @@ class PositionComponent extends Component {
   Vector2 scale;
   double angle;
   Anchor anchor;
+  double opacity = 1;
 
   PositionComponent({Vector2? position, Vector2? size, Vector2? scale, double? angle, Anchor? anchor, List<Component>? children, int? priority})
       : position = position ?? Vector2.zero(),
@@ -594,6 +595,7 @@ class FlameGame extends Component {
   CameraComponent camera;
   bool paused = false;
   Images images = Images();
+  Overlays overlays = Overlays();
 
   FlameGame({World? world, CameraComponent? camera, List<Component>? children})
       : world = world ?? World(),
@@ -611,4 +613,12 @@ class FlameGame extends Component {
   }
 
   Color backgroundColor() => const Color(0xFF000000);
+
+  Future<ParallaxComponent> loadParallaxComponent(List<ParallaxImageData> dados, {Vector2? baseVelocity, Vector2? velocityMultiplierDelta, dynamic repeat, dynamic fill, Vector2? size, Vector2? position, int? priority}) async {
+    final List<dynamic> imagens = [];
+    for (final d in dados) {
+      imagens.add(__flImage(d.caminho));
+    }
+    return ParallaxComponent(imagens: imagens, baseVelocity: baseVelocity, velocityMultiplierDelta: velocityMultiplierDelta, size: size ?? this.size.clone(), position: position, priority: priority);
+  }
 }
