@@ -551,7 +551,7 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
 
 aula(
     'Muitos objetos: lista, sorteio e remoção',
-    'Um jogo tem vários objetos iguais: inimigos, moedas, caixas. Cada um vira uma instância de uma classe '
+    'Um jogo tem vários objetos iguais: inimigos, ossos, caixas. Cada um vira uma instância de uma classe '
     '(aqui, Caixa, com x e altura) e todos ficam numa List. O laço faz três coisas com a lista. Criar (spawn): '
     'um contador regressivo, tempoProxima, diz quando nasce a próxima caixa, e Random sorteia a altura e o '
     'intervalo, para o jogo não ficar previsível. Mover: um for passa por todas e diminui o x. Remover: '
@@ -1008,7 +1008,7 @@ aula(
     'andam junto com as caixas. O operador % (resto da divisão) faz o desenho se repetir sem fim. A distância '
     'percorrida vira a pontuação, em metros.',
     'Em ▶ Testar, jogue algumas partidas e tente bater o recorde. Depois mude o jogo: troque as cores para um '
-    'cenário noturno, deixe a aceleração mais forte e acrescente uma moeda que vale 10 metros.',
+    'cenário noturno, deixe a aceleração mais forte e acrescente um osso que vale 10 metros.',
     r'''
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -1207,7 +1207,7 @@ class _PulaCaixaState extends State<PulaCaixa> with SingleTickerProviderStateMix
     [
         ['Cenário noturno', 'Troque a cor do céu (0xFF8FD3FE) por um azul escuro, como Color(0xFF14213D).', r'^(?![\s\S]*0xFF8FD3FE)'],
         ['Aceleração mais forte', 'No getter velocidade, troque tempoDePartida * 8 por * 15.', r'tempoDePartida\s*\*\s*15\b'],
-        ['Uma moeda que vale 10 metros', 'Crie uma classe Moeda com x e y, uma lista moedas, desenhe com drawCircle amarelo e some 10 * 20 ao deslocamento quando o jogador encostar.', r'class\s+Moeda\b[\s\S]*Colors\.(?:yellow|amber)'],
+        ['Um osso que vale 10 metros', 'Crie uma classe Osso com x e y, uma lista ossos, desenhe com drawCircle amarelo e some 10 * 20 ao deslocamento quando o jogador encostar.', r'class\s+Osso\b[\s\S]*Colors\.(?:yellow|amber)'],
     ],
 )
 
@@ -1629,7 +1629,7 @@ SETUP_SPRITES = (
     '  assets:\n'
     '    - assets/sprites/\n\n'
     'Coloque os arquivos PNG em assets/sprites/ na raiz do projeto. O simulador já tem estes sprites prontos, '
-    'desenhados para a Oficina: heroi.png (o vira-lata caramelo, 4 quadros de 16×16), moeda.png (6), gato.png (2), nave.png (2), '
+    'desenhados para a Oficina: heroi.png (o vira-lata caramelo, 4 quadros de 16×16), osso.png (6), gato.png (2), nave.png (2), '
     'explosao.png (5), tiro.png (8×8), caixa.png, coracao.png, maca.png, grama.png (16×16) e nuvem.png (32×16). '
     'Os arquivos estão na pasta tools/sprites do repositório da Oficina Flutter 2.'
 )
@@ -1667,8 +1667,8 @@ class Sprites {
   final ui.Image heroi;
   final ui.Image grama;
   final ui.Image caixa;
-  final ui.Image moeda;
-  Sprites(this.heroi, this.grama, this.caixa, this.moeda);
+  final ui.Image osso;
+  Sprites(this.heroi, this.grama, this.caixa, this.osso);
 }
 
 class Cena extends CustomPainter {
@@ -1686,7 +1686,7 @@ class Cena extends CustomPainter {
       canvas.drawImageRect(s.grama, bloco, Rect.fromLTWH(i * 32.0, chao, 32, 32), tinta);
     }
     canvas.drawImageRect(s.caixa, bloco, const Rect.fromLTWH(240, chao - 48, 48, 48), tinta);
-    canvas.drawImageRect(s.moeda, bloco, const Rect.fromLTWH(252, chao - 96, 24, 24), tinta);
+    canvas.drawImageRect(s.osso, bloco, const Rect.fromLTWH(252, chao - 96, 24, 24), tinta);
     canvas.drawImageRect(s.heroi, bloco, const Rect.fromLTWH(80, chao - 64, 64, 64), tinta);
 
     canvas.drawImage(s.heroi, const Offset(16, 16), tinta);
@@ -1716,8 +1716,8 @@ class _VitrineState extends State<Vitrine> {
     final heroi = await carregarImagem('assets/sprites/heroi.png');
     final grama = await carregarImagem('assets/sprites/grama.png');
     final caixa = await carregarImagem('assets/sprites/caixa.png');
-    final moeda = await carregarImagem('assets/sprites/moeda.png');
-    setState(() => sprites = Sprites(heroi, grama, caixa, moeda));
+    final osso = await carregarImagem('assets/sprites/osso.png');
+    setState(() => sprites = Sprites(heroi, grama, caixa, osso));
   }
 
   @override
@@ -1750,12 +1750,12 @@ aula(
     'Uma folha de sprites (sprite sheet) guarda os quadros de uma animação lado a lado, todos do mesmo tamanho. '
     'Animar é escolher qual pedaço recortar em cada momento: o quadro i começa em x = i * 16. O tempo decide o '
     'quadro: (tempo * 10).floor() % 4 troca de quadro 10 vezes por segundo e volta ao primeiro depois do quarto. '
-    'O herói só conta o tempo de caminhada enquanto anda; parado, ele mostra o quadro 0. A moeda tem o seu '
+    'O herói só conta o tempo de caminhada enquanto anda; parado, ele mostra o quadro 0. O osso tem o seu '
     'próprio relógio (12 quadros por segundo, 6 quadros), porque cada animação tem o seu ritmo. Para virar o '
     'herói para a esquerda não é preciso outra imagem: canvas.save, translate até o centro do sprite, scale(-1, 1) '
     'espelha tudo o que vier depois, e canvas.restore desfaz a transformação para o resto da cena.',
     'Em ▶ Testar, toque em pontos à esquerda e à direita e veja o herói andar e virar. Mude a velocidade da '
-    'animação de 10 para 4 e para 20 quadros por segundo. Depois faça a moeda girar mais devagar.',
+    'animação de 10 para 4 e para 20 quadros por segundo. Depois faça o osso brilhar mais devagar.',
     r'''
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -1775,13 +1775,13 @@ Future<ui.Image> carregarImagem(String caminho) async {
 
 class Cena extends CustomPainter {
   final ui.Image heroi;
-  final ui.Image moeda;
+  final ui.Image osso;
   final ui.Image grama;
   final double x;
   final double direcao;
   final int quadroHeroi;
-  final int quadroMoeda;
-  Cena(this.heroi, this.moeda, this.grama, this.x, this.direcao, this.quadroHeroi, this.quadroMoeda);
+  final int quadroOsso;
+  Cena(this.heroi, this.osso, this.grama, this.x, this.direcao, this.quadroHeroi, this.quadroOsso);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1792,8 +1792,8 @@ class Cena extends CustomPainter {
       canvas.drawImageRect(grama, const Rect.fromLTWH(0, 0, 16, 16), Rect.fromLTWH(i * 32.0, chao, 32, 32), tinta);
     }
 
-    final origemMoeda = Rect.fromLTWH(quadroMoeda * 16.0, 0, 16, 16);
-    canvas.drawImageRect(moeda, origemMoeda, const Rect.fromLTWH(300, 24, 40, 40), tinta);
+    final origemOsso = Rect.fromLTWH(quadroOsso * 16.0, 0, 16, 16);
+    canvas.drawImageRect(osso, origemOsso, const Rect.fromLTWH(300, 24, 40, 40), tinta);
 
     final origemHeroi = Rect.fromLTWH(quadroHeroi * 16.0, 0, 16, 16);
     canvas.save();
@@ -1818,7 +1818,7 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
   late Ticker ticker;
   double ultimo = 0;
   ui.Image? heroi;
-  ui.Image? moeda;
+  ui.Image? osso;
   ui.Image? grama;
   double x = 148;
   double alvo = 148;
@@ -1837,11 +1837,11 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
 
   Future<void> carregar() async {
     final h = await carregarImagem('assets/sprites/heroi.png');
-    final m = await carregarImagem('assets/sprites/moeda.png');
+    final m = await carregarImagem('assets/sprites/osso.png');
     final g = await carregarImagem('assets/sprites/grama.png');
     setState(() {
       heroi = h;
-      moeda = m;
+      osso = m;
       grama = g;
     });
   }
@@ -1882,17 +1882,17 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final quadroHeroi = andando ? (tempoAndando * 10).floor() % 4 : 0;
-    final quadroMoeda = (tempoTotal * 12).floor() % 6;
+    final quadroOsso = (tempoTotal * 12).floor() % 6;
     return Scaffold(
       backgroundColor: Colors.black,
-      body: heroi == null || moeda == null || grama == null
+      body: heroi == null || osso == null || grama == null
           ? const Center(child: CircularProgressIndicator())
           : Center(
               child: GestureDetector(
                 onTapDown: tocar,
                 child: CustomPaint(
                   size: const Size(largura, altura),
-                  painter: Cena(heroi!, moeda!, grama!, x, direcao, quadroHeroi, quadroMoeda),
+                  painter: Cena(heroi!, osso!, grama!, x, direcao, quadroHeroi, quadroOsso),
                 ),
               ),
             ),
@@ -1903,7 +1903,7 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
     [
         ['Animação a 4 quadros por segundo', 'No build, troque (tempoAndando * 10) por (tempoAndando * 4).', r'tempoAndando\s*\*\s*4\s*\)'],
         ['Herói mais rápido', 'No quadro, troque o passo 150 * dt por 300 * dt e confira se a animação ainda combina.', r'passo\s*=\s*300\s*\*\s*dt'],
-        ['Moeda mais devagar', 'Troque (tempoTotal * 12) por (tempoTotal * 6).', r'tempoTotal\s*\*\s*6\s*\)'],
+        ['Osso mais devagar', 'Troque (tempoTotal * 12) por (tempoTotal * 6).', r'tempoTotal\s*\*\s*6\s*\)'],
     ],
     setup=SETUP_SPRITES,
 )
@@ -1911,14 +1911,14 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
 aula(
     'Som: efeitos com audioplayers',
     'Som é metade da sensação de um jogo: o jogador percebe o acerto antes de olhar o placar. O pacote '
-    'audioplayers toca arquivos de áudio. Um AudioPlayer é um tocador; play(AssetSource(\'sons/moeda.wav\')) toca '
+    'audioplayers toca arquivos de áudio. Um AudioPlayer é um tocador; play(AssetSource(\'sons/osso.wav\')) toca '
     'um arquivo da pasta assets/sons (o AssetSource já começa em assets/). Aqui há dois tocadores, um para cada '
-    'tipo de efeito, para que um som não corte o outro. O jogo é pegar moedas: elas aparecem em lugares sorteados, '
-    'giram e somem depois de 2 segundos. Tocar numa moeda (a distância entre o dedo e o centro menor que 28) dá '
-    'ponto e toca moeda.wav; errar toca clique.wav; a cada 10 pontos toca poder.wav. A moeda que está para sumir '
+    'tipo de efeito, para que um som não corte o outro. O jogo é pegar ossos: eles aparecem em lugares sorteados, '
+    'brilham e somem depois de 2 segundos. Tocar num osso (a distância entre o dedo e o centro menor que 28) dá '
+    'ponto e toca osso.wav; errar toca clique.wav; a cada 10 pontos toca poder.wav. O osso que está para sumir '
     'fica transparente: o alfa da cor do Paint também vale para imagens.',
-    'Em ▶ Testar, pegue moedas e ouça os efeitos (o botão 🔊 Som no topo liga e desliga). Troque o som do erro por '
-    'batida.wav, deixe as moedas durarem menos e faça o fim de cada moeda perdida tocar dano.wav.',
+    'Em ▶ Testar, pegue ossos e ouça os efeitos (o botão 🔊 Som no topo liga e desliga). Troque o som do erro por '
+    'batida.wav, deixe os ossos durarem menos e faça o fim de cada osso perdido tocar dano.wav.',
     r'''
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -1937,23 +1937,23 @@ Future<ui.Image> carregarImagem(String caminho) async {
   return decodeImageFromList(dados.buffer.asUint8List());
 }
 
-class Moeda {
+class Osso {
   final Offset centro;
   double vida = 2;
-  Moeda(this.centro);
+  Osso(this.centro);
 }
 
 class Cena extends CustomPainter {
   final ui.Image folha;
-  final List<Moeda> moedas;
+  final List<Osso> ossos;
   final int quadro;
-  Cena(this.folha, this.moedas, this.quadro);
+  Cena(this.folha, this.ossos, this.quadro);
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF1D1B33));
     final origem = Rect.fromLTWH(quadro * 16.0, 0, 16, 16);
-    for (final m in moedas) {
+    for (final m in ossos) {
       final opacidade = m.vida < 0.5 ? m.vida * 2 : 1.0;
       final tinta = Paint()..color = Colors.white.withOpacity(opacidade);
       canvas.drawImageRect(folha, origem, Rect.fromCenter(center: m.centro, width: 40, height: 40), tinta);
@@ -1978,7 +1978,7 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
   final sorteio = Random();
   final somAcerto = AudioPlayer();
   final somErro = AudioPlayer();
-  List<Moeda> moedas = [];
+  List<Osso> ossos = [];
   double tempoProxima = 0;
   double tempoTotal = 0;
   int pontos = 0;
@@ -1993,7 +1993,7 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
   }
 
   Future<void> carregar() async {
-    final f = await carregarImagem('assets/sprites/moeda.png');
+    final f = await carregarImagem('assets/sprites/osso.png');
     setState(() => folha = f);
   }
 
@@ -2006,20 +2006,20 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
       tempoTotal += dt;
       tempoProxima -= dt;
       if (tempoProxima <= 0) {
-        moedas.add(Moeda(Offset(30 + sorteio.nextDouble() * 300, 60 + sorteio.nextDouble() * 420)));
+        ossos.add(Osso(Offset(30 + sorteio.nextDouble() * 300, 60 + sorteio.nextDouble() * 420)));
         tempoProxima = 0.7;
       }
-      for (final m in moedas) {
+      for (final m in ossos) {
         m.vida -= dt;
       }
-      perdidas += moedas.where((m) => m.vida <= 0).length;
-      moedas.removeWhere((m) => m.vida <= 0);
+      perdidas += ossos.where((m) => m.vida <= 0).length;
+      ossos.removeWhere((m) => m.vida <= 0);
     });
   }
 
   void tocar(TapDownDetails details) {
-    Moeda? pega;
-    for (final m in moedas) {
+    Osso? pega;
+    for (final m in ossos) {
       if ((m.centro - details.localPosition).distance < 28) {
         pega = m;
         break;
@@ -2027,12 +2027,12 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
     }
     setState(() {
       if (pega != null) {
-        moedas.remove(pega);
+        ossos.remove(pega);
         pontos++;
         if (pontos % 10 == 0) {
           somAcerto.play(AssetSource('sons/poder.wav'));
         } else {
-          somAcerto.play(AssetSource('sons/moeda.wav'));
+          somAcerto.play(AssetSource('sons/osso.wav'));
         }
       } else {
         somErro.play(AssetSource('sons/clique.wav'));
@@ -2052,7 +2052,7 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(title: Text('Moedas: $pontos · perdidas: $perdidas')),
+      appBar: AppBar(title: Text('Ossos: $pontos · perdidas: $perdidas')),
       body: folha == null
           ? const Center(child: CircularProgressIndicator())
           : Center(
@@ -2060,7 +2060,7 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
                 onTapDown: tocar,
                 child: CustomPaint(
                   size: const Size(largura, altura),
-                  painter: Cena(folha!, moedas, (tempoTotal * 12).floor() % 6),
+                  painter: Cena(folha!, ossos, (tempoTotal * 12).floor() % 6),
                 ),
               ),
             ),
@@ -2070,10 +2070,10 @@ class _JogoState extends State<Jogo> with SingleTickerProviderStateMixin {
 ''',
     [
         ['Erro com batida.wav', "No somErro, troque 'sons/clique.wav' por 'sons/batida.wav'.", r"somErro\.play\(\s*AssetSource\(\s*'sons/batida\.wav'"],
-        ['Moedas que duram menos', 'Na classe Moeda, troque double vida = 2 por 1.2.', r'double vida\s*=\s*1\.2\b'],
-        ['Som quando uma moeda some', "Quando perdidas aumentar, toque AssetSource('sons/dano.wav') no somErro.", r"sons/dano\.wav"],
+        ['Ossos que duram menos', 'Na classe Osso, troque double vida = 2 por 1.2.', r'double vida\s*=\s*1\.2\b'],
+        ['Som quando um osso some', "Quando perdidas aumentar, toque AssetSource('sons/dano.wav') no somErro.", r"sons/dano\.wav"],
     ],
-    lim="No simulador os sons são sintetizados pelo navegador, com timbre de videogame antigo. Os nomes disponíveis são pulo, moeda, batida, explosao, tiro, vitoria, derrota, clique, dano e poder (em sons/NOME.wav). O navegador só libera som depois do primeiro toque ou tecla.",
+    lim="No simulador os sons são sintetizados pelo navegador, com timbre de videogame antigo. Os nomes disponíveis são pulo, osso, batida, explosao, tiro, vitoria, derrota, clique, dano e poder (em sons/NOME.wav). O navegador só libera som depois do primeiro toque ou tecla.",
     setup='No terminal do projeto:\n  flutter pub add audioplayers\n\npubspec.yaml (dentro de flutter:):\n  assets:\n    - assets/sprites/\n    - assets/sons/\n\nColoque seus arquivos .wav ou .mp3 em assets/sons/. Sites como freesound.org e opengameart.org têm efeitos livres (confira a licença de cada um).',
 )
 
@@ -2208,7 +2208,7 @@ PARTS.append(['Sprites: imagens no Canvas', 'Parte 3 · Sprites, animação, som
 aula(
     'Projeto · Pega-Maçã',
     'O segundo projeto junta as Partes 1, 2 e 3. Maçãs e gatos caem do céu; o herói anda pelo chão, arrastando o '
-    'dedo ou com as setas, e precisa pegar as maçãs e fugir dos gatos. Cada maçã vale um ponto e toca moeda.wav. '
+    'dedo ou com as setas, e precisa pegar as maçãs e fugir dos gatos. Cada maçã vale um ponto e toca osso.wav. '
     'Cada gato tira um coração, toca dano.wav e deixa o herói piscando e invencível por 1 segundo (tempoInvencivel). '
     'Sem corações, a partida acaba, toca derrota.wav e o recorde é atualizado. Os itens caem cada vez mais rápido e '
     'mais seguido, porque a velocidade e o intervalo dependem do tempo de partida. A classe Item guarda o que é '
@@ -2404,7 +2404,7 @@ class _PegaMacaState extends State<PegaMaca> with SingleTickerProviderStateMixin
     for (final item in pegos) {
       if (item.boa) {
         pontos++;
-        somItem.play(AssetSource('sons/moeda.wav'));
+        somItem.play(AssetSource('sons/osso.wav'));
       } else if (tempoInvencivel <= 0) {
         vidas--;
         tempoInvencivel = 1;
@@ -2490,7 +2490,7 @@ class _PegaMacaState extends State<PegaMaca> with SingleTickerProviderStateMixin
         ['Gatos mais lentos', "No laço que faz os itens caírem, use velocidadeQueda * 0.6 quando o item não for boa.", r'boa\s*\?\s*velocidadeQueda\s*:\s*velocidadeQueda\s*\*|!\s*item\.boa[\s\S]{0,80}\*\s*0\.\d'],
     ],
     lim="O painter recebe o próprio State (Cena(sprites!, this)) para ler os campos do jogo: é um atalho comum em protótipos. Em projetos maiores, separe o estado do jogo numa classe própria, como o Flame faz.",
-    setup=SETUP_SPRITES + '\n\nSons: flutter pub add audioplayers e assets/sons/ (moeda.wav, dano.wav, derrota.wav, poder.wav).\nFonte: flutter pub add google_fonts.',
+    setup=SETUP_SPRITES + '\n\nSons: flutter pub add audioplayers e assets/sons/ (osso.wav, dano.wav, derrota.wav, poder.wav).\nFonte: flutter pub add google_fonts.',
 )
 
 PARTS.append(['Projeto · Pega-Maçã', 'Projeto 2 · Pega-Maçã'])
@@ -2504,8 +2504,8 @@ SETUP_FLAME = (
     '  assets:\n'
     '    - assets/images/\n'
     '    - assets/audio/\n\n'
-    'No simulador, os sprites prontos (heroi.png, moeda.png, gato.png, nave.png, explosao.png, tiro.png, caixa.png, '
-    'coracao.png, maca.png, grama.png, nuvem.png, ceu.png, montanhas.png, colinas.png), os sons (pulo.wav, moeda.wav, '
+    'No simulador, os sprites prontos (heroi.png, osso.png, gato.png, nave.png, explosao.png, tiro.png, caixa.png, '
+    'coracao.png, maca.png, grama.png, nuvem.png, ceu.png, montanhas.png, colinas.png), os sons (pulo.wav, osso.wav, '
     'batida.wav, explosao.wav, tiro.wav, vitoria.wav, derrota.wav, clique.wav, dano.wav, poder.wav) e as músicas '
     '(musica_aventura.mp3, musica_espaco.mp3, musica_menu.mp3) já existem com esses nomes. Imagens suas entram pelo botão 🖼 Sprites.'
 )
@@ -2582,10 +2582,10 @@ aula(
     'Para animar uma folha de sprites, game.loadSpriteAnimation recebe a imagem e um SpriteAnimationData.sequenced: '
     'quantos quadros (amount), quanto tempo cada um fica na tela (stepTime) e o tamanho de cada quadro na folha '
     '(textureSize). O componente troca de quadro sozinho no update. O herói aqui anda de um lado a outro; ao chegar na '
-    'borda ele inverte a direção e chama flipHorizontallyAroundCenter(), que espelha o desenho sem mudar a posição. A '
-    'moeda gira com 6 quadros, cada um por 0,08 segundo.',
+    'borda ele inverte a direção e chama flipHorizontallyAroundCenter(), que espelha o desenho sem mudar a posição. O '
+    'osso brilha com 6 quadros, cada um por 0,08 segundo.',
     'Em ▶ Testar, veja o herói andar e virar nas bordas. Deixe a animação mais lenta (stepTime 0.25), troque a caixa '
-    'pela maçã e coloque três moedas em fila.',
+    'pela maçã e coloque três ossos em fila.',
     r'''
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
@@ -2604,7 +2604,7 @@ class Vitrine extends FlameGame {
     add(SpriteComponent(sprite: await loadSprite('caixa.png'), position: Vector2(250, size.y - 112), size: Vector2.all(48)));
 
     final giro = await loadSpriteAnimation(
-      'moeda.png',
+      'osso.png',
       SpriteAnimationData.sequenced(amount: 6, stepTime: 0.08, textureSize: Vector2.all(16)),
     );
     add(SpriteAnimationComponent(animation: giro, position: Vector2(262, size.y - 170), size: Vector2.all(24)));
@@ -2644,7 +2644,7 @@ class Heroi extends SpriteAnimationComponent with HasGameReference<Vitrine> {
     [
         ['Animação mais lenta', 'No SpriteAnimationData do herói, troque stepTime: 0.1 por 0.25.', r"heroi\.png[\s\S]{0,140}stepTime:\s*0\.25"],
         ['Maçã no lugar da caixa', "Troque loadSprite('caixa.png') por loadSprite('maca.png').", r"loadSprite\(\s*'maca\.png'\s*\)"],
-        ['Três moedas', 'Crie as moedas num for com i de 0 a 2, mudando o x de cada uma (todas podem usar a mesma animação giro).', r'for\s*\([^)]*\)\s*\{[\s\S]{0,200}SpriteAnimationComponent\(\s*animation:\s*giro'],
+        ['Três ossos', 'Crie os ossos num for com i de 0 a 2, mudando o x de cada um (todos podem usar a mesma animação giro).', r'for\s*\([^)]*\)\s*\{[\s\S]{0,200}SpriteAnimationComponent\(\s*animation:\s*giro'],
     ],
     setup=SETUP_FLAME,
 )
@@ -2653,11 +2653,11 @@ aula(
     'Flame: toque e arrasto em componentes',
     'No Flame, quem recebe o toque é o componente. Basta acrescentar o mixin TapCallbacks e escrever onTapDown: o Flame '
     'só chama o método se o dedo cair dentro do retângulo daquele componente, e event.localPosition diz onde, a partir '
-    'do canto dele. Aqui cada moeda some quando tocada e toca um som com FlameAudio.play(\'moeda.wav\') (os sons ficam '
+    'do canto dele. Aqui cada osso some quando tocado e toca um som com FlameAudio.play(\'osso.wav\') (os sons ficam '
     'em assets/audio). Para arrastar, o mixin é DragCallbacks: onDragUpdate recebe event.localDelta, quanto o dedo andou '
     'desde a última vez. O herói só anda na horizontal, então soma só o x. O próprio jogo também pode ter '
-    'TapCallbacks: ele recebe os toques que não caíram em nenhum componente; aqui um toque no vazio cria uma moeda nova.',
-    'Em ▶ Testar, pegue as moedas tocando nelas, arraste o herói e toque no céu vazio para criar moedas. Faça o herói '
+    'TapCallbacks: ele recebe os toques que não caíram em nenhum componente; aqui um toque no vazio cria um osso novo.',
+    'Em ▶ Testar, pegue os ossos tocando neles, arraste o herói e toque no céu vazio para criar ossos. Faça o herói '
     'arrastar também na vertical e conte os pontos no título com um TextComponent.',
     r'''
 import 'package:flame/components.dart';
@@ -2674,27 +2674,27 @@ class Toques extends FlameGame with TapCallbacks {
   @override
   Future<void> onLoad() async {
     for (int i = 0; i < 4; i++) {
-      add(Moeda(Vector2(60 + i * 80.0, 160)));
+      add(Osso(Vector2(60 + i * 80.0, 160)));
     }
     add(Heroi());
   }
 
   @override
   void onTapDown(TapDownEvent event) {
-    add(Moeda(event.canvasPosition));
+    add(Osso(event.canvasPosition));
   }
 
   @override
   Color backgroundColor() => const Color(0xFF1D1B33);
 }
 
-class Moeda extends SpriteAnimationComponent with TapCallbacks, HasGameReference<Toques> {
-  Moeda(Vector2 posicao) : super(position: posicao, size: Vector2.all(40), anchor: Anchor.center);
+class Osso extends SpriteAnimationComponent with TapCallbacks, HasGameReference<Toques> {
+  Osso(Vector2 posicao) : super(position: posicao, size: Vector2.all(40), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     animation = await game.loadSpriteAnimation(
-      'moeda.png',
+      'osso.png',
       SpriteAnimationData.sequenced(amount: 6, stepTime: 0.08, textureSize: Vector2.all(16)),
     );
   }
@@ -2702,7 +2702,7 @@ class Moeda extends SpriteAnimationComponent with TapCallbacks, HasGameReference
   @override
   void onTapDown(TapDownEvent event) {
     game.pontos++;
-    FlameAudio.play('moeda.wav');
+    FlameAudio.play('osso.wav');
     removeFromParent();
   }
 }
@@ -2727,7 +2727,7 @@ class Heroi extends SpriteAnimationComponent with DragCallbacks, HasGameReferenc
 ''',
     [
         ['Arrastar na vertical também', 'No onDragUpdate, some também event.localDelta.y ao position.y (ou use position += event.localDelta).', r'position\.y\s*\+=\s*event\.localDelta\.y|position\s*\+=\s*event\.localDelta'],
-        ['Moedas maiores', 'No construtor da Moeda, troque Vector2.all(40) por Vector2.all(56).', r'Vector2\.all\(\s*56\s*\)'],
+        ['Ossos maiores', 'No construtor do Osso, troque Vector2.all(40) por Vector2.all(56).', r'Vector2\.all\(\s*56\s*\)'],
         ['Placar com TextComponent', "Crie um TextComponent no onLoad do jogo, guarde num campo late TextComponent placar e atualize placar.text no update do jogo.", r'placar\.text\s*='],
     ],
     setup=SETUP_FLAME,
@@ -2868,7 +2868,7 @@ aula(
     'herói deixa o movimento contínuo enquanto a tecla está apertada. O chão é uma fila de 60 blocos de grama, muito '
     'mais larga que a tela, e as nuvens ajudam a perceber que a câmera está andando.',
     'Em ▶ Testar, clique no celular e ande com ← e →. Veja o placar mostrar o x do herói. Mude o zoom da câmera para '
-    '1.5, faça o herói correr segurando Shift e acrescente moedas pelo caminho.',
+    '1.5, faça o herói correr segurando Shift e acrescente ossos pelo caminho.',
     r'''
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -2953,7 +2953,7 @@ class Heroi extends SpriteAnimationComponent with HasGameReference<Caminhada> {
     [
         ['Zoom de 1.5', 'Troque camera.viewfinder.zoom = 1 por 1.5.', r'camera\.viewfinder\.zoom\s*=\s*1\.5'],
         ['Correr com Shift', 'No onKeyEvent, se keysPressed tiver LogicalKeyboardKey.shiftLeft, multiplique a direção por 2.', r'LogicalKeyboardKey\.shiftLeft'],
-        ['Moedas no caminho', "Crie moedas com world.add num for, usando game.loadSpriteAnimation('moeda.png', ...) ou loadSprite.", r"world\.add\([\s\S]{0,200}moeda|moeda\.png[\s\S]*world\.add"],
+        ['Ossos no caminho', "Crie ossos com world.add num for, usando game.loadSpriteAnimation('osso.png', ...) ou loadSprite.", r"world\.add\([\s\S]{0,200}osso|osso\.png[\s\S]*world\.add"],
     ],
     lim='Clique no celular antes de usar as teclas. Em celulares de verdade não há teclado: jogos para celular também precisam de controles de toque.',
     setup=SETUP_FLAME,
@@ -3198,7 +3198,7 @@ PARTS.append(['Projeto · Pula-Caixa em Flame', 'Projeto 3 · Pula-Caixa em Flam
 # ---------------------------------------------------------------- Parte 5 · Flame: efeitos, telas e toques
 aula(
     'Flame: efeitos',
-    'Muita coisa que dá vida a um jogo é movimento que começa, dura um tempo e termina: a moeda que pula, o coração '
+    'Muita coisa que dá vida a um jogo é movimento que começa, dura um tempo e termina: o osso que pula, o coração '
     'que pulsa, a caixa que gira quando é tocada. No Flame isso é um efeito, um componente que se coloca dentro de '
     'outro com add(). MoveEffect muda a posição, ScaleEffect a escala, RotateEffect o ângulo e OpacityEffect a '
     'transparência; .to vai até um valor e .by soma ao valor atual. Quem diz quanto tempo o efeito dura é o '
@@ -3449,10 +3449,10 @@ aula(
     'função (context, game) que monta o widget; initialActiveOverlays diz quais aparecem no começo. Dentro do jogo, '
     'overlays.add(\'Pausa\') mostra um overlay e overlays.remove(\'Pausa\') esconde. pauseEngine() congela o update '
     'de todos os componentes e resumeEngine() volta. A música de fundo vem do FlameAudio.bgm: play começa a tocar '
-    'em loop, pause e resume acompanham a pausa. O jogo em si é simples: moedas aparecem e cada toque numa delas vale '
+    'em loop, pause e resume acompanham a pausa. O jogo em si é simples: ossos aparecem e cada toque num deles vale '
     'um ponto.',
-    'Em ▶ Testar, toque em Jogar, pegue algumas moedas e use o botão de pausa. Mude o título do menu, troque a música '
-    'por musica_espaco.mp3 e faça o jogo voltar ao menu quando chegar a 10 moedas.',
+    'Em ▶ Testar, toque em Jogar, pegue alguns ossos e use o botão de pausa. Mude o título do menu, troque a música '
+    'por musica_espaco.mp3 e faça o jogo voltar ao menu quando chegar a 10 ossos.',
     r'''
 import 'dart:math';
 import 'package:flame/components.dart';
@@ -3507,9 +3507,9 @@ class Coleta extends FlameGame {
 
   @override
   Future<void> onLoad() async {
-    placar = TextComponent(text: 'Moedas: 0', position: Vector2(16, 20));
+    placar = TextComponent(text: 'Ossos: 0', position: Vector2(16, 20));
     add(placar);
-    add(TimerComponent(period: 0.8, repeat: true, onTick: () => add(Moeda(Vector2(
+    add(TimerComponent(period: 0.8, repeat: true, onTick: () => add(Osso(Vector2(
       40 + sorteio.nextDouble() * (size.x - 80),
       100 + sorteio.nextDouble() * (size.y - 200),
     )))));
@@ -3520,7 +3520,7 @@ class Coleta extends FlameGame {
     overlays.remove('Menu');
     overlays.add('BotaoPausa');
     pontos = 0;
-    placar.text = 'Moedas: 0';
+    placar.text = 'Ossos: 0';
     FlameAudio.bgm.play('musica_aventura.mp3', volume: 0.5);
     resumeEngine();
   }
@@ -3539,23 +3539,23 @@ class Coleta extends FlameGame {
 
   void pegou() {
     pontos++;
-    placar.text = 'Moedas: $pontos';
-    FlameAudio.play('moeda.wav');
+    placar.text = 'Ossos: $pontos';
+    FlameAudio.play('osso.wav');
   }
 
   @override
   Color backgroundColor() => const Color(0xFF2B3A67);
 }
 
-class Moeda extends SpriteAnimationComponent with TapCallbacks, HasGameReference<Coleta> {
+class Osso extends SpriteAnimationComponent with TapCallbacks, HasGameReference<Coleta> {
   double vida = 2.5;
 
-  Moeda(Vector2 onde) : super(position: onde, size: Vector2.all(48), anchor: Anchor.center);
+  Osso(Vector2 onde) : super(position: onde, size: Vector2.all(48), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     animation = await game.loadSpriteAnimation(
-      'moeda.png',
+      'osso.png',
       SpriteAnimationData.sequenced(amount: 6, stepTime: 0.1, textureSize: Vector2.all(16)),
     );
   }
@@ -3589,10 +3589,10 @@ aula(
     'inclinado é bem maior que ele. No Flame, o RectangleHitbox gira junto com o componente, e a colisão é calculada '
     'com o retângulo girado de verdade. Aqui cada pá é um RectangleComponent com hitbox, e o update soma ao angle a '
     'cada quadro. Arraste a bola até a estrela do outro lado sem encostar nas pás; com debugMode ligado dá para ver '
-    'os contornos girando. Para saber quantas moedas faltam, o jogo pergunta aos próprios filhos: '
-    'children.query<Moeda>() devolve a lista dos componentes daquele tipo (whereType<Moeda>() também serve). Quando '
+    'os contornos girando. Para saber quantos ossos faltam, o jogo pergunta aos próprios filhos: '
+    'children.query<Osso>() devolve a lista dos componentes daquele tipo (whereType<Osso>() também serve). Quando '
     'a lista fica vazia, a fase acabou.',
-    'Em ▶ Testar, arraste a bola e pegue as três moedas sem bater. Ligue o debugMode, deixe as pás mais rápidas e '
+    'Em ▶ Testar, arraste a bola e pegue os três ossos sem bater. Ligue o debugMode, deixe as pás mais rápidas e '
     'acrescente uma terceira pá.',
     r'''
 import 'dart:math';
@@ -3613,17 +3613,17 @@ class Helices extends FlameGame with HasCollisionDetection {
     debugMode = false;
     add(Pa(Vector2(size.x / 2, 220), 1.6));
     add(Pa(Vector2(size.x / 2, 440), -2.2));
-    add(Moeda(Vector2(60, 220)));
-    add(Moeda(Vector2(size.x - 60, 330)));
-    add(Moeda(Vector2(60, 440)));
+    add(Osso(Vector2(60, 220)));
+    add(Osso(Vector2(size.x - 60, 330)));
+    add(Osso(Vector2(60, 440)));
     add(Bola(Vector2(size.x / 2, size.y - 60)));
-    aviso = TextComponent(text: 'Faltam 3 moedas', position: Vector2(16, 20));
+    aviso = TextComponent(text: 'Faltam 3 ossos', position: Vector2(16, 20));
     add(aviso);
   }
 
   void contar() {
-    final faltam = children.query<Moeda>().length;
-    aviso.text = faltam == 0 ? 'Você pegou todas!' : 'Faltam $faltam moedas';
+    final faltam = children.query<Osso>().length;
+    aviso.text = faltam == 0 ? 'Você pegou todos!' : 'Faltam $faltam ossos';
     if (faltam == 0) FlameAudio.play('vitoria.wav');
   }
 
@@ -3649,8 +3649,8 @@ class Pa extends RectangleComponent with CollisionCallbacks {
   }
 }
 
-class Moeda extends CircleComponent with CollisionCallbacks, HasGameReference<Helices> {
-  Moeda(Vector2 onde) : super(position: onde, radius: 14, anchor: Anchor.center, paint: Paint()..color = Colors.amber);
+class Osso extends CircleComponent with CollisionCallbacks, HasGameReference<Helices> {
+  Osso(Vector2 onde) : super(position: onde, radius: 14, anchor: Anchor.center, paint: Paint()..color = Colors.amber);
 
   @override
   Future<void> onLoad() async {
@@ -3688,9 +3688,9 @@ class Bola extends CircleComponent with DragCallbacks, CollisionCallbacks, HasGa
       position = inicio.clone();
       FlameAudio.play('dano.wav');
     }
-    if (other is Moeda) {
+    if (other is Osso) {
       other.removeFromParent();
-      FlameAudio.play('moeda.wav');
+      FlameAudio.play('osso.wav');
     }
   }
 }
@@ -4090,7 +4090,7 @@ aula(
     'O HudButtonComponent é um botão de jogo: button é o desenho normal, buttonDown o desenho enquanto está apertado, '
     'e onPressed e onReleased avisam quando o dedo encosta e quando solta. Joystick e botão funcionam ao mesmo tempo, '
     'cada um com um dedo.',
-    'Em ▶ Testar, arraste a bolinha do joystick com o mouse ou o dedo e pegue as moedas. Segure o botão laranja para '
+    'Em ▶ Testar, arraste a bolinha do joystick com o mouse ou o dedo e pegue os ossos. Segure o botão laranja para '
     'correr. Mude a velocidade, troque as cores do joystick e mostre a direção no placar.',
     r'''
 import 'dart:math';
@@ -4107,7 +4107,7 @@ class Passeio extends FlameGame {
   late JoystickComponent joystick;
   late Heroi heroi;
   late TextComponent placar;
-  int moedas = 0;
+  int ossos = 0;
   bool turbo = false;
 
   @override
@@ -4127,20 +4127,20 @@ class Passeio extends FlameGame {
       onPressed: () => turbo = true,
       onReleased: () => turbo = false,
     ));
-    placar = TextComponent(text: 'Moedas: 0', position: Vector2(16, 16));
+    placar = TextComponent(text: 'Ossos: 0', position: Vector2(16, 16));
     add(placar);
-    novaMoeda();
+    novoOsso();
   }
 
-  void novaMoeda() {
-    add(Moeda(Vector2(40 + sorteio.nextDouble() * (size.x - 80), 80 + sorteio.nextDouble() * (size.y - 280))));
+  void novoOsso() {
+    add(Osso(Vector2(40 + sorteio.nextDouble() * (size.x - 80), 80 + sorteio.nextDouble() * (size.y - 280))));
   }
 
   void pegou() {
-    moedas++;
-    placar.text = 'Moedas: $moedas';
-    FlameAudio.play('moeda.wav');
-    novaMoeda();
+    ossos++;
+    placar.text = 'Ossos: $ossos';
+    FlameAudio.play('osso.wav');
+    novoOsso();
   }
 
   @override
@@ -4173,13 +4173,13 @@ class Heroi extends SpriteAnimationComponent with HasGameReference<Passeio> {
   }
 }
 
-class Moeda extends SpriteAnimationComponent with HasGameReference<Passeio> {
-  Moeda(Vector2 onde) : super(position: onde, size: Vector2.all(36), anchor: Anchor.center);
+class Osso extends SpriteAnimationComponent with HasGameReference<Passeio> {
+  Osso(Vector2 onde) : super(position: onde, size: Vector2.all(36), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     animation = await game.loadSpriteAnimation(
-      'moeda.png',
+      'osso.png',
       SpriteAnimationData.sequenced(amount: 6, stepTime: 0.1, textureSize: Vector2.all(16)),
     );
   }
@@ -4197,7 +4197,7 @@ class Moeda extends SpriteAnimationComponent with HasGameReference<Passeio> {
     [
         ['Mais rápido', 'No update do herói, troque 140.0 por 200.0.', r'turbo\s*\?\s*[\d.]+\s*:\s*(?!140(?:\.0)?\b)[\d.]+'],
         ['Outras cores', 'Troque Colors.white70 do knob por outra cor, como Colors.amber.', r'knob:\s*CircleComponent\([^\n]*Colors\.(?!white70\b)\w+'],
-        ['Mostrar a direção', "No update do jogo (override void update(double dt)), escreva placar.text = 'Moedas: $moedas  ${joystick.direction.name}';", r'joystick\.direction'],
+        ['Mostrar a direção', "No update do jogo (override void update(double dt)), escreva placar.text = 'Ossos: $ossos  ${joystick.direction.name}';", r'joystick\.direction'],
     ],
     lim='No computador, o joystick funciona arrastando com o mouse; numa tela de toque, dá para usar o joystick e o botão ao mesmo tempo, com dois dedos.',
     setup=SETUP_FLAME,
@@ -4836,13 +4836,13 @@ class _InclinaState extends State<Inclina> with SingleTickerProviderStateMixin {
 aula(
     'Tiled: mapas prontos',
     'Montar fase bloco por bloco no código é trabalhoso. O Tiled é um editor de mapas gratuito: você pinta os blocos '
-    'numa grade, separa em camadas (chão, paredes, decoração) e marca objetos, como o ponto de partida e as moedas, '
+    'numa grade, separa em camadas (chão, paredes, decoração) e marca objetos, como o ponto de partida e os ossos, '
     'numa camada de objetos. O flame_tiled lê o arquivo .tmx: TiledComponent.load(\'arena.tmx\', Vector2.all(32)) '
     'monta o mapa com cada bloco de 16 pixels desenhado com 32. Depois, mapa.tileMap.getLayer<ObjectGroup>(\'objetos\') '
     'devolve uma camada de objetos, e cada objeto tem x, y, width, height, name, type e properties, em pixels do mapa '
     '(por isso multiplicamos por 2). As paredes vêm da camada solidos: cada retângulo vira um Rect, e o herói desfaz '
     'o passo se entrar num deles. O mapa é maior que a tela, e a câmera segue o herói.',
-    'Em ▶ Testar, ande pela arena com o joystick e pegue as moedas. Troque a escala dos blocos para 24, conte as moedas '
+    'Em ▶ Testar, ande pela arena com o joystick e pegue os ossos. Troque a escala dos blocos para 24, conte os ossos '
     'que faltam e troque o mapa por fase1.tmx para ver como ele é.',
     r'''
 import 'package:flame/components.dart';
@@ -4860,7 +4860,7 @@ class Arena extends FlameGame {
   late TextComponent placar;
   final List<Rect> paredes = [];
   final double escala = 2;
-  int moedas = 0;
+  int ossos = 0;
 
   @override
   Future<void> onLoad() async {
@@ -4874,8 +4874,8 @@ class Arena extends FlameGame {
     final objetos = mapa.tileMap.getLayer<ObjectGroup>('objetos');
     for (final o in objetos!.objects) {
       final onde = Vector2(o.x * escala, o.y * escala);
-      if (o.type == 'moeda') {
-        world.add(Moeda(onde));
+      if (o.type == 'osso') {
+        world.add(Osso(onde));
       } else if (o.type == 'inicio') {
         heroi = Heroi(onde);
         world.add(heroi);
@@ -4889,7 +4889,7 @@ class Arena extends FlameGame {
       margin: const EdgeInsets.only(left: 30, bottom: 40),
     );
     camera.viewport.add(joystick);
-    placar = TextComponent(text: 'Moedas: 0', position: Vector2(16, 16));
+    placar = TextComponent(text: 'Ossos: 0', position: Vector2(16, 16));
     camera.viewport.add(placar);
   }
 
@@ -4899,9 +4899,9 @@ class Arena extends FlameGame {
   Color backgroundColor() => const Color(0xFF4A5060);
 
   void pegou() {
-    moedas++;
-    placar.text = 'Moedas: $moedas';
-    FlameAudio.play('moeda.wav');
+    ossos++;
+    placar.text = 'Ossos: $ossos';
+    FlameAudio.play('osso.wav');
   }
 }
 
@@ -4934,13 +4934,13 @@ class Heroi extends SpriteAnimationComponent with HasGameReference<Arena> {
   }
 }
 
-class Moeda extends SpriteAnimationComponent with HasGameReference<Arena> {
-  Moeda(Vector2 onde) : super(position: onde, size: Vector2.all(24), anchor: Anchor.center);
+class Osso extends SpriteAnimationComponent with HasGameReference<Arena> {
+  Osso(Vector2 onde) : super(position: onde, size: Vector2.all(24), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     animation = await game.loadSpriteAnimation(
-      'moeda.png',
+      'osso.png',
       SpriteAnimationData.sequenced(amount: 6, stepTime: 0.1, textureSize: Vector2.all(16)),
     );
   }
@@ -4956,8 +4956,8 @@ class Moeda extends SpriteAnimationComponent with HasGameReference<Arena> {
 }
 ''',
     [
-        ['Blocos menores', 'Troque final double escala = 2 por 1.5: o mapa inteiro encolhe, inclusive as paredes e as moedas.', r'double\s+escala\s*=\s*(?!2\b)[\d.]+'],
-        ['Quantas faltam', "No pegou, mostre também quantas faltam: world.children.query<Moeda>().length - 1 (a moeda que acabou de ser pega ainda está saindo).", r'children\.query<\s*Moeda\s*>\(\)'],
+        ['Blocos menores', 'Troque final double escala = 2 por 1.5: o mapa inteiro encolhe, inclusive as paredes e os ossos.', r'double\s+escala\s*=\s*(?!2\b)[\d.]+'],
+        ['Quantos faltam', "No pegou, mostre também quantos faltam: world.children.query<Osso>().length - 1 (o osso que acabou de ser pego ainda está saindo).", r'children\.query<\s*Osso\s*>\(\)'],
         ['Outro mapa', "Troque 'arena.tmx' por 'fase1.tmx', a fase de plataforma vista de lado. O herói começa no objeto inicio dela, mas anda solto pelo ar: este código não tem gravidade. As paredes da camada solidos continuam valendo.", r"TiledComponent\.load\(\s*'(?!arena\.tmx')[\w.-]+\.tmx'"],
     ],
     lim='O simulador lê mapas ortogonais e isométricos com as camadas em CSV ou base64 sem compressão e o tileset incorporado no .tmx, incluindo camadas de imagem e blocos animados. Mapas infinitos e tilesets externos (.tsx) não são lidos.',
@@ -4967,16 +4967,20 @@ class Moeda extends SpriteAnimationComponent with HasGameReference<Arena> {
 PARTS.append(['Joystick e botões na tela', 'Parte 6 · Celular, física e mapas'])
 
 aula(
-    'Projeto · Caça-Moedas',
+    'Projeto · Caça-Ossos',
     'O último projeto junta a Parte 6 num jogo completo para celular. A arena vem do Tiled: as paredes saem da camada '
-    'solidos, e as moedas, o ponto de partida e os gatos saem da camada objetos. O herói anda com o joystick, e cada '
-    'gato patrulha de um lado para o outro com um MoveEffect que vai e volta para sempre. Encostar num gato tira '
-    'uma vida, pinta o herói de vermelho com um ColorEffect e deixa ele um segundo sem levar dano. O placar é um '
-    'overlay do Flutter que se atualiza sozinho: moedas e vidas são ValueNotifier, e o ValueListenableBuilder redesenha '
-    'o texto quando o valor muda, sem setState. Quando as moedas acabam ou as vidas zeram, o jogo pausa e mostra o '
+    'solidos, e os ossos, o ponto de partida e os gatos saem da camada objetos. O herói anda com o joystick, e cada '
+    'gato anda de parede em parede até ver o caramelo: a menos de 150 pixels (visao), ele corre atrás. O rumo é o '
+    'vetor alvo - position com normalize(), que vira um passo de tamanho 1 apontando para o herói; multiplicado pela '
+    'velocidade e por dt, vira o passo do quadro, e as paredes valem para o gato também. O gato é mais lento que o '
+    'herói, então dá para fugir, mas não dá para passar perto. Encostar num gato tira uma vida, pinta o herói de '
+    'vermelho com um ColorEffect e deixa ele um segundo sem levar dano, e o gato descansa 1,5 segundo antes de voltar '
+    'a perseguir (no começo, descanso = 2 dá dois segundos para o herói se afastar). O placar é um '
+    'overlay do Flutter que se atualiza sozinho: ossos e vidas são ValueNotifier, e o ValueListenableBuilder redesenha '
+    'o texto quando o valor muda, sem setState. Quando os ossos acabam ou as vidas zeram, o jogo pausa e mostra o '
     'overlay de fim; Jogar de novo apaga o mundo e monta o mapa outra vez.',
-    'Em ▶ Testar, pegue todas as moedas sem encostar nos gatos. Dê 5 vidas ao herói, deixe os gatos mais rápidos e '
-    'mostre quantas moedas faltam no placar.',
+    'Em ▶ Testar, pegue todos os ossos sem encostar nos gatos. Dê 5 vidas ao herói, deixe os gatos mais rápidos e '
+    'mostre quantos ossos faltam no placar.',
     r'''
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -4987,9 +4991,9 @@ import 'package:flame_tiled/flame_tiled.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(GameWidget(
-      game: CacaMoedas(),
+      game: CacaOssos(),
       overlayBuilderMap: {
-        'Placar': (BuildContext context, CacaMoedas game) => Align(
+        'Placar': (BuildContext context, CacaOssos game) => Align(
               alignment: Alignment.topLeft,
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -4997,8 +5001,8 @@ void main() => runApp(GameWidget(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ValueListenableBuilder<int>(
-                      valueListenable: game.moedas,
-                      builder: (context, valor, child) => Text('Moedas: $valor', style: const TextStyle(color: Colors.white, fontSize: 20)),
+                      valueListenable: game.ossos,
+                      builder: (context, valor, child) => Text('Ossos: $valor', style: const TextStyle(color: Colors.white, fontSize: 20)),
                     ),
                     const SizedBox(width: 16),
                     ValueListenableBuilder<int>(
@@ -5009,7 +5013,7 @@ void main() => runApp(GameWidget(
                 ),
               ),
             ),
-        'Fim': (BuildContext context, CacaMoedas game) => Center(
+        'Fim': (BuildContext context, CacaOssos game) => Center(
               child: Card(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -5028,8 +5032,8 @@ void main() => runApp(GameWidget(
       initialActiveOverlays: const ['Placar'],
     ));
 
-class CacaMoedas extends FlameGame {
-  final moedas = ValueNotifier<int>(0);
+class CacaOssos extends FlameGame {
+  final ossos = ValueNotifier<int>(0);
   final vidas = ValueNotifier<int>(3);
   final List<Rect> paredes = [];
   final double escala = 2;
@@ -5052,7 +5056,7 @@ class CacaMoedas extends FlameGame {
 
   Future<void> montar() async {
     paredes.clear();
-    moedas.value = 0;
+    ossos.value = 0;
     vidas.value = 3;
     total = 0;
     final mapa = await TiledComponent.load('arena.tmx', Vector2.all(16 * escala));
@@ -5062,8 +5066,8 @@ class CacaMoedas extends FlameGame {
     }
     for (final o in mapa.tileMap.getLayer<ObjectGroup>('objetos')!.objects) {
       final onde = Vector2(o.x * escala, o.y * escala);
-      if (o.type == 'moeda') {
-        world.add(Moeda(onde));
+      if (o.type == 'osso') {
+        world.add(Osso(onde));
         total++;
       } else if (o.type == 'inimigo') {
         world.add(Gato(onde));
@@ -5078,9 +5082,9 @@ class CacaMoedas extends FlameGame {
   bool bateu(Rect r) => paredes.any((p) => p.overlaps(r));
 
   void pegou() {
-    moedas.value++;
-    FlameAudio.play('moeda.wav');
-    if (moedas.value == total) terminar('Você venceu!', 'vitoria.wav');
+    ossos.value++;
+    FlameAudio.play('osso.wav');
+    if (ossos.value == total) terminar('Você venceu!', 'vitoria.wav');
   }
 
   void ferido() {
@@ -5107,7 +5111,7 @@ class CacaMoedas extends FlameGame {
   Color backgroundColor() => const Color(0xFF4A5060);
 }
 
-class Heroi extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
+class Heroi extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
   double protegido = 0;
 
   Heroi(Vector2 inicio) : super(position: inicio, size: Vector2.all(40), anchor: Anchor.center, priority: 2);
@@ -5146,13 +5150,13 @@ class Heroi extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
   }
 }
 
-class Moeda extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
-  Moeda(Vector2 onde) : super(position: onde, size: Vector2.all(24), anchor: Anchor.center);
+class Osso extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
+  Osso(Vector2 onde) : super(position: onde, size: Vector2.all(24), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     animation = await game.loadSpriteAnimation(
-      'moeda.png',
+      'osso.png',
       SpriteAnimationData.sequenced(amount: 6, stepTime: 0.1, textureSize: Vector2.all(16)),
     );
   }
@@ -5167,7 +5171,12 @@ class Moeda extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
   }
 }
 
-class Gato extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
+class Gato extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
+  double velocidade = 90;
+  double visao = 150;
+  double direcao = 1;
+  double descanso = 2;
+
   Gato(Vector2 onde) : super(position: onde, size: Vector2.all(36), anchor: Anchor.center);
 
   @override
@@ -5176,25 +5185,49 @@ class Gato extends SpriteAnimationComponent with HasGameReference<CacaMoedas> {
       'gato.png',
       SpriteAnimationData.sequenced(amount: 2, stepTime: 0.3, textureSize: Vector2.all(16)),
     );
-    add(MoveEffect.by(Vector2(96, 0), EffectController(duration: 1.6, alternate: true, infinite: true, curve: Curves.easeInOut)));
+  }
+
+  Rect corpo() => Rect.fromCenter(center: position.toOffset(), width: 24, height: 24);
+
+  void andar(Vector2 passo) {
+    position.x += passo.x;
+    if (game.bateu(corpo())) {
+      position.x -= passo.x;
+      direcao = -direcao;
+    }
+    position.y += passo.y;
+    if (game.bateu(corpo())) position.y -= passo.y;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    if (position.distanceTo(game.heroi.position) < 30) {
+    if (descanso > 0) {
+      descanso -= dt;
+      return;
+    }
+    final alvo = game.heroi.position;
+    final distancia = position.distanceTo(alvo);
+    if (distancia < visao) {
+      final rumo = (alvo - position)..normalize();
+      andar(rumo * velocidade * dt);
+    } else {
+      andar(Vector2(direcao * velocidade * 0.6 * dt, 0));
+    }
+    if (distancia < 30) {
       game.heroi.levarDano();
+      descanso = 1.5;
     }
   }
 }
 ''',
     [
         ['Cinco vidas', 'No montar, troque vidas.value = 3 por vidas.value = 5.', r'vidas\.value\s*=\s*(?!3\b)\d+\s*;'],
-        ['Gatos mais rápidos', 'No MoveEffect do gato, troque duration: 1.6 por 0.9.', r'MoveEffect\.by\([^;]*?duration:\s*(?!1\.6\b)[\d.]+'],
-        ['Moedas que faltam', "No overlay Placar, mostre 'Moedas: $valor de ${game.total}'.", r'game\.total'],
+        ['Gatos mais rápidos', 'Na classe Gato, troque double velocidade = 90 por 120: quase a velocidade do herói.', r'double\s+velocidade\s*=\s*(?!90\b)[\d.]+'],
+        ['Ossos que faltam', "No overlay Placar, mostre 'Ossos: $valor de ${game.total}'.", r'game\.total'],
     ],
     lim='No simulador a música é sintetizada pelo navegador e só começa depois do primeiro toque. O joystick funciona com o mouse ou com o dedo.',
     setup=SETUP_TILED,
 )
 
-PARTS.append(['Projeto · Caça-Moedas', 'Projeto 5 · Caça-Moedas'])
+PARTS.append(['Projeto · Caça-Ossos', 'Projeto 5 · Caça-Ossos'])

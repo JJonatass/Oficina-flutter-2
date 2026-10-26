@@ -21,6 +21,7 @@ PAL = {
     'n': (150, 96, 54), 'N': (98, 60, 34), 'm': (196, 140, 86),
     'p': (160, 90, 220), 'P': (100, 50, 160), 'c': (90, 220, 230),
     'e': (130, 140, 160), 'E': (80, 90, 110), 'f': (255, 150, 40),
+    'O': (250, 244, 226), 'Q': (214, 200, 168),            # osso
     'C': (214, 140, 62), 'D': (160, 96, 40), 'L': (246, 206, 150), 't': (236, 104, 120),   # caramelo
 }
 
@@ -75,19 +76,25 @@ def caramelo(i):
     return from_art(linhas + PATAS[i])
 heroi = sheet([caramelo(i) for i in range(4)])
 
-# ---- moeda (16x16, 6 quadros girando)
-def moeda(wd):
+# ---- osso (16x16, 6 quadros: flutua para cima e para baixo e dá uma brilhada)
+OSSO = [
+    '.NN..........NN.',
+    'NOON........NOQN',
+    'NOOONNNNNNNNOOQN',
+    '.NOOOOOOOOOOOQN.',
+    '.NOOOOOOOOOOQQN.',
+    'NOOQNNNNNNNNOQQN',
+    'NOQN........NQQN',
+    '.NN..........NN.',
+]
+def osso(dy, brilho):
     img = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    x0, x1 = 8 - wd / 2, 8 + wd / 2 - 1
-    d.ellipse([x0, 2, x1, 13], fill=PAL['Y'] + (255,))
-    if wd > 3:
-        d.ellipse([x0 + 1, 3, x1 - 1, 12], fill=PAL['y'] + (255,))
-        if wd > 7:
-            d.line([8, 5, 8, 10], fill=PAL['Y'] + (255,))
-            d.point([(x0 + 2, 5)], fill=PAL['o'] + (255,))
+    img.paste(from_art(OSSO), (0, 4 + dy))
+    if brilho:
+        for x, y in brilho:
+            img.putpixel((x, y + dy), PAL['y'] + (255,))
     return img
-moedas = sheet([moeda(w) for w in (12, 10, 6, 2, 6, 10)])
+ossos = sheet([osso(0, None), osso(-1, None), osso(-1, [(4, 6), (3, 7), (5, 7), (4, 8)]), osso(0, [(4, 7)]), osso(1, None), osso(1, None)])
 
 # ---- inimigo: gato de rua cinza, de frente (16x16, 2 quadros: olhando e piscando, com o rabo balançando)
 # Cada linha tem só a metade esquerda; a direita é o espelho. O rabo entra depois, do lado direito.
@@ -471,7 +478,7 @@ for i, t in enumerate([losango((96, 196, 86), (70, 150, 60), (50, 120, 46), Fals
 
 SPRITES = [
     ('heroi', heroi, 4, 'Herói: o vira-lata caramelo andando para a direita (4 quadros de 16×16)'),
-    ('moeda', moedas, 6, 'Moeda girando (6 quadros de 16×16)'),
+    ('osso', ossos, 6, 'Osso flutuando e brilhando (6 quadros de 16×16)'),
     ('gato', gato_img, 2, 'Inimigo: gato de rua cinza, piscando e balançando o rabo (2 quadros de 16×16)'),
     ('nave', nave, 2, 'Nave apontando para cima, com fogo (2 quadros de 16×16)'),
     ('explosao', explosoes, 5, 'Explosão (5 quadros de 16×16)'),

@@ -81,7 +81,7 @@ def tmx(w, h, camadas, nid):
 ARENA = [
     'PPPPPPPPPPPPPPPPPPPP',
     'P..f......$.....f..P',
-    'P.$....A.......$...P',
+    'P.$....A.......$.S.P',
     'P....PPPP...PPPP...P',
     'P....P.........P.$.P',
     'P.$..P..$...$..P...P',
@@ -89,7 +89,7 @@ ARENA = [
     'P..................P',
     'P.f.....$...$.....fP',
     'PPPP...PPPPPPPP..PPP',
-    'P..................P',
+    'P.........S........P',
     'P.$..S.........$...P',
     'P.......A..........P',
     'P...PPP.....PPP..$.P',
@@ -97,7 +97,7 @@ ARENA = [
     'P...P....I....P....P',
     'P...PPPP...PPPP....P',
     'P.$..........$...f.P',
-    'P........S.........P',
+    'P..S...............P',
     'P.f..$.........$...P',
     'PPPPPPPPPPPPPPPPPPPP',
 ]
@@ -123,7 +123,7 @@ for y in range(AH):
         c = ARENA[y][x]
         cx, cy = x * T + T // 2, y * T + T // 2
         if c == '$':
-            objs.append({'id': nid, 'name': 'moeda', 'type': 'moeda', 'x': cx, 'y': cy, 'props': {'valor': 1}})
+            objs.append({'id': nid, 'name': 'osso', 'type': 'osso', 'x': cx, 'y': cy, 'props': {'valor': 1}})
         elif c == 'S':
             objs.append({'id': nid, 'name': 'gato', 'type': 'inimigo', 'x': cx, 'y': cy})
         elif c == 'I':
@@ -174,7 +174,7 @@ for y in range(FH):
         c = FASE[y][x]
         cx, cy = x * T + T // 2, y * T + T // 2
         if c == '$':
-            objs.append({'id': nid, 'name': 'moeda', 'type': 'moeda', 'x': cx, 'y': cy, 'props': {'valor': 1}})
+            objs.append({'id': nid, 'name': 'osso', 'type': 'osso', 'x': cx, 'y': cy, 'props': {'valor': 1}})
         elif c == 'I':
             objs.append({'id': nid, 'name': 'inicio', 'type': 'inicio', 'x': cx, 'y': (y + 1) * T})
         elif c == 'F':
@@ -205,7 +205,7 @@ blocos_iso = [[{'S': 4, 'D': 2}.get(ISO[y][x], 0) for x in range(IW)] for y in r
 nid = 1
 objs = []
 for (x, y) in ((1, 1), (10, 1), (6, 4), (3, 10), (10, 10), (7, 8)):
-    objs.append({'id': nid, 'name': 'moeda', 'type': 'moeda', 'x': x * 16 + 8, 'y': y * 16 + 8})
+    objs.append({'id': nid, 'name': 'osso', 'type': 'osso', 'x': x * 16 + 8, 'y': y * 16 + 8})
     nid += 1
 TS_ISO = ('<tileset firstgid="1" name="iso" tilewidth="32" tileheight="32" tilecount="4" columns="4">\n'
           '  <image source="tiles_iso.png" width="128" height="32"/>\n </tileset>')

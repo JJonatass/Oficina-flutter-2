@@ -62,41 +62,41 @@
   <object id="18" name="agua" type="perigo" x="144" y="179" width="32" height="13"/>
   <object id="19" name="agua" type="perigo" x="272" y="179" width="64" height="13"/>
   <object id="20" name="agua" type="perigo" x="400" y="179" width="48" height="13"/>
-  <object id="21" name="moeda" type="moeda" x="168" y="56">
+  <object id="21" name="osso" type="osso" x="168" y="56">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="22" name="moeda" type="moeda" x="184" y="56">
+  <object id="22" name="osso" type="osso" x="184" y="56">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="23" name="moeda" type="moeda" x="408" y="56">
+  <object id="23" name="osso" type="osso" x="408" y="56">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="24" name="moeda" type="moeda" x="424" y="56">
+  <object id="24" name="osso" type="osso" x="424" y="56">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="25" name="moeda" type="moeda" x="440" y="56">
+  <object id="25" name="osso" type="osso" x="440" y="56">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
   <object id="26" name="fim" type="fim" x="704" y="64" width="16" height="32"/>
-  <object id="27" name="moeda" type="moeda" x="56" y="88">
+  <object id="27" name="osso" type="osso" x="56" y="88">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="28" name="moeda" type="moeda" x="664" y="88">
+  <object id="28" name="osso" type="osso" x="664" y="88">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="29" name="moeda" type="moeda" x="680" y="88">
+  <object id="29" name="osso" type="osso" x="680" y="88">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="30" name="moeda" type="moeda" x="696" y="88">
+  <object id="30" name="osso" type="osso" x="696" y="88">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="31" name="moeda" type="moeda" x="232" y="104">
+  <object id="31" name="osso" type="osso" x="232" y="104">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="32" name="moeda" type="moeda" x="248" y="104">
+  <object id="32" name="osso" type="osso" x="248" y="104">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
-  <object id="33" name="moeda" type="moeda" x="360" y="120">
+  <object id="33" name="osso" type="osso" x="360" y="120">
    <properties><property name="valor" type="int" value="1"/></properties>
   </object>
   <object id="34" name="inicio" type="inicio" x="24" y="160">

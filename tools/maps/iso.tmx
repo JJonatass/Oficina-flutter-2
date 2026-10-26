@@ -36,22 +36,22 @@
 </data>
  </layer>
  <objectgroup id="3" name="objetos">
-  <object id="1" name="moeda" type="moeda" x="24" y="24">
+  <object id="1" name="osso" type="osso" x="24" y="24">
    <point/>
   </object>
-  <object id="2" name="moeda" type="moeda" x="168" y="24">
+  <object id="2" name="osso" type="osso" x="168" y="24">
    <point/>
   </object>
-  <object id="3" name="moeda" type="moeda" x="104" y="72">
+  <object id="3" name="osso" type="osso" x="104" y="72">
    <point/>
   </object>
-  <object id="4" name="moeda" type="moeda" x="56" y="168">
+  <object id="4" name="osso" type="osso" x="56" y="168">
    <point/>
   </object>
-  <object id="5" name="moeda" type="moeda" x="168" y="168">
+  <object id="5" name="osso" type="osso" x="168" y="168">
    <point/>
   </object>
-  <object id="6" name="moeda" type="moeda" x="120" y="136">
+  <object id="6" name="osso" type="osso" x="120" y="136">
    <point/>
   </object>
  </objectgroup>

@@ -8,12 +8,12 @@
   "desc": "Herói: o vira-lata caramelo andando para a direita (4 quadros de 16×16)"
  },
  {
-  "nome": "moeda",
-  "caminho": "assets/sprites/moeda.png",
+  "nome": "osso",
+  "caminho": "assets/sprites/osso.png",
   "largura": 96,
   "altura": 16,
   "quadros": 6,
-  "desc": "Moeda girando (6 quadros de 16×16)"
+  "desc": "Osso flutuando e brilhando (6 quadros de 16×16)"
  },
  {
   "nome": "gato",

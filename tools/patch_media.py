@@ -8,7 +8,7 @@ from patch_engine import sub1
 
 ROOT = pathlib.Path(__file__).resolve().parent
 
-SONS = ['pulo', 'moeda', 'batida', 'explosao', 'tiro', 'vitoria', 'derrota', 'clique', 'dano', 'poder']
+SONS = ['pulo', 'osso', 'batida', 'explosao', 'tiro', 'vitoria', 'derrota', 'clique', 'dano', 'poder']
 
 
 def sprites_js():
@@ -36,6 +36,7 @@ window.OF_SONS=__SONS__;
     g.gain.setValueAtTime(vol,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);s.connect(fl);fl.connect(g);g.connect(c.destination);s.start(t0);s.stop(t0+dur)}
   var SFX={
     pulo:function(t,v){tom(t,'square',260,720,0.16,0.18*v)},
+    osso:function(t,v){tom(t,'square',988,988,0.07,0.15*v);tom(t+0.07,'square',1319,1319,0.22,0.15*v)},
     moeda:function(t,v){tom(t,'square',988,988,0.07,0.15*v);tom(t+0.07,'square',1319,1319,0.22,0.15*v)},
     batida:function(t,v){ruido(t,0.12,0.5*v,1800,300);tom(t,'sine',160,60,0.12,0.4*v)},
     explosao:function(t,v){ruido(t,0.6,0.6*v,2400,120);tom(t,'sine',90,40,0.5,0.4*v)},
@@ -59,7 +60,7 @@ function spriteOf(path){var s=window.OF_SPRITES&&window.OF_SPRITES[String(path)]
   if(!s)throw exc('Unable to load asset: "'+path+'". O simulador tem estes sprites: '+Object.keys(window.OF_SPRITES||{}).join(', '));return s}
 function mkImg(path){var s=spriteOf(path);return{nat:'Img',path:String(path),f:{width:s.w,height:s.h},src:"Image('"+path+"')"}}
 function somOf(path){var p=String(path==null?'':path),m=/([\w-]+)\.(?:wav|mp3|ogg|m4a|aac)$/i.exec(p),n=m?m[1]:p;
-  if((window.OF_SONS||[]).indexOf(n)<0&&(window.OF_MUSICAS||[]).indexOf(n)<0)throw exc('Unable to load asset: "'+p+'". O simulador tem estes sons: '+(window.OF_SONS||[]).map(function(s){return 'sons/'+s+'.wav'}).join(', ')+' e estas músicas: '+(window.OF_MUSICAS||[]).map(function(s){return 'sons/'+s+'.mp3'}).join(', '));return n}
+  if(n!=='moeda'&&(window.OF_SONS||[]).indexOf(n)<0&&(window.OF_MUSICAS||[]).indexOf(n)<0)throw exc('Unable to load asset: "'+p+'". O simulador tem estes sons: '+(window.OF_SONS||[]).map(function(s){return 'sons/'+s+'.wav'}).join(', ')+' e estas músicas: '+(window.OF_MUSICAS||[]).map(function(s){return 'sons/'+s+'.mp3'}).join(', '));return n}
 function isMusica(n){return (window.OF_MUSICAS||[]).indexOf(n)>=0}
 function audioPlay(v,n,vol){if(v.au.h!=null&&window.OF_MUSIC){window.OF_MUSIC.stop(v.au.h);v.au.h=null}if(isMusica(n)){if(window.OF_MUSIC)v.au.h=window.OF_MUSIC.play(n,vol,!!v.au.loop);return}if(v.au.loop&&window.OF_MUSIC){v.au.h=window.OF_MUSIC.playSfxLoop(n,vol);return}sfx(n,vol)}
 function assetOk(path){var p=String(path);if(window.OF_SPRITES&&window.OF_SPRITES[p])return true;try{somOf(p);return true}catch(e){return false}}
