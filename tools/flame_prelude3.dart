@@ -494,6 +494,8 @@ class Body {
   Vector2 worldPoint(Vector2 local) => __b2PontoMundo(this, local);
   Vector2 localPoint(Vector2 ponto) => __b2PontoLocal(this, ponto);
   Vector2 worldVector(Vector2 local) => __b2VetorMundo(this, local);
+  Vector2 localVector(Vector2 v) => __b2VetorLocal(this, v);
+  List<Joint> get joints => world.joints.where((j) => j.def.bodyA == this || j.def.bodyB == this).toList();
 }
 
 class Forge2DWorld extends World {
@@ -504,7 +506,23 @@ class Forge2DWorld extends World {
       : gravity = gravity ?? Vector2(0, 10),
         super(children: children);
 
+  List<Joint> joints = [];
+
   Forge2DWorld get physicsWorld => this;
+
+  Joint createJoint(Joint j) {
+    joints.add(j);
+    return j;
+  }
+
+  void destroyJoint(Joint j) {
+    j.destruido = true;
+    joints.remove(j);
+  }
+
+  void raycast(dynamic callback, Vector2 inicio, Vector2 fim) {
+    __b2Raio(this, callback, inicio, fim);
+  }
 
   void setGravity(Vector2 g) {
     gravity = g.clone();
@@ -519,6 +537,7 @@ class Forge2DWorld extends World {
   void destroyBody(Body b) {
     b.destruido = true;
     bodies.remove(b);
+    joints.removeWhere((j) => j.def.bodyA == b || j.def.bodyB == b);
   }
 
   @override
@@ -535,6 +554,180 @@ class Forge2DGame extends FlameGame {
 
   Vector2 screenToWorld(Vector2 p) => __flTelaParaMundo(this, p);
   Vector2 worldToScreen(Vector2 p) => __flMundoParaTela(this, p);
+}
+
+// ---- juntas
+class JointDef {
+  Body? bodyA;
+  Body? bodyB;
+  Vector2 localAnchorA = Vector2.zero();
+  Vector2 localAnchorB = Vector2.zero();
+  bool collideConnected = false;
+  dynamic userData;
+}
+
+class RevoluteJointDef extends JointDef {
+  double referenceAngle = 0;
+  bool enableLimit = false;
+  double lowerAngle = 0;
+  double upperAngle = 0;
+  bool enableMotor = false;
+  double motorSpeed = 0;
+  double maxMotorTorque = 0;
+
+  void initialize(Body a, Body b, Vector2 ancora) {
+    bodyA = a;
+    bodyB = b;
+    localAnchorA = a.localPoint(ancora);
+    localAnchorB = b.localPoint(ancora);
+    referenceAngle = b.angle - a.angle;
+  }
+}
+
+class WeldJointDef extends JointDef {
+  double referenceAngle = 0;
+  double frequencyHz = 0;
+  double dampingRatio = 0;
+
+  void initialize(Body a, Body b, Vector2 ancora) {
+    bodyA = a;
+    bodyB = b;
+    localAnchorA = a.localPoint(ancora);
+    localAnchorB = b.localPoint(ancora);
+    referenceAngle = b.angle - a.angle;
+  }
+}
+
+class DistanceJointDef extends JointDef {
+  double length = 1;
+  double frequencyHz = 0;
+  double dampingRatio = 0;
+
+  void initialize(Body a, Body b, Vector2 ancoraA, Vector2 ancoraB) {
+    bodyA = a;
+    bodyB = b;
+    localAnchorA = a.localPoint(ancoraA);
+    localAnchorB = b.localPoint(ancoraB);
+    length = ancoraA.distanceTo(ancoraB);
+  }
+}
+
+class RopeJointDef extends JointDef {
+  double maxLength = 1;
+}
+
+class PrismaticJointDef extends JointDef {
+  Vector2 localAxisA = Vector2(1, 0);
+  double referenceAngle = 0;
+  bool enableLimit = false;
+  double lowerTranslation = 0;
+  double upperTranslation = 0;
+  bool enableMotor = false;
+  double motorSpeed = 0;
+  double maxMotorForce = 0;
+
+  void initialize(Body a, Body b, Vector2 ancora, Vector2 eixo) {
+    bodyA = a;
+    bodyB = b;
+    localAnchorA = a.localPoint(ancora);
+    localAnchorB = b.localPoint(ancora);
+    localAxisA = a.localVector(eixo).normalized();
+    referenceAngle = b.angle - a.angle;
+  }
+}
+
+class MouseJointDef extends JointDef {
+  Vector2 target = Vector2.zero();
+  double maxForce = 0;
+  double frequencyHz = 5;
+  double dampingRatio = 0.7;
+}
+
+class Joint {
+  dynamic def;
+  String tipo;
+  bool destruido = false;
+
+  Joint(this.def, this.tipo);
+
+  Body get bodyA => def.bodyA;
+  Body get bodyB => def.bodyB;
+  Vector2 get anchorA => tipo == 'mouse' ? def.target.clone() : bodyA.worldPoint(def.localAnchorA);
+  Vector2 get anchorB => bodyB.worldPoint(def.localAnchorB);
+  dynamic get userData => def.userData;
+  double get jointAngle => bodyB.angle - bodyA.angle - def.referenceAngle;
+  double get jointSpeed => bodyB.angularVelocity - bodyA.angularVelocity;
+  double get motorSpeed => def.motorSpeed;
+  bool get isMotorEnabled => def.enableMotor;
+  bool get isLimitEnabled => def.enableLimit;
+  double get length => def.length;
+  Vector2 get target => def.target;
+
+  void setMotorSpeed(double v) {
+    def.motorSpeed = v;
+  }
+
+  void enableMotor(bool v) {
+    def.enableMotor = v;
+  }
+
+  void enableLimit(bool v) {
+    def.enableLimit = v;
+  }
+
+  void setLimits(double inferior, double superior) {
+    if (tipo == 'prismatic') {
+      def.lowerTranslation = inferior;
+      def.upperTranslation = superior;
+    } else {
+      def.lowerAngle = inferior;
+      def.upperAngle = superior;
+    }
+  }
+
+  void setMaxMotorTorque(double v) {
+    def.maxMotorTorque = v;
+  }
+
+  void setMaxMotorForce(double v) {
+    def.maxMotorForce = v;
+  }
+
+  void setTarget(Vector2 alvo) {
+    def.target = alvo.clone();
+  }
+
+  void setLength(double v) {
+    def.length = v;
+  }
+}
+
+class RevoluteJoint extends Joint {
+  RevoluteJoint(RevoluteJointDef d) : super(d, 'revolute');
+}
+
+class WeldJoint extends Joint {
+  WeldJoint(WeldJointDef d) : super(d, 'weld');
+}
+
+class DistanceJoint extends Joint {
+  DistanceJoint(DistanceJointDef d) : super(d, 'distance');
+}
+
+class RopeJoint extends Joint {
+  RopeJoint(RopeJointDef d) : super(d, 'rope');
+}
+
+class PrismaticJoint extends Joint {
+  PrismaticJoint(PrismaticJointDef d) : super(d, 'prismatic');
+}
+
+class MouseJoint extends Joint {
+  MouseJoint(MouseJointDef d) : super(d, 'mouse');
+}
+
+abstract class RayCastCallback {
+  double reportFixture(Fixture fixture, Vector2 point, Vector2 normal, double fraction);
 }
 
 mixin ContactCallbacks {
@@ -677,6 +870,7 @@ class RenderableTiledMap {
   RenderableTiledMap(this.map, this.destTileSize, this.dados);
 
   dynamic getLayer(String nome) => map.layerByName(nome);
+  bool get isometric => __tlIso(this);
 }
 
 class TiledComponent extends PositionComponent {
@@ -684,7 +878,7 @@ class TiledComponent extends PositionComponent {
 
   TiledComponent(RenderableTiledMap mapa, {Vector2? position, int? priority})
       : tileMap = mapa,
-        super(position: position, size: Vector2(mapa.map.width * mapa.destTileSize.x, mapa.map.height * mapa.destTileSize.y), priority: priority);
+        super(position: position, size: __tlTamanho(mapa), priority: priority);
 
   static Future<TiledComponent> load(String arquivo, Vector2 destTileSize, {int? priority, String? prefix}) async {
     final d = __tlCarregar(arquivo);

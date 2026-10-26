@@ -4383,7 +4383,7 @@ class Bola extends BodyComponent {
         ['Gravidade ao contrário', 'No construtor do jogo, troque Vector2(0, 10) por Vector2(0, -10). Toque e veja as bolas caírem para cima.', r'gravity:\s*Vector2\(\s*[-\d.]+\s*,\s*-\s*\d'],
         ['Torre mais alta', 'No for das caixas, troque i < 6 por i < 10.', r'i\s*<\s*(?!6\b)\d+\s*;'],
     ],
-    lim='O Forge2D do simulador é uma versão simplificada do Box2D: tem corpos estáticos, dinâmicos e cinemáticos, círculos, polígonos convexos, arestas e correntes, atrito, quique, impulsos, forças e contatos, mas não tem juntas (joints), raycast nem corpos dormindo.',
+    lim='O Forge2D do simulador é uma versão simplificada do Box2D: tem corpos estáticos, dinâmicos e cinemáticos, círculos, polígonos convexos, arestas e correntes, atrito, quique, impulsos, forças e contatos, e as juntas da próxima aula, mas não tem corpos dormindo nem CCD (corpos muito rápidos podem atravessar paredes finas).',
     setup=SETUP_FORGE2D,
 )
 
@@ -4540,6 +4540,300 @@ class Alvo extends BodyComponent with ContactCallbacks {
 )
 
 aula(
+    'Forge2D: juntas e raio',
+    'Juntas (joints) prendem dois corpos um ao outro. A RevoluteJoint é um pino: os corpos giram em volta de um ponto '
+    'comum, como o pêndulo, que fica pendurado num eixo estático. Com enableMotor, motorSpeed (em radianos por segundo) '
+    'e maxMotorTorque, o pino vira um motor, e o catavento gira sozinho e empurra o que encontrar. A junta nasce de um '
+    'JointDef: initialize(corpoA, corpoB, ponto) calcula as posições, e world.createJoint(RevoluteJoint(def)) cria a '
+    'junta no mundo. Repare que o eixo é um corpo criado dentro do createBody, só para segurar a outra ponta. A '
+    'MouseJoint é a junta do arrasto: ela puxa um corpo até target com uma força limitada por maxForce, e setTarget '
+    'muda o alvo enquanto o dedo anda. O raio (raycast) responde à pergunta "o que existe nessa linha?": '
+    'world.raycast(callback, de, até) chama reportFixture para cada contorno atravessado, com o ponto, a normal e a '
+    'fração do caminho; devolver fraction faz o raio parar no mais próximo. O laser usa isso a cada quadro.',
+    'Em ▶ Testar, arraste as caixas laranja com o mouse ou o dedo e jogue uma no catavento. Tire as caixas da frente do '
+    'laser e veja o ponto vermelho andar. Acelere o motor, troque o pino do pêndulo por uma corda e suba o laser.',
+    r'''import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(GameWidget(game: Parque()));
+
+class Parque extends Forge2DGame with DragCallbacks {
+  Parque() : super(gravity: Vector2(0, 20), zoom: 12);
+
+  late Chao chao;
+  final caixas = <Caixa>[];
+  MouseJoint? puxador;
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    chao = Chao();
+    await world.add(chao);
+    final pendulo = Pendulo();
+    await world.add(pendulo);
+    await world.add(Corda(pendulo));
+    await world.add(Catavento());
+    for (var i = 0; i < 4; i++) {
+      final caixa = Caixa(Vector2(-10 + i * 2.5, 18));
+      caixas.add(caixa);
+      await world.add(caixa);
+    }
+    await world.add(Laser());
+  }
+
+  @override
+  void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
+    final ponto = screenToWorld(event.localPosition);
+    for (final caixa in caixas) {
+      if (caixa.body.position.distanceTo(ponto) < 2) {
+        final def = MouseJointDef()
+          ..bodyA = chao.body
+          ..bodyB = caixa.body
+          ..maxForce = 2000 * caixa.body.mass
+          ..target.setFrom(ponto);
+        puxador = MouseJoint(def);
+        world.createJoint(puxador!);
+        break;
+      }
+    }
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    puxador?.setTarget(screenToWorld(event.canvasEndPosition));
+  }
+
+  @override
+  void onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
+    if (puxador != null) world.destroyJoint(puxador!);
+    puxador = null;
+  }
+}
+
+class Chao extends BodyComponent {
+  Chao() : super(paint: Paint()..color = Colors.brown);
+
+  @override
+  Body createBody() {
+    final corpo = world.createBody(BodyDef(position: Vector2(0, 24)));
+    corpo.createFixture(FixtureDef(PolygonShape()..setAsBoxXY(16, 1), friction: 0.6));
+    return corpo;
+  }
+}
+
+class Pendulo extends BodyComponent {
+  Pendulo() : super(paint: Paint()..color = Colors.indigo);
+
+  @override
+  Body createBody() {
+    final eixo = world.createBody(BodyDef(position: Vector2(-8, -20)));
+    final bola = world.createBody(BodyDef(position: Vector2(0, -20), type: BodyType.dynamic));
+    bola.createFixture(FixtureDef(CircleShape()..radius = 1.5, density: 4));
+    final def = RevoluteJointDef()..initialize(eixo, bola, eixo.position);
+    world.createJoint(RevoluteJoint(def));
+    return bola;
+  }
+}
+
+class Corda extends Component {
+  final Pendulo pendulo;
+  Corda(this.pendulo);
+
+  @override
+  void render(Canvas canvas) {
+    final eixo = Vector2(-8, -20);
+    canvas.drawLine(eixo.toOffset(), pendulo.body.position.toOffset(), Paint()..color = Colors.white70..strokeWidth = 0.15);
+    canvas.drawCircle(eixo.toOffset(), 0.4, Paint()..color = Colors.white);
+  }
+}
+
+class Catavento extends BodyComponent {
+  Catavento() : super(paint: Paint()..color = Colors.teal);
+
+  @override
+  Body createBody() {
+    final eixo = world.createBody(BodyDef(position: Vector2(8, 6)));
+    final pa = world.createBody(BodyDef(position: Vector2(8, 6), type: BodyType.dynamic));
+    pa.createFixture(FixtureDef(PolygonShape()..setAsBoxXY(6, 0.5), density: 1));
+    final def = RevoluteJointDef()..initialize(eixo, pa, eixo.position);
+    def.enableMotor = true;
+    def.motorSpeed = 2;
+    def.maxMotorTorque = 3000;
+    world.createJoint(RevoluteJoint(def));
+    return pa;
+  }
+}
+
+class Caixa extends BodyComponent {
+  final Vector2 inicio;
+  Caixa(this.inicio) : super(paint: Paint()..color = Colors.orange);
+
+  @override
+  Body createBody() {
+    final corpo = world.createBody(BodyDef(position: inicio, type: BodyType.dynamic));
+    corpo.createFixture(FixtureDef(PolygonShape()..setAsBoxXY(1, 1), density: 1, friction: 0.5));
+    return corpo;
+  }
+}
+
+class Mira extends RayCastCallback {
+  Vector2? ponto;
+
+  @override
+  double reportFixture(Fixture fixture, Vector2 point, Vector2 normal, double fraction) {
+    ponto = point.clone();
+    return fraction;
+  }
+}
+
+class Laser extends Component with HasGameReference<Parque> {
+  final origem = Vector2(-16, 21.5);
+  final fim = Vector2(16, 21.5);
+  Vector2 alvo = Vector2(16, 21.5);
+
+  @override
+  void update(double dt) {
+    final mira = Mira();
+    game.world.raycast(mira, origem, fim);
+    alvo = mira.ponto ?? fim;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawLine(origem.toOffset(), alvo.toOffset(), Paint()..color = Colors.red..strokeWidth = 0.25);
+    canvas.drawCircle(alvo.toOffset(), 0.5, Paint()..color = Colors.redAccent);
+  }
+}
+''',
+    [
+        ['Motor mais rápido', 'No Catavento, troque def.motorSpeed = 2 por 5 (e um valor negativo gira ao contrário).', r'motorSpeed\s*=\s*(?!2\s*;)-?[\d.]+'],
+        ['Pêndulo de corda', 'No Pendulo, troque a RevoluteJoint por uma DistanceJoint: final def = DistanceJointDef()..initialize(eixo, bola, eixo.position, bola.position); e world.createJoint(DistanceJoint(def)). A distância entre o eixo e a bola fica fixa, mas a bola pode girar sobre si mesma.', r'DistanceJoint\('],
+        ['Laser mais alto', 'No Laser, troque o y de origem, fim e alvo de 21.5 para 19: o raio passa por cima das caixas paradas e só acerta as que você levantar.', r'origem\s*=\s*Vector2\(\s*-16\s*,\s*(?!21\.5\b)[\d.]+'],
+    ],
+    lim='No simulador as juntas são resolvidas por uma versão simplificada do Box2D: RevoluteJoint, WeldJoint, DistanceJoint, RopeJoint, PrismaticJoint e MouseJoint. GearJoint, PulleyJoint, WheelJoint e FrictionJoint não existem.',
+    setup=SETUP_FORGE2D,
+)
+
+aula(
+    'Sensores: inclinar o celular',
+    'O celular sabe para que lado está inclinado graças ao acelerômetro, que mede a gravidade em cada eixo, em m/s². '
+    'Deitado na mesa, ele marca x 0, y 0 e z 9,8; inclinado para a direita, x fica negativo, e com o topo para baixo, y '
+    'fica negativo. O pacote sensors_plus entrega essas leituras num Stream: accelerometerEventStream(samplingPeriod: '
+    'SensorInterval.gameInterval).listen(...) recebe um AccelerometerEvent com x, y e z umas 50 vezes por segundo. '
+    'Aqui o listen só guarda a inclinação em ax e ay; quem move a bola é o Ticker, como na Parte 1: a inclinação '
+    'vira aceleração, a aceleração muda a velocidade, e a velocidade muda a posição. Multiplicar a velocidade por 0.99 '
+    'a cada quadro é o atrito, e inverter a velocidade pela metade nas bordas faz a bola quicar. Guarde a assinatura '
+    '(StreamSubscription) e cancele no dispose, senão o sensor continua ligado depois que a tela fecha.',
+    'Em ▶ Testar no computador, arraste a bolinha do painel 📐 Inclinar o celular e leve a bola branca até o anel. '
+    'Abra o app no celular pelo endereço do site e incline o aparelho de verdade. Depois deixe a bola mais pesada, '
+    'aumente o atrito e o quique.',
+    r'''import 'dart:async';
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:sensors_plus/sensors_plus.dart';
+
+void main() => runApp(const MaterialApp(home: Inclina()));
+
+class Inclina extends StatefulWidget {
+  const Inclina({super.key});
+  @override
+  State<Inclina> createState() => _InclinaState();
+}
+
+class _InclinaState extends State<Inclina> with SingleTickerProviderStateMixin {
+  final sorteio = Random();
+  late Ticker ticker;
+  StreamSubscription<AccelerometerEvent>? sensor;
+  Duration anterior = Duration.zero;
+
+  double ax = 0, ay = 0;
+  double x = 160, y = 300, vx = 0, vy = 0;
+  double alvoX = 80, alvoY = 120;
+  int pontos = 0;
+
+  static const raio = 18.0;
+  static const largura = 360.0;
+  static const altura = 600.0;
+
+  @override
+  void initState() {
+    super.initState();
+    sensor = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval).listen((AccelerometerEvent e) {
+      ax = -e.x;
+      ay = e.y;
+    });
+    ticker = createTicker(passo)..start();
+  }
+
+  void passo(Duration agora) {
+    final dt = (agora - anterior).inMicroseconds / 1000000;
+    anterior = agora;
+    if (dt <= 0 || dt > 0.1) return;
+    setState(() {
+      vx = (vx + ax * 60 * dt) * 0.99;
+      vy = (vy + ay * 60 * dt) * 0.99;
+      x += vx * dt;
+      y += vy * dt;
+      if (x < raio) { x = raio; vx = -vx * 0.5; }
+      if (x > largura - raio) { x = largura - raio; vx = -vx * 0.5; }
+      if (y < raio) { y = raio; vy = -vy * 0.5; }
+      if (y > altura - raio) { y = altura - raio; vy = -vy * 0.5; }
+      final dx = x - alvoX, dy = y - alvoY;
+      if (sqrt(dx * dx + dy * dy) < 30) {
+        pontos++;
+        alvoX = 40 + sorteio.nextDouble() * (largura - 80);
+        alvoY = 60 + sorteio.nextDouble() * (altura - 120);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    sensor?.cancel();
+    ticker.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF14213D),
+      body: Stack(children: [
+        Positioned(
+          left: alvoX - 30,
+          top: alvoY - 30,
+          child: Container(width: 60, height: 60, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.amber, width: 4))),
+        ),
+        Positioned(
+          left: x - raio,
+          top: y - raio,
+          child: Container(width: raio * 2, height: raio * 2, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+        ),
+        Positioned(
+          left: 16,
+          top: 16,
+          child: Text('Pontos: $pontos   inclinação ${ax.toStringAsFixed(1)}, ${ay.toStringAsFixed(1)}', style: const TextStyle(color: Colors.white, fontSize: 16)),
+        ),
+      ]),
+    );
+  }
+}
+''',
+    [
+        ['Bola mais ágil', 'Em passo, troque ax * 60 e ay * 60 por ax * 120 e ay * 120: a mesma inclinação acelera o dobro.', r'ax\s*\*\s*(?!60\b)\d+'],
+        ['Mais atrito', 'Troque os dois * 0.99 por * 0.95: a bola perde velocidade mais depressa.', r'\)\s*\*\s*(?!0\.99\b)0\.\d+\s*;'],
+        ['Quique maior', 'Nas bordas, troque -vx * 0.5 e -vy * 0.5 por -vx * 0.8 e -vy * 0.8.', r'vx\s*=\s*-vx\s*\*\s*(?!0\.5\b)[\d.]+'],
+    ],
+    lim='No computador, o painel 📐 Inclinar o celular faz o papel do acelerômetro: arraste a bolinha ou toque em Nivelar. No celular, aberto pelo endereço do site, o simulador usa o sensor de verdade; no iPhone, toque na tela uma vez para permitir o acesso aos sensores de movimento.',
+    setup='No terminal do projeto:\n  flutter pub add sensors_plus\n\nNo iPhone, acrescente NSMotionUsageDescription ao ios/Runner/Info.plist com uma frase explicando por que o jogo usa o movimento do aparelho.',
+)
+
+aula(
     'Tiled: mapas prontos',
     'Montar fase bloco por bloco no código é trabalhoso. O Tiled é um editor de mapas gratuito: você pinta os blocos '
     'numa grade, separa em camadas (chão, paredes, decoração) e marca objetos, como o ponto de partida e as moedas, '
@@ -4666,7 +4960,7 @@ class Moeda extends SpriteAnimationComponent with HasGameReference<Arena> {
         ['Quantas faltam', "No pegou, mostre também quantas faltam: world.children.query<Moeda>().length - 1 (a moeda que acabou de ser pega ainda está saindo).", r'children\.query<\s*Moeda\s*>\(\)'],
         ['Outro mapa', "Troque 'arena.tmx' por 'fase1.tmx', a fase de plataforma vista de lado. O herói começa no objeto inicio dela, mas anda solto pelo ar: este código não tem gravidade. As paredes da camada solidos continuam valendo.", r"TiledComponent\.load\(\s*'(?!arena\.tmx')[\w.-]+\.tmx'"],
     ],
-    lim='O simulador lê mapas ortogonais (blocos quadrados) com as camadas em CSV ou base64 sem compressão e o tileset incorporado no .tmx. Camadas de imagem, blocos animados e mapas infinitos não são desenhados.',
+    lim='O simulador lê mapas ortogonais e isométricos com as camadas em CSV ou base64 sem compressão e o tileset incorporado no .tmx, incluindo camadas de imagem e blocos animados. Mapas infinitos e tilesets externos (.tsx) não são lidos.',
     setup=SETUP_TILED,
 )
 

@@ -11,8 +11,11 @@ import pathlib
 OUT = pathlib.Path(__file__).resolve().parent / 'maps'
 OUT.mkdir(exist_ok=True)
 T = 16
-TILESET = ('<tileset firstgid="1" name="tiles" tilewidth="16" tileheight="16" tilecount="16" columns="8">\n'
-           '  <image source="tiles.png" width="128" height="32"/>\n </tileset>')
+TILESET = ('<tileset firstgid="1" name="tiles" tilewidth="16" tileheight="16" tilecount="24" columns="8">\n'
+           '  <image source="tiles.png" width="128" height="48"/>\n'
+           '  <tile id="5"><animation><frame tileid="5" duration="300"/><frame tileid="16" duration="300"/><frame tileid="17" duration="300"/></animation></tile>\n'
+           '  <tile id="18"><animation><frame tileid="18" duration="120"/><frame tileid="19" duration="120"/><frame tileid="20" duration="120"/></animation></tile>\n'
+           ' </tileset>')
 
 
 def csv(grid):
@@ -102,6 +105,8 @@ AW, AH = len(ARENA[0]), len(ARENA)
 chao = [[7 if (x + y) % 2 == 0 else 8 for x in range(AW)] for y in range(AH)]
 paredes = [[3 if ARENA[y][x] == 'P' else 0 for x in range(AW)] for y in range(AH)]
 deco = [[10 if ARENA[y][x] == 'f' else (9 if ARENA[y][x] == 'A' else 0) for x in range(AW)] for y in range(AH)]
+for (tx, ty) in ((5, 3), (14, 3), (4, 13), (14, 13), (7, 9), (12, 9)):
+    deco[ty][tx] = 19
 nid = 1
 sol = []
 for r in rects(paredes, {3}):
@@ -179,4 +184,33 @@ for y in range(FH):
         nid += 1
 (OUT / 'fase1.tmx').write_text(tmx(FW, FH, [layer(1, 'fundo', fundo), layer(2, 'blocos', blocos),
                                               objgroup(3, 'solidos', sol), objgroup(4, 'objetos', objs)], nid))
+# ---------------------------------------------------------------- mapa isométrico
+ISO = [
+    'GGGGGGGGGGGG',
+    'GGGGGWWGGGGG',
+    'GGSGGWWGGSGG',
+    'GGGGGGGGGGGG',
+    'GDDGGGGGGDDG',
+    'GGGGGSGGGGGG',
+    'GGGGGGGGWWGG',
+    'GSGGDGGGWWGG',
+    'GGGGGGGGGGGG',
+    'GGGDDGGGGSGG',
+    'GGGGGGGGGGGG',
+    'GGGGGGGGGGGG',
+]
+IW, IH = len(ISO[0]), len(ISO)
+chao_iso = [[{'G': 1, 'W': 3}.get(ISO[y][x], 1) for x in range(IW)] for y in range(IH)]
+blocos_iso = [[{'S': 4, 'D': 2}.get(ISO[y][x], 0) for x in range(IW)] for y in range(IH)]
+nid = 1
+objs = []
+for (x, y) in ((1, 1), (10, 1), (6, 4), (3, 10), (10, 10), (7, 8)):
+    objs.append({'id': nid, 'name': 'moeda', 'type': 'moeda', 'x': x * 16 + 8, 'y': y * 16 + 8})
+    nid += 1
+TS_ISO = ('<tileset firstgid="1" name="iso" tilewidth="32" tileheight="32" tilecount="4" columns="4">\n'
+          '  <image source="tiles_iso.png" width="128" height="32"/>\n </tileset>')
+(OUT / 'iso.tmx').write_text('<?xml version="1.0" encoding="UTF-8"?>\n'
+    f'<map version="1.10" tiledversion="1.10.2" orientation="isometric" renderorder="right-down" width="{IW}" height="{IH}" '
+    f'tilewidth="32" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="{nid}">\n ' + TS_ISO + '\n'
+    + '\n'.join([layer(1, 'chao', chao_iso), layer(2, 'blocos', blocos_iso), objgroup(3, 'objetos', objs)]) + '\n</map>\n')
 print('\n'.join(str(p) for p in sorted(OUT.glob('*.tmx'))))

@@ -411,9 +411,52 @@ tiles = sheet([grama_topo(), bloco(PAL['n'], (PAL['N'], PAL['m']), 0.12), pedra(
                piso((214, 200, 168), (190, 174, 140)), piso((168, 176, 150), (146, 154, 128)),
                arbusto(), flor(), placa(), porta(), espinhos(), escada(),
                bloco((190, 230, 248), ((220, 244, 255), (160, 210, 236)), 0.15), bloco((236, 210, 140), ((220, 192, 120), (246, 226, 164)), 0.2)])
-tiles_img = Image.new('RGBA', (128, 32), (0, 0, 0, 0))
+
+
+def agua_quadro(desl):
+    b = bloco((52, 120, 220), ((70, 140, 230), (44, 104, 200)), 0.15)
+    d = ImageDraw.Draw(b)
+    pts = []
+    for x in range(0, 17, 4):
+        pts += [x, 2 if ((x // 4 + desl) % 2 == 0) else 1]
+    d.line(pts, fill=(160, 210, 250, 255))
+    d.point(((5 + desl * 5) % 16, 8), fill=(160, 210, 250, 255))
+    return b
+
+
+def tocha(q):
+    b = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(b)
+    d.rectangle([7, 8, 8, 15], fill=PAL['N'] + (255,))
+    chama = [(4, 8, 11, 2), (5, 8, 10, 3), (4, 8, 11, 1)][q]
+    d.ellipse([chama[0], chama[3], chama[2], chama[1] + 1], fill=PAL['f'] + (255,))
+    d.ellipse([chama[0] + 2, chama[3] + 2, chama[2] - 2, chama[1]], fill=PAL['y'] + (255,))
+    return b
+
+
+tiles_img = Image.new('RGBA', (128, 48), (0, 0, 0, 0))
 tiles_img.paste(tiles.crop((0, 0, 128, 16)), (0, 0))
 tiles_img.paste(tiles.crop((128, 0, 256, 16)), (0, 16))
+for i, t in enumerate([agua_quadro(1), agua_quadro(2), tocha(0), tocha(1), tocha(2)]):
+    tiles_img.paste(t, (i * 16, 32))
+
+# ---- blocos isométricos (losangos 32x16 com 8 de altura extra para o bloco)
+def losango(topo, lado1, lado2, alto=True):
+    b = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
+    d = ImageDraw.Draw(b)
+    y0 = 8 if alto else 16
+    if alto:
+        d.polygon([(0, y0 + 8), (16, y0 + 16), (16, 32), (0, 24)], fill=lado1 + (255,))
+        d.polygon([(16, y0 + 16), (32, y0 + 8), (32, 24), (16, 32)], fill=lado2 + (255,))
+    d.polygon([(16, y0), (32, y0 + 8), (16, y0 + 16), (0, y0 + 8)], fill=topo + (255,))
+    return b
+
+
+iso = Image.new('RGBA', (128, 32), (0, 0, 0, 0))
+for i, t in enumerate([losango((96, 196, 86), (70, 150, 60), (50, 120, 46), False), losango((150, 96, 54), (120, 76, 42), (98, 60, 34)),
+                       losango((52, 120, 220), (40, 100, 190), (30, 80, 160), False), losango((150, 156, 170), (120, 126, 140), (95, 100, 115))]):
+    iso.paste(t, (i * 32, 0))
+
 
 SPRITES = [
     ('heroi', heroi, 4, 'Herói andando para a direita (4 quadros de 16×16)'),
@@ -430,7 +473,8 @@ SPRITES = [
     ('ceu', ceu, 1, 'Fundo de céu para parallax (128×224)'),
     ('montanhas', montanhas, 1, 'Montanhas com fundo transparente, para parallax (128×224)'),
     ('colinas', colinas, 1, 'Colinas com árvores, fundo transparente, para parallax (128×224)'),
-    ('tiles', tiles_img, 1, 'Blocos para mapas do Tiled: 8 colunas × 2 linhas de 16×16'),
+    ('tiles', tiles_img, 1, 'Blocos para mapas do Tiled: 8 colunas × 3 linhas de 16×16 (a última traz quadros de água e tocha)'),
+    ('tiles_iso', iso, 1, 'Blocos isométricos para o Tiled: 4 de 32×32 (grama, terra, água, pedra)'),
 ]
 
 manifest = []

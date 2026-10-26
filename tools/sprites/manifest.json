@@ -115,8 +115,16 @@
   "nome": "tiles",
   "caminho": "assets/sprites/tiles.png",
   "largura": 128,
+  "altura": 48,
+  "quadros": 1,
+  "desc": "Blocos para mapas do Tiled: 8 colunas × 3 linhas de 16×16 (a última traz quadros de água e tocha)"
+ },
+ {
+  "nome": "tiles_iso",
+  "caminho": "assets/sprites/tiles_iso.png",
+  "largura": 128,
   "altura": 32,
   "quadros": 1,
-  "desc": "Blocos para mapas do Tiled: 8 colunas × 2 linhas de 16×16"
+  "desc": "Blocos isométricos para o Tiled: 4 de 32×32 (grama, terra, água, pedra)"
  }
 ]
