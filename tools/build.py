@@ -11,7 +11,7 @@ import json, re, sys, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'tools'))
-import patch_engine, patch_input, patch_media, patch_flame, patch_limits, patch_extra, patch_draw, patch_dart, patch_sens, patch_ui, patch_widgets, patch_data, patch_plat, solucoes, lessons  # noqa: E402
+import patch_engine, patch_input, patch_media, patch_flame, patch_limits, patch_extra, patch_draw, patch_dart, patch_sens, patch_ui, patch_widgets, patch_data, patch_plat, patch_leitura, solucoes, lessons  # noqa: E402
 
 
 def sub1(src, old, new, label):
@@ -42,6 +42,9 @@ def lessons_js():
             o['lim'] = L['lim']
         if L.get('setup'):
             o['setup'] = L['setup']
+        if L.get('leitura'):
+            o['leitura'] = L['leitura']
+            o['quiz'] = L.get('quiz') or []
         out.append(js(o))
     return 'var LESSONS=[\n' + ',\n'.join(out) + '\n];\n'
 
@@ -62,6 +65,7 @@ def build():
     src = patch_data.patch(src)
     src = patch_data.patch_limits(src)
     src = patch_plat.patch(src)
+    src = patch_leitura.patch(src)
 
     # marca e textos do cabeçalho
     src = sub1(src, '<title>Oficina Flutter</title>', '<title>Oficina Flutter 2</title>', 'title')
@@ -100,6 +104,7 @@ def build():
     src = patch_limits.finish(src)
     src = src + patch_extra.SPRITES_UI_EXTRA + patch_sens.PAD + patch_widgets.CSS + patch_data.CSS
     src = patch_plat.finish(src)
+    src = patch_leitura.finish(src)
     (ROOT / 'index.html').write_text(src, encoding='utf-8')
     import hashlib
     patch_plat.write_pwa(ROOT, hashlib.sha1(src.encode()).hexdigest()[:10])

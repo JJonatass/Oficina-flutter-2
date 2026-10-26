@@ -1,10 +1,14 @@
 # Oficina Flutter 2 · Jogos
 
-Simulador de Flutter no navegador com a trilha de jogos 2D, em 42 aulas e 5 projetos: laço do jogo, Ticker e
+Simulador de Flutter no navegador com a trilha de jogos 2D, em 51 aulas e 5 projetos: laço do jogo, Ticker e
 delta time, CustomPainter, toque, arrasto, teclado, sprites, som, efeitos visuais, Flame (componentes, efeitos,
 partículas, paralaxe, overlays), joystick, Forge2D (corpos, impulsos, contatos, juntas e raycast), sensores de
 movimento, mapas do Tiled, inimigos com máquina de estados, recorde com Hive e ranking com Supabase.
 O herói é um vira-lata caramelo.
+
+Nove aulas são de leitura (📖), com texto, figuras animadas, um teste rápido e um código para experimentar:
+matemática de jogos (vetores, ângulos, interpolação), game design (ciclo principal, dificuldade, game feel)
+e arte e som (pixel art, princípios de animação, efeitos e música).
 
 Na página:
 - **⬇ Projeto** baixa a aula aberta como projeto Flutter (.zip com pubspec.yaml, lib/main.dart, sprites, sons e mapas).
@@ -29,6 +33,8 @@ O `index.html` é gerado; para mudar aulas ou o motor, edite `tools/` e rode:
 - `tools/patch_widgets.py`: Overlay, Cupertino, PaginatedDataTable, Provider e go_router
 - `tools/patch_data.py`: Hive, Supabase, Google Fonts e NestedScrollView
 - `tools/patch_plat.py`: respostas do modo professor, ⬇ Projeto (.zip) e PWA (manifest, sw.js e ícones gerados na raiz)
+- `tools/patch_leitura.py`: janela de leitura das aulas 📖, teste rápido e figuras animadas
+- `tools/teoria.py`, `tools/teoria/*.dart`: conteúdo e códigos das aulas de leitura
 - `tools/solucoes.py`: gabarito das etapas dos exercícios (conferido no build)
 - `tools/sprites.py`, `tools/maps.py`: sprites e mapas prontos
 - `tools/lessons.py`: aulas, exercícios e partes

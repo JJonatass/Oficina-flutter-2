@@ -19,7 +19,7 @@ ENGINE = r"""/* ===== Oficina 2: Hive e Supabase simulados ===== */
 if(!DBP.hive)DBP.hive={};if(!DBP.sb)DBP.sb={t:{},seq:{},users:{},cur:null};
 var _dbClear1=ST.dbClear;ST.dbClear=function(){_dbClear1();DBP.hive={};DBP.sb={t:{},seq:{},users:{},cur:null};dbSave()};
 var SBNAT={HiveBox:1,SbInst:1,SbClient:1,SbQ:1,SbAuth:1,SbUser:1,SbSession:1,SbAuthResp:1,SbAuthState:1,AuthException:1,PostgrestException:1,HiveError:1};
-NATCLS.Hive=1;NATCTOR.UserAttributes=1;NATCLS.Supabase=1;NATCLS.AuthChangeEvent=1;
+NATCLS.Hive=1;NATCLS.Color=NATCLS.Color||1;NATCTOR.UserAttributes=1;NATCLS.Supabase=1;NATCLS.AuthChangeEvent=1;
 function hvKey(k){return k instanceof Dbl?k.v:k}
 function hvBox(name){var b=DBP.hive[name];if(!b)b=DBP.hive[name]={e:[],ai:0};return b}
 function hvIdx(b,k){k=hvKey(k);for(var i=0;i<b.e.length;i++)if(b.e[i][0]===k)return i;return -1}
@@ -234,6 +234,42 @@ def patch(src):
         "function stkTipo(c){if(!c)return '';if(!c.unknown)return c.type;var r=String(c.raw||'').trim(),m=/^(?:if|for)\\s*\\(/.exec(r);if(!m)return '';var d=0,i=m[0].length-1;for(;i<r.length;i++){if(r[i]==='(')d++;else if(r[i]===')'){d--;if(d===0)break}}var t=/^\\s*(?:const\\s+)?([A-Z][\\w.]*)/.exec(r.slice(i+1));return t?t[1]:''}\n"
         "function stackFill(n){var ch=n.slots.children||[];if(ch.some(function(c){return c.type==='DraggableScrollableSheet'}))return true;if(!ch.length)return false;return ch.every(function(c){var t=stkTipo(c);return /^(Positioned|AnimatedPositioned|Positioned\\.fill|Positioned\\.directional|Center|Align|SizedBox\\.expand)$/.test(t)})}", 'stackFill if')
     src = sub1(src, "  else{var ast=pTern(p);p.eat(';');val=ev(ast,env);if(lastSusp)fx=lastSusp}", "  else{var ast=pTern(p);p.eat(';');val=sbVal(ev(ast,env));sbFlush();if(lastSusp)fx=lastSusp}", 'await stmt sb')
+    # aulas de teoria: Offset.lerp, ui.lerpDouble e função de topo usada como valor (tear-off)
+    src = sub1(src, "    if(c==='Offset'&&name==='zero')return mkOffset(0,0);",
+        "    if(c==='Offset'&&name==='zero')return mkOffset(0,0);\n"
+        "    if(c==='Offset'&&name==='lerp'){var A0=args[0],B0=args[1],T0=nn(args[2]);if(!A0||!B0)return A0||B0||null;var ax0=nn(A0.f.dx),ay0=nn(A0.f.dy);return mkOffset(ax0+(nn(B0.f.dx)-ax0)*T0,ay0+(nn(B0.f.dy)-ay0)*T0)}", 'offset lerp')
+    src = sub1(src, "      case 'instantiateImageCodec':return{nat:'Codec',",
+        "      case 'lerpDouble':{if(args[0]==null||args[1]==null)return null;var la=nn(args[0]),lb=nn(args[1]);return new Dbl(la+(lb-la)*nn(args[2]))}\n"
+        "      case 'instantiateImageCodec':return{nat:'Codec',", 'lerpDouble')
+    src = sub1(src, "  if(n==='context')return{nat:'#ctx',f:{},src:'context'};",
+        "  if(ST.funcs&&hasOwn(ST.funcs,n)){var gfn=ST.funcs[n];return{lam:true,src:n,pn:[],call:function(args){return runMethod(gfn,args,null)}}}\n"
+        "  if(n==='context')return{nat:'#ctx',f:{},src:'context'};", 'func tearoff')
+    # lista[i](x): chamar a função guardada numa lista ou mapa
+    src = sub1(src, "    else if(p.is('[')){p.i++;var ix=pTern(p);p.need(']');a={t:'idx',o:a,i:ix}}",
+        "    else if(p.is('[')){p.i++;var ix=pTern(p);p.need(']');a={t:'idx',o:a,i:ix}}\n    else if(p.is('(')&&a&&a.t==='idx'){p.i++;a={t:'icall',f:a,args:pArgs(p)}}", 'icall parse')
+    src = sub1(src, "    case 'aw':return sbVal(ev(a.a,env));", "    case 'aw':return sbVal(ev(a.a,env));\n    case 'icall':{var icf=ev(a.f,env);return callLam(icf,a.args.map(function(x){if(x.ast===undefined)throw new Error('arg');return ev(x.ast,env)}))}", 'icall ev')
+    # Color.lerp: o interpretador guarda a expressão e o pintor calcula a cor misturada
+    src = sub1(src, "    if(c==='Offset'&&name==='lerp'){", "    if(c==='Color'&&name==='lerp'){if(args[0]==null||args[1]==null)return args[0]||args[1]||null;return{raw:'Color.lerp('+pcol(args[0])+', '+pcol(args[1])+', '+nn(args[2])+')'}}\n    if(c==='Offset'&&name==='lerp'){", 'color lerp')
+    src = sub1(src, "function pcssColor(raw){\n  if(raw==null)return '#000';raw=String(raw).trim();",
+        "function pcssColor(raw){\n  if(raw==null)return '#000';raw=String(raw).trim();\n"
+        "  if(/^Color\\.lerp\\(/.test(raw)&&/\\)!?$/.test(raw)){var inn=raw.replace(/!$/,'').slice(11,-1),pts=[],dd=0,cur='';for(var ci=0;ci<inn.length;ci++){var ch=inn[ci];if(ch==='('||ch==='[')dd++;else if(ch===')'||ch===']')dd--;if(ch===','&&dd===0){pts.push(cur);cur=''}else cur+=ch}pts.push(cur);\n"
+        "    if(pts.length===3){var rgb=function(x){var s=pcssColor(x.trim()),mm;if((mm=/^#([0-9a-f]{6})$/i.exec(s))){var v=parseInt(mm[1],16);return[v>>16,(v>>8)&255,v&255,1]}if((mm=/^rgba?\\(([^)]*)\\)$/.exec(s))){var q=mm[1].split(',').map(Number);return[q[0],q[1],q[2],q[3]==null||isNaN(q[3])?1:q[3]]}return[136,136,136,1]};var A1=rgb(pts[0]),B1=rgb(pts[1]),T1=Math.max(0,Math.min(1,+pts[2]||0));var o1=A1.map(function(v,i){return v+(B1[i]-v)*T1});return 'rgba('+Math.round(o1[0])+','+Math.round(o1[1])+','+Math.round(o1[2])+','+o1[3].toFixed(3)+')'}}", 'pcss lerp')
+    # funções locais: double x(double t) => ...;  ou  void f() { ... }  dentro de um método
+    src = sub1(src, "  if(tryDecl(p,env,run)){p.eat(';');return}",
+        "  if(localFn(p,env,run))return;\n  if(tryDecl(p,env,run)){p.eat(';');return}", 'local fn hook')
+    src = sub1(src, "function tryDecl(p,env,run){",
+        "function localFn(p,env,run){var t=p.t,i=p.i;\n"
+        "  if(!t[i]||t[i].k!=='id'||/^(return|if|for|while|switch|final|var|const|late|await|throw|else|do|case|new)$/.test(t[i].v))return false;\n"
+        "  var j=i+1;if(t[j]&&t[j].k==='p'&&t[j].v==='<'){var gd=0;for(;j<t.length;j++){if(t[j].v==='<')gd++;else if(t[j].v==='>'){gd--;if(gd===0){j++;break}}}}\n"
+        "  if(t[j]&&t[j].k==='p'&&t[j].v==='?')j++;\n"
+        "  if(!(t[j]&&t[j].k==='id'&&t[j+1]&&t[j+1].k==='p'&&t[j+1].v==='('))return false;\n"
+        "  var nome=t[j].v,a=j+1,d=0,b=a;for(;b<t.length;b++){if(t[b].v==='(')d++;else if(t[b].v===')'){d--;if(d===0)break}}\n"
+        "  var q=t[b+1];if(!q||q.k!=='p'||(q.v!=='=>'&&q.v!=='{'))return false;\n"
+        "  var e=b+2,fim;if(q.v==='=>'){d=0;for(;e<t.length;e++){var v=t[e].v;if(t[e].k==='p'){if(v==='('||v==='['||v==='{')d++;else if(v===')'||v===']'||v==='}')d--;else if(v===';'&&d===0)break}}fim=e}\n"
+        "  else{d=0;for(e=b+1;e<t.length;e++){if(t[e].v==='{')d++;else if(t[e].v==='}'){d--;if(d===0)break}}fim=e}\n"
+        "  var srcFn=p.src.slice(t[a].s,t[b].e)+' '+p.src.slice(q.s,q.v==='=>'?t[fim-1].e:t[fim].e);\n"
+        "  p.i=fim+1;if(run){env.locals=env.locals||{};env.locals[nome]=ev(pTern(new Ps(srcFn)),env)}return true}\n"
+        "function tryDecl(p,env,run){", 'local fn def')
     # Stack só com Positioned ocupa todo o espaço, como no Flutter
     src = sub1(src, "    case 'Stack':{d.className+=' stack';", "    case 'Stack':{d.className+=' stack';if(stackFill(n)&&!(n.slots.children||[]).some(function(c){return c.type==='DraggableScrollableSheet'})){d.style.flex='1 1 0';d.style.alignSelf='stretch';d.style.minHeight='0';d.style.minWidth='0'}", 'stack cheio')
     assert src.count("(FirebaseAuth|FirebaseFirestore)")==3

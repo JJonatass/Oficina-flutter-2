@@ -240,3 +240,19 @@ def resposta(titulo, i, code, desc, rx):
         return [list(x) for x in m]
     g = gabarito(code, desc, rx)
     return [g] if g else None
+
+# Aulas de leitura (tools/teoria.py)
+MANUAL.update({
+    ('Matemática de jogos: vetores', 2): [('if (d.distance > 2) {', 'if (d.distance > 40) {')],
+    ('Matemática de jogos: ângulos, seno e cosseno', 2): [('Offset(cos(tempo), sin(tempo))', 'Offset(cos(-tempo), sin(-tempo))')],
+    ('Matemática de jogos: interpolação e curvas', 1): [('pow(0.02, dt)', 'pow(0.3, dt)')],
+    ('Matemática de jogos: interpolação e curvas', 2): [('double freia(double t) => 1 - (1 - t) * (1 - t);', 'double freia(double t) => 1 - (1 - t) * (1 - t) * (1 - t);')],
+    ('Game design: objetivo, desafio e recompensa', 1): [('pontos += combo;', 'pontos += min(combo, 5);')],
+    ('Game design: objetivo, desafio e recompensa', 2): [('        combo++;\n', '        combo++;\n        tempoLimite = max(0.6, tempoLimite - 0.05);\n')],
+    ('Game design: game feel e "suco"', 2): [('bool comSuco = true;', 'bool comSuco = false;')],
+    ('Arte de jogos: pixel art e paletas', 0): [("  'Malhado': {'C': Color(0xFFF2EEE6), 'D': Color(0xFF6B4A2E), 'L': Color(0xFFC9A27A), 'k': Color(0xFF222034), 't': Color(0xFFEC6878)},\n",
+                                               "  'Malhado': {'C': Color(0xFFF2EEE6), 'D': Color(0xFF6B4A2E), 'L': Color(0xFFC9A27A), 'k': Color(0xFF222034), 't': Color(0xFFEC6878)},\n"
+                                               "  'Dourado': {'C': Color(0xFFE0A100), 'D': Color(0xFF9C6B00), 'L': Color(0xFFFFE08A), 'k': Color(0xFF222034), 't': Color(0xFFEC6878)},\n")],
+    ('Arte de jogos: pixel art e paletas', 2): [("'...DC...CCCC.t..'", "'...DC...CCCC....'")],
+    ('Som de jogos: efeitos e música', 2): [("  'vitoria': Envelope(0.01, 0.1, 0.8, 0.3),\n", "  'vitoria': Envelope(0.01, 0.1, 0.8, 0.3),\n  'dano': Envelope(0.0, 0.15, 0.2, 0.1),\n")],
+})

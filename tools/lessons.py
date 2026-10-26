@@ -5,8 +5,8 @@ LESSONS = []
 EXERCISES = {}
 
 
-def aula(t, text, tryit, code, ex, lim=None, setup=None):
-    LESSONS.append({'t': t, 'text': text, 'tryit': tryit, 'code': code, 'lim': lim, 'setup': setup})
+def aula(t, text, tryit, code, ex, lim=None, setup=None, leitura=None, quiz=None):
+    LESSONS.append({'t': t, 'text': text, 'tryit': tryit, 'code': code, 'lim': lim, 'setup': setup, 'leitura': leitura, 'quiz': quiz})
     EXERCISES[t] = ex
 
 
@@ -6101,3 +6101,7 @@ class Gato extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
 )
 
 PARTS.append(['Projeto · Caça-Ossos', 'Projeto 5 · Caça-Ossos'])
+
+
+import teoria  # noqa: E402
+teoria.inserir(LESSONS, EXERCISES, PARTS)
