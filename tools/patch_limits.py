@@ -40,12 +40,13 @@ window.OF_MUSIC=(function(){
   function stop(id){var it=live[id];if(!it)return;clearInterval(it.timer);try{it.out.gain.setTargetAtTime(0,it.c.currentTime,0.02);setTimeout(function(){try{it.out.disconnect()}catch(e){}},200)}catch(e){}delete live[id];if(bgmId===id)bgmId=null}
   function playSfxLoop(name,vol){if(!window.OF_SFX)return null;var id=++ids;var it={id:id,timer:setInterval(function(){window.OF_SFX(name,vol)},700),out:{gain:{setTargetAtTime:function(){}},disconnect:function(){}},c:{currentTime:0}};window.OF_SFX(name,vol);live[id]=it;return id}
   function render(name){var t=TR[name];if(!t||typeof OfflineAudioContext==='undefined'||!window.OF_WAV)return Promise.resolve(null);
-    var sr=22050,st=60/t.bpm/4,dur=t.len*st,c=new OfflineAudioContext(1,Math.ceil(sr*(dur+0.3)),sr),out=c.createGain(),nb=noiseBuf;out.gain.value=0.6;out.connect(c.destination);noiseBuf=null;
-    try{for(var i=0;i<t.len;i++){var tt=0.02+i*st,l=t.lead[i%t.lead.length],b=t.bass[i%t.bass.length],d=t.drum[i%t.drum.length];
+    /* duas voltas seguidas e fica só a segunda: o começo dela já traz o final da primeira soando, e a emenda do loop some */
+    var sr=22050,st=60/t.bpm/4,dur=t.len*st,c=new OfflineAudioContext(1,Math.ceil(sr*(2*dur+0.3)),sr),out=c.createGain(),nb=noiseBuf;out.gain.value=0.6;out.connect(c.destination);noiseBuf=null;
+    try{for(var k=0;k<2*t.len;k++){var i=k%t.len,tt=0.02+k*st,l=t.lead[i%t.lead.length],b=t.bass[i%t.bass.length],d=t.drum[i%t.drum.length];
       if(l&&l!=='.'){var fl=midi(l);if(fl)tone(c,out,t.wave,fl,tt,st*1.8,0.07)}
       if(b&&b!=='.'){var fb=midi(b);if(fb)tone(c,out,'triangle',fb,tt,st*3.5,0.13)}
       if(d&&d!=='.')drum(c,out,d,tt,1)}}finally{noiseBuf=nb}
-    return c.startRendering().then(function(buf){return window.OF_WAV(buf.getChannelData(0).subarray(0,Math.round(sr*(dur+0.02))),sr)})}
+    return c.startRendering().then(function(buf){var ini=Math.round(sr*(0.02+dur));return window.OF_WAV(buf.getChannelData(0).subarray(ini,ini+Math.round(sr*dur)),sr)})}
   return{play:play,stop:stop,playSfxLoop:playSfxLoop,render:render,tickAll:function(){Object.keys(live).forEach(function(k){if(live[k].name)tick(live[k])})},
     stopAll:function(){Object.keys(live).forEach(function(k){stop(+k)})},
     pause:function(id){if(live[id])live[id].paused=true},

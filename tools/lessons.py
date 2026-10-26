@@ -3265,7 +3265,9 @@ aula(
     'tela, as Nuvens se repetem devagar (paralaxe) e o jogo só coordena: cria caixas, conta a distância e troca de '
     'estado. A colisão vem do Flame: o hitbox do jogador é um pouco menor que o desenho (RectangleHitbox com position '
     'e size), e onCollisionStart com uma Caixa termina a partida. O placar e o aviso são TextComponents. O jogo aceita '
-    'toque (TapCallbacks) e teclado (espaço ou seta para cima, com KeyboardEvents) e toca pulo.wav e derrota.wav.',
+    'toque (TapCallbacks) e teclado (espaço ou seta para cima, com KeyboardEvents) e toca pulo.wav e derrota.wav. '
+    'O caramelo tem três animações e troca a cada quadro: sentado antes de começar, correndo no chão e '
+    'pulando no ar (animation = noChao ? correndo : pulando).',
     'Em ▶ Testar, jogue tocando ou com o espaço. Compare este código com o do Projeto 1. Depois: deixe o céu noturno, '
     'aumente a aceleração e toque vitoria.wav quando o jogador passar de 100 m.',
     r'''
@@ -3394,6 +3396,9 @@ class PulaCaixa extends FlameGame with HasCollisionDetection, TapCallbacks, Keyb
 
 class Jogador extends SpriteAnimationComponent with CollisionCallbacks, HasGameReference<PulaCaixa> {
   double vy = 0;
+  late SpriteAnimation correndo;
+  late SpriteAnimation pulando;
+  late SpriteAnimation sentado;
 
   Jogador() : super(size: Vector2.all(56), anchor: Anchor.bottomLeft);
 
@@ -3401,10 +3406,19 @@ class Jogador extends SpriteAnimationComponent with CollisionCallbacks, HasGameR
 
   @override
   Future<void> onLoad() async {
-    animation = await game.loadSpriteAnimation(
+    correndo = await game.loadSpriteAnimation(
       'heroi.png',
       SpriteAnimationData.sequenced(amount: 4, stepTime: 0.1, textureSize: Vector2.all(16)),
     );
+    pulando = await game.loadSpriteAnimation(
+      'caramelo_pulo.png',
+      SpriteAnimationData.sequenced(amount: 1, stepTime: 1, textureSize: Vector2.all(16)),
+    );
+    sentado = await game.loadSpriteAnimation(
+      'caramelo_sentado.png',
+      SpriteAnimationData.sequenced(amount: 2, stepTime: 0.4, textureSize: Vector2.all(16)),
+    );
+    animation = sentado;
     position = Vector2(60, game.chao);
     add(RectangleHitbox(position: Vector2(10, 8), size: Vector2(36, 48)));
   }
@@ -3419,8 +3433,11 @@ class Jogador extends SpriteAnimationComponent with CollisionCallbacks, HasGameR
   @override
   void update(double dt) {
     super.update(dt);
-    playing = game.estado == Estado.jogando && noChao;
-    if (game.estado != Estado.jogando) return;
+    if (game.estado != Estado.jogando) {
+      animation = sentado;
+      return;
+    }
+    animation = noChao ? correndo : pulando;
     vy += gravidade * dt;
     position.y += vy * dt;
     if (position.y > game.chao) {
@@ -5702,7 +5719,7 @@ aula(
     'vida (até maxVidas); o osso dourado vale 5 e enche todas as vidas. Quando faltam chega a zero, proximaFase limpa '
     'o mundo e monta o próximo mapa. Os gatos são uma máquina de estados (enum EstadoGato): descansando, patrulhando '
     'de parede em parede, perseguindo quando o caramelo chega a menos de 150 pixels (o rumo é alvo - position com '
-    'normalize) e assustados. O botão do cachorro latindo é um HudButtonComponent: latir assusta os gatos a menos de '
+    'normalize) e assustados. Parado, o caramelo senta e abana o rabo (a animação troca para sentado). O botão do cachorro latindo é um HudButtonComponent: latir assusta os gatos a menos de '
     '170 pixels, que fogem por 2,5 segundos, e depois espera 3 segundos para latir de novo. Encostar num gato tira '
     'uma vida e pinta o caramelo de vermelho. O placar é um overlay com ValueListenableBuilder, e o recorde fica '
     'guardado com Hive: no fim, se os pontos passaram do recorde, caixa.put grava o valor novo.',
@@ -5912,6 +5929,7 @@ class Heroi extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
   double latindo = 0;
   late SpriteAnimation andando;
   late SpriteAnimation latido;
+  late SpriteAnimation sentado;
 
   Heroi(Vector2 inicio) : super(position: inicio, size: Vector2.all(40), anchor: Anchor.center, priority: 2);
 
@@ -5925,7 +5943,11 @@ class Heroi extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
       'caramelo_latindo.png',
       SpriteAnimationData.sequenced(amount: 2, stepTime: 0.1, textureSize: Vector2.all(16)),
     );
-    animation = andando;
+    sentado = await game.loadSpriteAnimation(
+      'caramelo_sentado.png',
+      SpriteAnimationData.sequenced(amount: 2, stepTime: 0.4, textureSize: Vector2.all(16)),
+    );
+    animation = sentado;
   }
 
   Rect corpo() => Rect.fromCenter(center: position.toOffset(), width: 24, height: 28);
@@ -5950,12 +5972,9 @@ class Heroi extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
   void update(double dt) {
     super.update(dt);
     if (protegido > 0) protegido -= dt;
-    if (latindo > 0) {
-      latindo -= dt;
-      if (latindo <= 0) animation = andando;
-    }
+    if (latindo > 0) latindo -= dt;
     final j = game.joystick;
-    playing = latindo > 0 || !j.isIdle;
+    if (latindo <= 0) animation = j.isIdle ? sentado : andando;
     if (j.isIdle) return;
     final passo = j.relativeDelta * 150 * dt;
     position.x += passo.x;

@@ -76,9 +76,9 @@ window.OF_WAV=function(d,sr){var n=d.length,out=new DataView(new ArrayBuffer(44+
     var pub='name: '+nomeApp+'\ndescription: Jogo feito na Oficina Flutter 2.\npublish_to: none\nversion: 1.0.0+1\n\nenvironment:\n  sdk: ">=3.4.0 <4.0.0"\n\ndependencies:\n  flutter:\n    sdk: flutter\n'+(deps?deps+'\n':'')+
       '\nflutter:\n  uses-material-design: true\n'+(ps.length?'  assets:\n'+ps.map(function(p){return '    - '+p}).join('\n')+'\n':'');
     var leia='Projeto gerado pela Oficina Flutter 2 ('+titulo+').\n\nComo rodar no seu computador ou celular:\n  1. Descompacte esta pasta.\n  2. No terminal, dentro dela: flutter create .\n     (cria as pastas android, ios, web etc. sem apagar o lib/main.dart nem o pubspec.yaml)\n  3. flutter pub get\n  4. flutter run\n\n'+
-      (Object.keys(pkgs).length?'Os pacotes ('+Object.keys(pkgs).join(', ')+') estão no pubspec.yaml com a versão "any": o flutter pub get escolhe a mais nova que funciona junto. Se quiser travar as versões, troque "any" pelos números que o pub get mostrar.\n\n':'')+
+      (Object.keys(pkgs).length?'Os pacotes ('+Object.keys(pkgs).join(', ')+') estão no pubspec.yaml com a versão "any": o flutter pub get escolhe a mais nova que funciona junto. O pub get grava as versões escolhidas no pubspec.lock: guarde esse arquivo junto com o projeto para todo mundo usar as mesmas. Se quiser travar no pubspec.yaml, troque "any" por ^ e o número que está no pubspec.lock (por exemplo flame: ^1.37.0).\n\n':'')+
       (sons.length?'Os efeitos sonoros foram gravados em WAV a partir do som sintetizado no navegador.\n':'')+
-      (musicas.length?'As músicas foram gravadas em WAV (uma volta do tema, para tocar em loop), e no main.dart os nomes .mp3 viraram .wav. Para usar uma música sua, troque o arquivo mantendo o nome.\n':'')+
+      (musicas.length?'As músicas foram gravadas em WAV (uma volta do tema, que emenda sem corte quando toca em loop), e no main.dart os nomes .mp3 viraram .wav. Para usar uma música sua, troque o arquivo mantendo o nome.\n':'')+
       (pkgs.sensors_plus?'\nsensors_plus no iPhone: acrescente NSMotionUsageDescription ao ios/Runner/Info.plist.\n':'')+
       (pkgs.supabase_flutter?'\nSupabase: troque url e anonKey no main.dart pelos do seu projeto (Project Settings > API) e crie as tabelas usadas no código.\n':'')+
       (pkgs.firebase_core||pkgs.cloud_firestore||pkgs.firebase_auth?'\nFirebase: rode flutterfire configure para gerar o firebase_options.dart do seu projeto.\n':'')+
@@ -93,14 +93,22 @@ window.OF_WAV=function(d,sr){var n=d.length,out=new DataView(new ArrayBuffer(44+
         .concat(arqs.map(function(a){return{nome:base+a.nome,dados:a.dados}}));
       return{nome:nomeApp+'.zip',blob:zipar(todos),arquivos:todos.map(function(a){return a.nome})}})};
   var b=document.getElementById('dlBtn');
+  function aviso(m,ms){var t=document.getElementById('toast');if(!t)return;t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('on')},ms||4200)}
+  /* dentro do Claude, o download passa pela permissão downloads do artefato */
+  var dlCap=null;try{if(window.claude&&typeof window.claude.use==='function')window.claude.use('downloads').then(function(d){dlCap=d}).catch(function(){})}catch(e){}
   if(b)b.addEventListener('click',function(){
-    if(window.self!==window.top){var t0=document.getElementById('toast');if(t0){t0.textContent='Aqui dentro o navegador não deixa baixar arquivos. Abra oficina-flutter-2.vercel.app e use ⬇ Projeto lá.';t0.classList.add('on');clearTimeout(t0._t);t0._t=setTimeout(function(){t0.classList.remove('on')},5000)}return}
+    var dentro=window.self!==window.top;
+    if(dentro&&!dlCap){aviso('Aqui dentro o navegador não deixa baixar arquivos. Abra oficina-flutter-2.vercel.app e use ⬇ Projeto lá.',5000);return}
     var L=(window.OF.LESSONS||[])[(window.OF.A&&OF.A.S||{}).lesson]||{},src=(OF.A&&OF.A.S&&OF.A.S.src)||'';
     b.disabled=true;
     window.OF_PROJETO(src,String(L.t||'jogo').replace(/^\d+\.\s*/,'')).then(function(r){
+      var info=r.nome+' ('+r.arquivos.length+' arquivos). Veja o LEIA-ME.txt dentro do .zip.';
+      if(dlCap)return dlCap.save({filename:r.nome,data:r.blob}).then(function(){aviso('Salvo: '+info)},function(e){
+        var c=e&&e.code;if(c==='declined')aviso('Download cancelado.');else if(c==='rate_limited')aviso('Já há um pedido de download aberto. Tente de novo em instantes.');
+        else aviso('Não deu para salvar aqui ('+(c||'erro')+'). Abra oficina-flutter-2.vercel.app e use ⬇ Projeto lá.',5000)});
       var a=document.createElement('a'),u=URL.createObjectURL(r.blob);a.href=u;a.download=r.nome;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove()},4000);
-      var t=document.getElementById('toast');if(t){t.textContent='Baixando '+r.nome+' ('+r.arquivos.length+' arquivos). Veja o LEIA-ME.txt dentro do .zip.';t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('on')},4200)}
-    }).catch(function(e){var t=document.getElementById('toast');if(t){t.textContent='Não consegui montar o .zip: '+e.message;t.classList.add('on')}}).then(function(){b.disabled=false})});
+      aviso('Baixando '+info);
+    }).catch(function(e){aviso('Não consegui montar o .zip: '+e.message,6000)}).then(function(){b.disabled=false})});
 })();
 /* ===== Oficina 2: instalar como app (PWA) ===== */
 (function(){try{if('serviceWorker' in navigator&&location.protocol==='https:'&&window.top===window.self&&/vercel\.app$|github\.io$|localhost$/.test(location.hostname))navigator.serviceWorker.register('sw.js')}catch(e){}})();
