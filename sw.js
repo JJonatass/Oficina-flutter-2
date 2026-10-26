@@ -1,5 +1,5 @@
 /* Oficina Flutter 2: service worker. Guarda a página e as fontes para abrir sem internet. */
-const VERSAO = '0ea8c35204';
+const VERSAO = '3dd7e82c1f';
 const CACHE = 'oficina2-' + VERSAO;
 const BASE = ['./', 'index.html', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png', 'icone-180.png'];
 

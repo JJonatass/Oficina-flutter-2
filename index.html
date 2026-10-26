@@ -10967,6 +10967,7 @@ window.OF_WAV=function(d,sr){var n=d.length,out=new DataView(new ArrayBuffer(44+
       return{nome:nomeApp+'.zip',blob:zipar(todos),arquivos:todos.map(function(a){return a.nome})}})};
   var b=document.getElementById('dlBtn');
   if(b)b.addEventListener('click',function(){
+    if(window.self!==window.top){var t0=document.getElementById('toast');if(t0){t0.textContent='Aqui dentro o navegador não deixa baixar arquivos. Abra oficina-flutter-2.vercel.app e use ⬇ Projeto lá.';t0.classList.add('on');clearTimeout(t0._t);t0._t=setTimeout(function(){t0.classList.remove('on')},5000)}return}
     var L=(window.OF.LESSONS||[])[(window.OF.A&&OF.A.S||{}).lesson]||{},src=(OF.A&&OF.A.S&&OF.A.S.src)||'';
     b.disabled=true;
     window.OF_PROJETO(src,String(L.t||'jogo').replace(/^\d+\.\s*/,'')).then(function(r){
