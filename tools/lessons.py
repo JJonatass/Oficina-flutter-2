@@ -4974,7 +4974,8 @@ aula(
     'vetor alvo - position com normalize(), que vira um passo de tamanho 1 apontando para o herói; multiplicado pela '
     'velocidade e por dt, vira o passo do quadro, e as paredes valem para o gato também. O gato é mais lento que o '
     'herói, então dá para fugir, mas não dá para passar perto. Encostar num gato tira uma vida, pinta o herói de '
-    'vermelho com um ColorEffect e deixa ele um segundo sem levar dano, e o gato descansa 1,5 segundo antes de voltar '
+    'vermelho com um ColorEffect e deixa ele um segundo sem levar dano; cada osso pego devolve uma vida (até maxVidas), '
+    'pisca o herói de verde e toca poder.wav, e o gato descansa 1,5 segundo antes de voltar '
     'a perseguir (no começo, descanso = 2 dá dois segundos para o herói se afastar). O placar é um '
     'overlay do Flutter que se atualiza sozinho: ossos e vidas são ValueNotifier, e o ValueListenableBuilder redesenha '
     'o texto quando o valor muda, sem setState. Quando os ossos acabam ou as vidas zeram, o jogo pausa e mostra o '
@@ -5035,6 +5036,7 @@ void main() => runApp(GameWidget(
 class CacaOssos extends FlameGame {
   final ossos = ValueNotifier<int>(0);
   final vidas = ValueNotifier<int>(3);
+  int maxVidas = 3;
   final List<Rect> paredes = [];
   final double escala = 2;
   late JoystickComponent joystick;
@@ -5057,7 +5059,7 @@ class CacaOssos extends FlameGame {
   Future<void> montar() async {
     paredes.clear();
     ossos.value = 0;
-    vidas.value = 3;
+    vidas.value = maxVidas;
     total = 0;
     final mapa = await TiledComponent.load('arena.tmx', Vector2.all(16 * escala));
     world.add(mapa);
@@ -5083,7 +5085,13 @@ class CacaOssos extends FlameGame {
 
   void pegou() {
     ossos.value++;
-    FlameAudio.play('osso.wav');
+    if (vidas.value < maxVidas) {
+      vidas.value++;
+      heroi.curar();
+      FlameAudio.play('poder.wav');
+    } else {
+      FlameAudio.play('osso.wav');
+    }
     if (ossos.value == total) terminar('Você venceu!', 'vitoria.wav');
   }
 
@@ -5131,6 +5139,10 @@ class Heroi extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
     protegido = 1;
     add(ColorEffect(Colors.red, EffectController(duration: 0.1, alternate: true, repeatCount: 4), opacityTo: 0.8));
     game.ferido();
+  }
+
+  void curar() {
+    add(ColorEffect(Colors.lightGreenAccent, EffectController(duration: 0.15, alternate: true, repeatCount: 2), opacityTo: 0.7));
   }
 
   @override
@@ -5222,7 +5234,7 @@ class Gato extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
 }
 ''',
     [
-        ['Cinco vidas', 'No montar, troque vidas.value = 3 por vidas.value = 5.', r'vidas\.value\s*=\s*(?!3\b)\d+\s*;'],
+        ['Cinco vidas', 'No CacaOssos, troque int maxVidas = 3 por 5: o jogo começa com 5 vidas e cada osso recupera até 5.', r'int\s+maxVidas\s*=\s*(?!3\b)\d+\s*;'],
         ['Gatos mais rápidos', 'Na classe Gato, troque double velocidade = 90 por 120: quase a velocidade do herói.', r'double\s+velocidade\s*=\s*(?!90\b)[\d.]+'],
         ['Ossos que faltam', "No overlay Placar, mostre 'Ossos: $valor de ${game.total}'.", r'game\.total'],
     ],
