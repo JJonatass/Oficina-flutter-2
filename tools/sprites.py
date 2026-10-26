@@ -21,6 +21,7 @@ PAL = {
     'n': (150, 96, 54), 'N': (98, 60, 34), 'm': (196, 140, 86),
     'p': (160, 90, 220), 'P': (100, 50, 160), 'c': (90, 220, 230),
     'e': (130, 140, 160), 'E': (80, 90, 110), 'f': (255, 150, 40),
+    'C': (214, 140, 62), 'D': (160, 96, 40), 'L': (246, 206, 150), 't': (236, 104, 120),   # caramelo
 }
 
 
@@ -44,30 +45,35 @@ def sheet(frames):
     return img
 
 
-# ---- herói (16x16, 4 quadros de caminhada, olhando para a direita)
-HEAD = [
+# ---- herói: o vira-lata caramelo (16x16, 4 quadros de caminhada, olhando para a direita)
+CORPO = [
     '................',
-    '.....RRRRRR.....',
-    '....RrrrrrrR....',
-    '...RrrrrrrrrrR..',
-    '....kkssssss....',
-    '....ksskskss....',
-    '....ssssssss....',
-    '.....ssSSss.....',
+    '................',
+    '..........DD....',
+    '..D.......DCCC..',
+    '..D......CCkCC..',
+    '..D......CCCCLLk',
+    '...D.....CCCLLL.',
+    '...DC...CCCC.t..',
+    '....CCCCCCCC....',
+    '...CCCCCCCCCC...',
+    '...CCCCCCCCCC...',
+    '...CLLLLLLLLC...',
 ]
-TORSO = [
-    '....bbbbbbb.....',
-    '...sbbbbbbbs....',
-    '...sbBbbbBbs....',
-    '....BBBBBBB.....',
+PATAS = [
+    ['...C.C....C.C...', '...C.C....C.C...', '...D.D....D.D...', '................'],
+    ['..C...C..C...C..', '..C...C..C...C..', '..D...D..D...D..', '................'],
+    ['....CC.....CC...', '....CC.....CC...', '....DD.....DD...', '................'],
+    ['...C..C...C..C..', '....C..C...C..C.', '....D..D...D..D.', '................'],
 ]
-LEGS = [
-    ['....BB...BB.....', '....BB...BB.....', '...kkk...kkk....', '................'],
-    ['.....BB.BB......', '.....BB.BB......', '.....kkkkk......', '................'],
-    ['...BB.....BB....', '..BB.......BB...', '..kkk.......kkk.', '................'],
-    ['.....BB.BB......', '.....BB.BB......', '.....kkkkk......', '................'],
-]
-heroi = sheet([from_art(HEAD + TORSO + l) for l in LEGS])
+def caramelo(i):
+    linhas = list(CORPO)
+    if i % 2:
+        linhas[3] = '.D.' + linhas[3][3:]
+        linhas[4] = '.D.' + linhas[4][3:]
+        linhas[5] = '..D' + linhas[5][3:]
+    return from_art(linhas + PATAS[i])
+heroi = sheet([caramelo(i) for i in range(4)])
 
 # ---- moeda (16x16, 6 quadros girando)
 def moeda(wd):
@@ -459,7 +465,7 @@ for i, t in enumerate([losango((96, 196, 86), (70, 150, 60), (50, 120, 46), Fals
 
 
 SPRITES = [
-    ('heroi', heroi, 4, 'Herói andando para a direita (4 quadros de 16×16)'),
+    ('heroi', heroi, 4, 'Herói: o vira-lata caramelo andando para a direita (4 quadros de 16×16)'),
     ('moeda', moedas, 6, 'Moeda girando (6 quadros de 16×16)'),
     ('slime', slime, 2, 'Inimigo slime pulsando (2 quadros de 16×16)'),
     ('nave', nave, 2, 'Nave apontando para cima, com fogo (2 quadros de 16×16)'),

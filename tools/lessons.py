@@ -1629,7 +1629,7 @@ SETUP_SPRITES = (
     '  assets:\n'
     '    - assets/sprites/\n\n'
     'Coloque os arquivos PNG em assets/sprites/ na raiz do projeto. O simulador já tem estes sprites prontos, '
-    'desenhados para a Oficina: heroi.png (4 quadros de 16×16), moeda.png (6), slime.png (2), nave.png (2), '
+    'desenhados para a Oficina: heroi.png (o vira-lata caramelo, 4 quadros de 16×16), moeda.png (6), slime.png (2), nave.png (2), '
     'explosao.png (5), tiro.png (8×8), caixa.png, coracao.png, maca.png, grama.png (16×16) e nuvem.png (32×16). '
     'Os arquivos estão na pasta tools/sprites do repositório da Oficina Flutter 2.'
 )
