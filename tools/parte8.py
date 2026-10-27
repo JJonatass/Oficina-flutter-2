@@ -152,11 +152,11 @@ def adicionar(aula, PARTS, SETUP_FLAME):
     # ---------------------------------------------------------------- Parte 9: desafios abertos
     desafio(aula,
         'Desafio · Relógio de reação',
-        'Desafio aberto: o código começa quase vazio e o enunciado está nos comentários. A pessoa toca para começar, espera '
+        'Desafio: o código já traz a tela, as cores e os textos, e marca com FAÇA o que falta. A pessoa toca para começar, espera '
         'um tempo sorteado e toca assim que a tela ficar verde; o jogo mostra o tempo em milissegundos e guarda o recorde. '
         'Planeje antes de programar: quais estados a tela tem (pronto, esperando, agora, resultado, cedo demais) e o que um '
-        'toque faz em cada um. As etapas abaixo conferem as partes principais; o resto do jeito de fazer é seu.',
-        'Leia os comentários do código e construa o jogo. Teste em ▶ Testar a cada parte que ficar pronta.',
+        'toque faz em cada um. As etapas abaixo conferem as partes principais. Quer mais desafio? Apague tudo e faça do zero.',
+        'Procure os comentários FAÇA no código e complete na ordem. Teste em ▶ Testar a cada parte que ficar pronta.',
         'reacao',
         [
             ['Tempo sorteado', 'Crie um Timer com uma Duration sorteada (Random().nextInt) para a tela ficar verde.', r'Timer\([\s\S]*nextInt|nextInt[\s\S]*Timer\('],
@@ -168,11 +168,11 @@ def adicionar(aula, PARTS, SETUP_FLAME):
 
     desafio(aula,
         'Desafio · Cobrinha do caramelo',
-        'Desafio aberto: a clássica cobrinha numa grade. O corpo é uma lista de casas; a cada passo, uma cabeça nova entra '
+        'Desafio: a clássica cobrinha numa grade. A grade, os botões e o desenho já estão prontos; faltam o laço, o osso e a batida (os comentários FAÇA). O corpo é uma lista de casas; a cada passo, uma cabeça nova entra '
         'na frente e o rabo sai, a não ser que o caramelo tenha comido um osso (aí ele cresce). Pense em como guardar a '
         'direção e em como impedir que ele vire para trás de uma vez. Use as aulas de Timer.periodic, de CustomPainter e '
         'de colisão.',
-        'Leia os comentários do código e construa o jogo. Comece pelo movimento, depois a comida e por fim a batida.',
+        'Procure os comentários FAÇA e complete na ordem: o movimento, depois o osso e por fim a batida no corpo.',
         'cobra',
         [
             ['O laço', 'Crie um Timer.periodic(const Duration(milliseconds: 200), ...) que move o caramelo uma casa.', r'Timer\.periodic\(\s*(?:const\s+)?Duration\('],
@@ -183,11 +183,11 @@ def adicionar(aula, PARTS, SETUP_FLAME):
 
     desafio(aula,
         'Desafio · Caramelo voador',
-        'Desafio aberto em Flame: um caramelo que cai com a gravidade e sobe a cada toque, passando entre canos. É o mesmo '
+        'Desafio em Flame: um caramelo que cai com a gravidade e sobe a cada toque, passando entre canos. É o mesmo '
         'pulo da Parte 1 com o salto no lugar do chão, e os canos nascem com um TimerComponent como os obstáculos da Parte '
         '4. Decida o tamanho do vão, a velocidade dos canos e a força do impulso jogando várias vezes: esses números são o '
-        'game feel do jogo.',
-        'Leia os comentários do código e construa o jogo. Teste o pulo antes de pôr os canos.',
+        'game feel do jogo. O caramelo animado, o toque e a criação dos canos já estão prontos; faltam a gravidade, o relógio dos canos e a batida (os comentários FAÇA).',
+        'Procure os comentários FAÇA e complete na ordem. Teste o pulo antes de pôr os canos.',
         'voo',
         [
             ['Gravidade e impulso', 'No update do caramelo, some a gravidade à velocidade (velocidade += gravidade * dt); no toque, dê uma velocidade negativa.', r'velocidade\s*\+=\s*gravidade'],
@@ -199,11 +199,11 @@ def adicionar(aula, PARTS, SETUP_FLAME):
 
     desafio(aula,
         'Desafio · Quebra-blocos',
-        'Desafio aberto: raquete, bola e uma parede de blocos. A bola anda com velocidade em x e em y e inverte uma delas ao '
+        'Desafio: raquete, bola e uma parede de blocos. O desenho, os blocos, os quiques e as vidas já estão prontos; faltam a raquete, o Ticker e a quebra (os comentários FAÇA). A bola anda com velocidade em x e em y e inverte uma delas ao '
         'bater numa parede; na raquete, o ponto em que bate muda o ângulo, o que dá controle ao jogador. Os blocos são uma '
         'lista de Rect, e o que a bola tocar sai da lista. Use a aula de Ticker e delta time, a de arrastar e a de colisão '
         'AABB.',
-        'Leia os comentários do código e construa o jogo. Faça a bola quicar nas paredes antes de criar os blocos.',
+        'Procure os comentários FAÇA e complete na ordem: a raquete, depois a bola andando e por fim os blocos quebrando.',
         'blocos',
         [
             ['Raquete', 'Mova a raquete com GestureDetector(onPanUpdate: ...).', r'onPanUpdate'],
@@ -214,10 +214,10 @@ def adicionar(aula, PARTS, SETUP_FLAME):
 
     desafio(aula,
         'Desafio · Jogo da memória',
-        'Desafio aberto: 12 cartas, 6 pares. O jogo precisa lembrar quais cartas estão viradas agora (no máximo duas) e '
+        'Desafio: 12 cartas, 6 pares. As cartas e o toque já estão prontos; faltam embaralhar, comparar e o fim de jogo (os comentários FAÇA). O jogo precisa lembrar quais cartas estão viradas agora (no máximo duas) e '
         'quais pares já foram achados. Quando duas cartas diferentes ficam viradas, o jogo espera um segundo antes de '
         'desvirar, e nesse tempo não deixa virar outra. Use listas, Set e Timer, e pense em como embaralhar.',
-        'Leia os comentários do código e construa o jogo.',
+        'Procure os comentários FAÇA e complete na ordem.',
         'memoria',
         [
             ['Embaralhar', 'Monte a lista com cada figura duas vezes e embaralhe com .shuffle().', r'\.\.shuffle\(\)|\.shuffle\(\)'],
