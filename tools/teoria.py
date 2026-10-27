@@ -929,7 +929,7 @@ leitura(
         {'q': 'Como evitar que a história cresça demais?', 'ops': ['Tirar todas as escolhas', 'Fazer galhos se juntarem e guardar consequências em variáveis', 'Escrever só finais tristes', 'Não testar'], 'ok': 1,
          'exp': 'Galhos que voltam e variáveis que mudam detalhes mantêm o tamanho controlado.'},
     ],
-    parte='Parte 8 · Mais sistemas de jogo',
+    parte='Parte 8 · Eletiva: mais sistemas de jogo',
 )
 
 leitura(
@@ -1029,7 +1029,7 @@ leitura(
         {'q': 'Um jogo de construir e decorar a própria casa oferece principalmente...', 'ops': ['Expressão', 'Companhia', 'Narrativa', 'Sensação'], 'ok': 0,
          'exp': 'Criar algo seu é a estética da expressão.'},
     ],
-    parte='Parte 9 · Mais gêneros e técnicas',
+    parte='Parte 9 · Eletiva: mais gêneros e técnicas',
 )
 
 leitura(
@@ -1127,6 +1127,101 @@ leitura(
          'exp': 'Os dois aceitam os arquivos do flutter build web sem custo.'},
         {'q': 'Além de estúdios de entretenimento, onde há trabalho com jogos?', 'ops': ['Em lugar nenhum', 'Em jogos sérios, gamificação e simulações', 'Só em fliperamas', 'Só fora do Brasil'], 'ok': 1,
          'exp': 'Educação, saúde, treinamento e simulações também usam jogos.'},
+    ],
+)
+
+
+# ------------------------------------------------------------------ Leituras da quinta leva (trilha)
+leitura(
+    'Flame: o primeiro jogo',
+    'Programação de jogos: Flutter puro ou Flame?',
+    'Leitura: até aqui os jogos foram feitos com Flutter puro (widgets, setState, CustomPainter e Ticker). A partir da '
+    'Parte 4 entra o Flame. Quando vale cada um? No código, um questionário sobre o seu jogo dá um conselho.',
+    'Em ▶ Testar, marque o que vale para o jogo que você quer fazer e leia o conselho. Depois mude o limite, acrescente '
+    'uma pergunta e mude um peso.',
+    'motor',
+    [
+        ['Conselho mais exigente', 'Troque final int limite = 2 por 4.', r'int limite\s*=\s*(?!2\b)\d+'],
+        ['Pergunta nova', "Acrescente Pergunta('Música no ritmo da ação', 1), no fim da lista perguntas.", r"Pergunta\('(?!Muitos objetos|O mundo|Colisões|Física|Mapas|O jogo é|Joga por|Muitas telas|Só um)[^']+',\s*-?\d\)"],
+        ['Peso do tabuleiro', "Mude o peso da pergunta do tabuleiro de -2 para -3.", r"casas de um tabuleiro',\s*-3\)"],
+    ],
+    [
+        {'h': 'Dois jeitos de fazer o mesmo jogo'},
+        {'p': 'Até a Parte 3, cada jogo foi Flutter puro: um StatefulWidget, um Timer ou Ticker chamando setState, e um '
+              'CustomPainter ou widgets desenhando a tela. O **Flame** é um motor de jogos feito sobre o Flutter: ele já traz '
+              'o laço do jogo, componentes com update(dt) e render(canvas), câmera, colisões, efeitos, partículas, mapas do '
+              'Tiled e física (Forge2D). As duas formas são Flutter e podem viver no mesmo app.'},
+        {'fig': 'motor', 'legenda': 'No Flutter puro a tela só é refeita quando algo muda (um toque, um timer chamando setState). '
+                                    'No Flame o laço roda sempre: a cada quadro todos os componentes atualizam e desenham.'},
+        {'h': 'Quando o Flutter puro basta'},
+        {'p': 'Jogos de tabuleiro, de cartas, de turnos, quiz, jogo da memória, palavras cruzadas: quase nada se move sozinho e a '
+              'tela é feita de botões e casas. Widgets e setState resolvem com menos código, e o resto do app (menus, listas, '
+              'formulários) já é Flutter. Jogos com um ou dois objetos animados também vão bem com Ticker e CustomPainter, como '
+              'a cobrinha, o bando e o jogo de ritmo desta trilha.'},
+        {'h': 'Quando o Flame compensa'},
+        {'p': 'Quando há muitos objetos com vida própria (inimigos, tiros, partículas), um mundo maior que a tela com câmera, '
+              'colisões entre muitas formas, física ou mapas do Tiled. Escrever tudo isso à mão é possível (você fez parte nas '
+              'Partes 1 a 3), mas o Flame já resolve e organiza o jogo em componentes que cuidam de si mesmos.'},
+        {'dica': 'Não é uma escolha para a vida: menus, telas de fim e configurações continuam em widgets mesmo num jogo Flame '
+                 '(as overlays da Parte 5 e as telas do Navigator da Parte 7). Comece pelo mais simples que resolve o seu jogo.',
+         'titulo': 'Misturar é normal'},
+    ],
+    [
+        {'q': 'Num jogo da memória com 12 cartas, o que costuma bastar?', 'ops': ['Flame com Forge2D', 'Flutter puro: widgets e setState', 'Um motor 3D', 'Nada'], 'ok': 1,
+         'exp': 'Quase nada se move sozinho: são botões que viram.'},
+        {'q': 'O que o Flame traz pronto?', 'ops': ['Só fontes', 'Laço do jogo, componentes, câmera e colisões', 'Um editor de imagens', 'Banco de dados'], 'ok': 1,
+         'exp': 'É um motor de jogos sobre o Flutter.'},
+        {'q': 'No Flutter puro, quando a tela é refeita?', 'ops': ['Sempre, 60 vezes por segundo', 'Quando algo chama setState', 'Nunca', 'Só ao abrir o app'], 'ok': 1,
+         'exp': 'Por isso os jogos usam Timer ou Ticker chamando setState a cada quadro.'},
+        {'q': 'Num jogo Flame, onde costuma ficar o menu de pausa?', 'ops': ['Num componente obrigatoriamente', 'Num widget por cima do jogo (overlay)', 'No Tiled', 'Não dá para ter menu'], 'ok': 1,
+         'exp': 'Widgets e Flame convivem: menus são widgets.'},
+    ],
+    parte='Parte 4 · Flame',
+)
+
+leitura(
+    'IA de turnos: o gato que pensa (minimax)',
+    'Programação de jogos: recursão',
+    'Leitura: uma função que chama a si mesma resolve problemas que se repetem em tamanhos menores, como árvores, '
+    'labirintos e a busca de jogadas do minimax. No código, uma árvore fractal desenhada por recursão.',
+    'Em ▶ Testar, mexa na profundidade e na abertura e veja o número de galhos dobrar a cada nível. Depois encurte os '
+    'galhos, faça três galhos por nó e aumente o tronco.',
+    'recursao',
+    [
+        ['Galhos curtos', 'Troque final double encolhe = 0.72 por 0.6.', r'encolhe\s*=\s*(?!0\.72\b)0\.\d+'],
+        ['Três galhos', 'Acrescente uma terceira chamada no meio: galho(canvas, ponta, tamanho * encolhe, angulo, resta - 1);', r'galho\(canvas,\s*ponta,\s*tamanho \* encolhe,\s*angulo,\s*resta - 1\)'],
+        ['Tronco maior', 'Na chamada do paint, troque o tamanho do tronco 95 por 120.', r'galho\(canvas,\s*Offset\(size\.width / 2,\s*size\.height\),\s*(?!95\b)\d+'],
+    ],
+    [
+        {'h': 'Uma função que chama a si mesma'},
+        {'p': 'Uma função é **recursiva** quando, dentro dela, há uma chamada para ela mesma. Parece um laço sem fim, mas não é: '
+              'cada chamada resolve um pedaço menor do problema, e existe um **caso base**, uma situação tão simples que a '
+              'função responde sem chamar mais ninguém. Sem caso base, a recursão nunca para.'},
+        {'p': 'A árvore do código é o exemplo clássico: desenhar uma árvore é desenhar um tronco e, na ponta dele, duas árvores '
+              'menores. A função galho desenha um traço e chama galho duas vezes, com tamanho menor e resta - 1. Quando resta '
+              'chega a zero, é uma folha: o caso base.'},
+        {'fig': 'pilha', 'legenda': 'Cada chamada espera, empilhada, a chamada de cima terminar. Quando o caso base responde, as '
+                                    'respostas voltam descendo a pilha até a primeira chamada.'},
+        {'h': 'A pilha de chamadas'},
+        {'p': 'Quando uma função chama outra, o computador guarda onde parou numa **pilha de chamadas**. Na recursão, a pilha cresce '
+              'a cada nível e esvazia na volta. Se a recursão for funda demais (ou não tiver caso base), a pilha estoura: é o '
+              'erro "Stack Overflow". Por isso a profundidade costuma ter um limite.'},
+        {'h': 'Recursão nos jogos'},
+        {'p': 'O **minimax** da próxima aula é recursivo: a nota de uma jogada é a melhor (ou a pior) nota das jogadas seguintes, '
+              'calculada pela própria função; o caso base é o fim da partida ou o limite de jogadas que o gato imagina. '
+              'Recursão também aparece em fractais, labirintos gerados por "cavar" caminhos e em buscas em árvores de diálogo.'},
+        {'dica': 'Cada nível com duas chamadas dobra o trabalho: 10 níveis já são 2.047 galhos. Antes de aumentar a profundidade de '
+                 'uma recursão, estime quantas chamadas ela vai fazer.', 'titulo': 'Cuidado com o tamanho'},
+    ],
+    [
+        {'q': 'O que é o caso base de uma recursão?', 'ops': ['A primeira chamada', 'A situação em que a função responde sem chamar a si mesma', 'Um erro', 'O maior caso'], 'ok': 1,
+         'exp': 'É ele que faz a recursão parar.'},
+        {'q': 'O que acontece numa recursão sem caso base?', 'ops': ['Ela termina mais rápido', 'A pilha de chamadas cresce até estourar', 'Nada', 'Ela vira um laço for'], 'ok': 1,
+         'exp': 'É o famoso Stack Overflow.'},
+        {'q': 'Uma árvore em que cada galho abre dois, com 3 níveis abaixo do tronco, tem quantos galhos?', 'ops': ['6', '8', '15', '3'], 'ok': 2,
+         'exp': '1 + 2 + 4 + 8 = 15.'},
+        {'q': 'Onde o minimax usa recursão?', 'ops': ['Para desenhar o tabuleiro', 'Para dar nota a uma jogada a partir das notas das jogadas seguintes', 'Para tocar som', 'Não usa'], 'ok': 1,
+         'exp': 'A função calcula a nota chamando a si mesma para as respostas possíveis.'},
     ],
 )
 

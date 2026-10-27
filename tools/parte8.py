@@ -45,7 +45,7 @@ def adicionar(aula, PARTS, SETUP_FLAME):
             ['Segredo valioso', "Na escolha 'Combinado, amigo!', troque ossos: 1 por ossos: 3.", r"'Combinado, amigo!',\s*'fim',\s*amizade:\s*1,\s*ossos:\s*(?!1\b)\d+"],
         ],
     )
-    PARTS.append(['Diálogos e escolhas', 'Parte 8 · Mais sistemas de jogo'])
+    PARTS.append(['Diálogos e escolhas', 'Parte 8 · Eletiva: mais sistemas de jogo'])
 
     aula(
         'Inventário e itens salvos em JSON',
@@ -153,7 +153,7 @@ def adicionar(aula, PARTS, SETUP_FLAME):
     import parte9
     parte9.adicionar(aula, PARTS, SETUP_FLAME)
 
-    # ---------------------------------------------------------------- Parte 10: desafios abertos
+    # ---------------------------------------------------------------- desafios (o trilha.py espalha cada um depois da parte que ele consolida)
     desafio(aula,
         'Desafio · Relógio de reação',
         'Desafio: o código já traz a tela, as cores e os textos, e marca com FAÇA o que falta. A pessoa toca para começar, espera '
@@ -168,7 +168,6 @@ def adicionar(aula, PARTS, SETUP_FLAME):
             ['Recorde', 'Guarde o menor tempo numa variável recorde e mostre na tela.', r'recorde\s*=[^=]'],
         ],
     )
-    PARTS.append(['Desafio · Relógio de reação', 'Parte 10 · Desafios e projeto final'])
 
     desafio(aula,
         'Desafio · Cobrinha do caramelo',

@@ -235,6 +235,13 @@ MANUAL.update({
     ('Carreira: game jams, portfólio e mercado', 1): [("'Projeto em dupla'),\n];", "'Projeto em dupla'),\n  Projeto('Meu Jogo', 'Tudo', 'O jogo do meu projeto final.', 'meusite.itch.io/meujogo', 'Projeto final'),\n];")],
 })
 
+MANUAL.update({
+    ('Programação de jogos: Flutter puro ou Flame?', 1): [("  Pergunta('Só um ou dois objetos animados na tela', -1),\n];", "  Pergunta('Só um ou dois objetos animados na tela', -1),\n  Pergunta('Música no ritmo da ação', 1),\n];")],
+    ('Programação de jogos: Flutter puro ou Flame?', 2): [("casas de um tabuleiro', -2)", "casas de um tabuleiro', -3)")],
+    ('Programação de jogos: recursão', 1): [("    galho(canvas, ponta, tamanho * encolhe, angulo - abertura, resta - 1);\n", "    galho(canvas, ponta, tamanho * encolhe, angulo - abertura, resta - 1);\n    galho(canvas, ponta, tamanho * encolhe, angulo, resta - 1);\n")],
+    ('Programação de jogos: recursão', 2): [("galho(canvas, Offset(size.width / 2, size.height), 95,", "galho(canvas, Offset(size.width / 2, size.height), 120,")],
+})
+
 def resposta(titulo, i, code, desc, rx):
     """Devolve a lista de trocas que resolve a etapa, ou None."""
     m = MANUAL.get((titulo, i))

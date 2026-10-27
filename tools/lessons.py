@@ -6112,3 +6112,6 @@ parte8.adicionar(aula, PARTS, SETUP_FLAME)
 
 import teoria  # noqa: E402
 teoria.inserir(LESSONS, EXERCISES, PARTS)
+
+import trilha  # noqa: E402
+trilha.reorganizar(LESSONS, PARTS)

@@ -237,6 +237,18 @@ FIGS = r"""<script>
           g.save();g.translate(x+fw/2,H/2+44);txt(g,f[0],0,0,ink,12,'center');g.restore();x+=fw});
         for(var hh=0;hh<=48;hh+=12)txt(g,hh+'h',x0+hh/tot*w,H/2-36,ink,11,'center');
         var xc=x0+Math.min(tot,hora)/tot*w;g.strokeStyle=VERM;g.lineWidth=2;g.beginPath();g.moveTo(xc,H/2-30);g.lineTo(xc,H/2+30);g.stroke()})},
+    motor:function(c,st){laco(c,st,function(g,t,W,H){var ink=cor('--ink','#0F1B2D'),w=(W-60)/2,x1=20,x2=40+w,y=36,h=H-70,k=(t*1.2)%3;
+        [[x1,'Flutter puro','#90CAF9',['toque / Timer','setState','build','widgets na tela']],[x2,'Flame','#FFCC80',['laço do jogo (sempre)','update(dt)','render(canvas)','componentes']]].forEach(function(col,ci){
+          g.fillStyle=col[2];g.globalAlpha=0.35;g.fillRect(col[0],y-8,w,h);g.globalAlpha=1;txt(g,col[1],col[0]+w/2,y+12,ink,16,'center');
+          col[3].forEach(function(e,i){var yy=y+40+i*((h-60)/4),on=ci===1?Math.floor((t*3)%4)===i:(k<1.6&&Math.floor(k/0.4)===i);g.fillStyle=on?CAR:'rgba(255,255,255,0.85)';g.fillRect(col[0]+14,yy,w-28,26);txt(g,e,col[0]+w/2,yy+18,on?'#fff':'#0F1B2D',13,'center');
+            if(i<3)txt(g,'▼',col[0]+w/2,yy+26+((h-60)/4-26)/2+5,ink,11,'center')})});
+        txt(g,'redesenha só quando algo muda',x1+w/2,H-14,ink,12,'center');txt(g,'redesenha todo quadro, ~60 vezes por segundo',x2+w/2,H-14,ink,12,'center')})},
+    pilha:function(c,st){var seq=[3,2,1,0,1,2,3];laco(c,st,function(g,t,W,H){var ink=cor('--ink','#0F1B2D'),k=Math.floor(t*0.9)%(seq.length+1),n=k<seq.length?seq[k]:0,topo=3-n,volta=k>3;
+        txt(g,'contar(3): cada chamada espera a de cima terminar',W/2,22,ink,14,'center');
+        for(var i=0;i<=topo&&k<seq.length;i++){var y=H-30-i*42;g.fillStyle=i===topo?(volta?VERDE:CAR):'#B0BEC5';g.fillRect(W/2-120,y-30,240,36);
+          txt(g,'contar('+(3-i)+')'+(i===topo?(volta||3-i===0?'  → devolve':'  → chama contar('+(2-i)+')'):'  esperando…'),W/2,y-7,'#0F1B2D',14,'center')}
+        if(k>=seq.length)txt(g,'pilha vazia: resultado pronto',W/2,H/2,VERDE,16,'center');
+        txt(g,'caso base: contar(0) não chama ninguém',W/2,H-6,ink,12,'center')})},
     projeto:function(c,st){var et=['Documento','Protótipo','Uma fase','Arte e som','Teste','Entrega'];
       laco(c,st,function(g,t,W,H){var ink=cor('--ink','#0F1B2D'),lin=cor('--line','#D6DDE7'),x0=110,w=(W-130)/6,sem=(t*0.8)%7;
         for(var s=0;s<6;s++){txt(g,'sem '+(s+1),x0+s*w+w/2,18,ink,11,'center');g.strokeStyle=lin;g.beginPath();g.moveTo(x0+s*w,24);g.lineTo(x0+s*w,H-10);g.stroke()}

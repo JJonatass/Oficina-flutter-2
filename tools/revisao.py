@@ -58,7 +58,7 @@ REVISAO = {
         ['Qual destas ajuda o desempenho?', ['Criar objetos novos a cada quadro', 'Reaproveitar objetos e medir o FPS', 'Desenhar tudo duas vezes', 'Aumentar o dt'], 1, 'Menos lixo para a memória, quadros mais regulares.'],
         ['No teste com jogadores, o que fazer?', ['Explicar tudo antes', 'Observar sem ajudar e anotar onde travam', 'Jogar no lugar deles', 'Só perguntar se gostaram'], 1, 'O que eles fazem diz mais do que o que eles falam.'],
     ],
-    'Parte 8 · Mais sistemas de jogo': [
+    'Parte 8 · Eletiva: mais sistemas de jogo': [
         ['Por que guardar o roteiro como dados?', ['Para acrescentar falas sem mexer no código que mostra a conversa', 'Para o jogo ficar mais lento', 'Para esconder o texto', 'Não há motivo'], 0, 'Roteiro é dado: fácil de revisar e traduzir.'],
         ['O que faz jsonEncode?', ['Transforma Map e List em texto', 'Desenha um sprite', 'Apaga o save', 'Toca um som'], 0, 'O texto pode ir para o Hive, um arquivo ou a nuvem.'],
         ['Uma conquista é...', ['Uma condição sobre os números do jogo, conferida quando eles mudam', 'Um tipo de inimigo', 'Uma música', 'Uma fase secreta'], 0, 'Ex.: ossos >= 20 desbloqueia "Colecionador".'],
@@ -66,7 +66,7 @@ REVISAO = {
         ['Na conta do jogador com Supabase, como cada progresso é separado?', ['Pela cor', 'Pela linha marcada com o user_id de quem entrou', 'Pelo nome do jogo', 'Não é separado'], 1, 'Cada jogador lê e grava só a própria linha.'],
         ['Na tradução, onde ficam os textos?', ['Soltos pelo código', 'Num mapa por idioma, buscados por uma chave', 'Em imagens', 'No nome das variáveis'], 1, 'Assim um idioma novo é só um mapa novo.'],
     ],
-    'Parte 9 · Mais gêneros e técnicas': [
+    'Parte 9 · Eletiva: mais gêneros e técnicas': [
         ['No minimax, na vez do computador fica...', ['A menor nota dos filhos', 'A maior nota dos filhos', 'Uma nota sorteada', 'Sempre zero'], 1, 'Ele escolhe o melhor para si e supõe que você também jogará bem.'],
         ['O que a poda alfa-beta faz?', ['Corta galhos que o outro jogador nunca deixaria acontecer', 'Apaga peças', 'Sorteia jogadas', 'Deixa o jogo mais difícil'], 0, 'Mesmo resultado, muito menos posições analisadas.'],
         ['Como funciona o botão desfazer?', ['Uma pilha de cópias do estado, empilhadas antes de cada movimento', 'Apagando o jogo', 'Tocando o jogo de trás para frente', 'Sorteando um estado'], 0, 'Desfazer é desempilhar a última foto.'],
@@ -74,7 +74,7 @@ REVISAO = {
         ['De onde deve vir o tempo de um jogo de ritmo?', ['Da soma de dt a cada quadro', 'Do relógio do Ticker (tempo desde o começo)', 'De um número sorteado', 'Do placar'], 1, 'Somar dt acumula erros e a música sai do ritmo.'],
         ['Por que as torres reaproveitam os tiros?', ['Para não criar e destruir um componente a cada tiro', 'Para o tiro mudar de cor', 'Para errar menos', 'Não reaproveitam'], 0, 'Uma reserva (pool) de objetos deixa o jogo mais leve.'],
     ],
-    'Parte 10 · Desafios e projeto final': [
+    'Parte 10 · Projeto final': [
         ['Como deve ser o projeto final?', ['O maior possível', 'Pequeno, claro e terminado', 'Só com arte', 'Sem documento'], 1, 'Um jogo curto e polido vale mais que um grande pela metade.'],
         ['O que é um protótipo?', ['O jogo final', 'O ciclo principal funcionando com formas simples', 'Um vídeo', 'A capa do jogo'], 1, 'Primeiro descobrir se é divertido, depois enfeitar.'],
         ['Quando fazer o teste com colegas?', ['Antes da entrega, com tempo para ajustar', 'Depois da entrega', 'Nunca', 'No primeiro dia'], 0, 'O teste só ajuda se ainda der para mudar.'],
@@ -136,6 +136,9 @@ GLOSSARIO = [
     ['Conquista', 'Objetivo extra que o jogo reconhece quando uma condição é cumprida.', 'Conquistas'],
     ['Bando (boids)', 'Comportamento de grupo com separação, alinhamento e coesão.', 'Bando: comportamento de grupo'],
     ['Internacionalização', 'Preparar o jogo para vários idiomas, com os textos separados do código.', 'Tradução: o jogo em vários idiomas'],
+    ['Recursão', 'Função que chama a si mesma com um problema menor, até chegar ao caso base.', 'Programação de jogos: recursão'],
+    ['Caso base', 'A situação em que a função recursiva responde sem chamar a si mesma; é o que faz a recursão parar.', 'Programação de jogos: recursão'],
+    ['Motor de jogo', 'Biblioteca que traz o laço do jogo, componentes, câmera e colisões prontos, como o Flame.', 'Programação de jogos: Flutter puro ou Flame?'],
     ['Minimax', 'IA que escolhe a jogada imaginando as respostas do adversário.', 'IA de turnos: o gato que pensa (minimax)'],
     ['Poda alfa-beta', 'Corte de galhos no minimax que não mudam a decisão.', 'IA de turnos: o gato que pensa (minimax)'],
     ['Cascata (combo)', 'Novas combinações que surgem quando peças caem após uma jogada.', 'Quebra-cabeça em grade: combinar 3'],

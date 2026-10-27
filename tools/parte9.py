@@ -4,7 +4,7 @@ import pathlib
 import solucoes
 
 PASTA = pathlib.Path(__file__).resolve().parent / 'parte9'
-PARTE = 'Parte 9 · Mais gêneros e técnicas'
+PARTE = 'Parte 9 · Eletiva: mais gêneros e técnicas'
 
 
 def codigo(nome):

@@ -1,5 +1,8 @@
 # Oficina Flutter 2 · janela da aula: um botão fixo (📘 Aula) abre, de qualquer lugar, a aula aberta
 # (texto, Experimente, leitura, etapas) e a lista de todas as aulas por parte, com busca.
+# Também põe em cada aula a linha "Você vai usar" (pré-requisitos, do trilha.py) e o aviso das partes eletivas.
+import json
+import trilha
 
 CSS = r"""<style>
 #aulaFab{position:fixed;z-index:90;left:max(14px,env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));
@@ -25,6 +28,10 @@ CSS = r"""<style>
 .au-item.on{border-color:var(--accent);background:var(--panel2)}
 .au-item .n{color:var(--ink2);min-width:2.2em;text-align:right;font-variant-numeric:tabular-nums}
 .au-item .ok{margin-left:auto;color:#2BA36B}
+.lesson p.usa{grid-column:1/-1;font-size:13px;color:var(--ink2)}
+.lesson p.usa a{color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.lesson p.eletiva{grid-column:1/-1;font-size:13px;background:rgba(43,163,107,.12);border:1px solid rgba(43,163,107,.45);border-radius:8px;padding:5px 10px}
+.au-item .el{font-size:11px;color:#2BA36B;border:1px solid currentColor;border-radius:999px;padding:0 6px}
 </style>
 """
 
@@ -72,7 +79,17 @@ JS = r"""<script>
   function ir(i){var s=sel();if(!s||i<0||i>=s.options.length)return;s.selectedIndex=i;s.dispatchEvent(new Event('change',{bubbles:true}));setTimeout(titulo,50)}
   function abre(){traz();titulo();aba(false);$('auModal').hidden=false;$('auClose').focus()}
   function fecha(){$('auModal').hidden=true;devolve();$('aulaFab').focus()}
+  var USA=__USA__;
+  function parteDe(i){var Ls=window.OF.LESSONS||[],P=window.OF.PARTS||[],nome='';P.forEach(function(p){var k=Ls.findIndex(function(L){return tit(L)===p[0]});if(k>=0&&k<=i&&/^Parte /.test(p[1]))nome=p[1]});return nome}
+  // a linha "Você vai usar" e o aviso de eletiva entram logo depois do título da aula
+  function enfeita(){var b=$('lessonBox');if(!b||b.querySelector('.usa,.eletiva'))return;var h=b.querySelector('h1');if(!h)return;var Ls=window.OF.LESSONS||[],i=atual(),L=Ls[i];if(!L)return;
+    var html='',us=USA[tit(L)]||[];
+    if(us.length)html+='<p class="usa">🔗 Você vai usar: '+us.map(function(u){var k=Ls.findIndex(function(x){return tit(x)===u});return '<a data-ir="'+k+'">'+(k+1)+'. '+esc(u)+'</a>'}).join(' · ')+'</p>';
+    if(/Eletiva/.test(parteDe(i)))html+='<p class="eletiva">🌿 Aula eletiva: as Partes 8 e 9 são um cardápio. Escolha as aulas que servem ao seu jogo, na ordem que quiser.</p>';
+    if(html)h.insertAdjacentHTML('afterend',html)}
   function inicia(){if(!$('aulaFab'))return;
+    var lb=$('lessonBox');if(lb){new MutationObserver(enfeita).observe(lb,{childList:true});enfeita();
+      lb.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('[data-ir]');if(!a)return;e.preventDefault();e.stopPropagation();ir(+a.getAttribute('data-ir'))},true)}
     $('aulaFab').addEventListener('click',abre);$('auClose').addEventListener('click',fecha);
     $('auModal').addEventListener('click',function(e){if(e.target===$('auModal'))fecha()});
     document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('auModal').hidden&&!document.querySelector('.modal:not(#auModal):not([hidden]),.le-modal:not([hidden])'))fecha()},true);
@@ -88,4 +105,4 @@ JS = r"""<script>
 
 
 def finish(src):
-    return src + CSS + HTML + JS
+    return src + CSS + HTML + JS.replace('__USA__', json.dumps(trilha.USA, ensure_ascii=False))
