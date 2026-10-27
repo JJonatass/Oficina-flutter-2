@@ -256,3 +256,33 @@ MANUAL.update({
     ('Arte de jogos: pixel art e paletas', 2): [("'...DC...CCCC.t..'", "'...DC...CCCC....'")],
     ('Som de jogos: efeitos e música', 2): [("  'vitoria': Envelope(0.01, 0.1, 0.8, 0.3),\n", "  'vitoria': Envelope(0.01, 0.1, 0.8, 0.3),\n  'dano': Envelope(0.0, 0.15, 0.2, 0.1),\n")],
 })
+
+# Parte 7 e leituras da segunda leva
+MANUAL.update({
+    ('Matemática de jogos: física e passo de tempo', 1): [('double passo = 1 / 120;', 'double passo = 1 / 240;')],
+    ('Matemática de jogos: física e passo de tempo', 2): [('Offset vel = const Offset(900, -150);', 'Offset vel = const Offset(400, -150);')],
+    ('Matemática de jogos: colisão em detalhes', 1): [('Size tamanho = const Size(110, 80);', 'Size tamanho = const Size(200, 40);')],
+    ('Matemática de jogos: colisão em detalhes', 2): [('bool mostrarEmpurrao = true;', 'bool mostrarEmpurrao = false;')],
+    ('Arte de jogos: interface e acessibilidade', 1): [('bool coresSeguras = false;', 'bool coresSeguras = true;')],
+    ('Navegação: menu, fases e pausa', 2): [("child: const Text('Jogar'),", "child: const Text('Começar'),")],
+    ('Game design: design de fases e ritmo', 1): [("trechos = ['ensina', 'pratica',", "trechos = ['desafio', 'pratica',")],
+    ('Game design: design de fases e ritmo', 2): [("'chefe': 1.0,", "'chefe': 0.9,")],
+    ('Fases e estrelas: progresso com Hive', 0): [("  Fase('Praia', 11, 10),\n", "  Fase('Praia', 11, 10),\n  Fase('Parque', 13, 10),\n")],
+    ('Fases e estrelas: progresso com Hive', 1): [('if (sobra > 0.5) return 3;', 'if (sobra > 0.6) return 3;')],
+    ('Matemática de jogos: probabilidade e sorteio', 0): [("Item('Osso dourado', 3,", "Item('Osso dourado', 1,")],
+    ('Matemática de jogos: probabilidade e sorteio', 2): [("  Item('Osso dourado', 3, Color(0xFFFFC107)),\n", "  Item('Petisco', 20, Color(0xFFA1887F)),\n  Item('Osso dourado', 3, Color(0xFFFFC107)),\n")],
+    ('Geração procedural: semente, labirinto e cavernas', 1): [('int passosSuavizar = 4;', 'int passosSuavizar = 1;')],
+    ('Geração procedural: semente, labirinto e cavernas', 2): [('int semente = 42;', 'int semente = 2026;')],
+    ('Caminho até o alvo: BFS e A*', 1): [('bool aEstrela = false;', 'bool aEstrela = true;')],
+    ('Caminho até o alvo: BFS e A*', 2): [('int estimativa(Celula a, Celula b) => (a.x - b.x).abs() + (a.y - b.y).abs();', 'int estimativa(Celula a, Celula b) => 3 * ((a.x - b.x).abs() + (a.y - b.y).abs());')],
+    ('Desempenho: medir FPS e reaproveitar objetos', 1): [('if (tempos.length > 30)', 'if (tempos.length > 60)')],
+    ('Desempenho: medir FPS e reaproveitar objetos', 2): [('size: Vector2.all(28), anchor', 'size: Vector2.all(40), anchor')],
+    ('Programação de jogos: arquitetura em camadas', 0): [('final int vidasIniciais = 3;', 'final int vidasIniciais = 5;'), ('  int vidas = 3;', '  int vidas = 5;')],
+    ('Programação de jogos: arquitetura em camadas', 1): [('if (ossos % 5 == 0)', 'if (ossos % 10 == 0)')],
+    ('Game design: testar com jogadores', 2): [("'#...x.....#...#',", "'#.........#...#',")],
+    ('Produção: publicar o jogo', 0): [("const String versao = '1.0.0+1';", "const String versao = '1.0.1+2';")],
+    ('Produção: publicar o jogo', 1): [("  Etapa('Loja', 'Chave de assinatura',", "  Etapa('Qualidade', 'Pedir para 3 pessoas jogarem', 'Playtest antes de publicar.'),\n  Etapa('Loja', 'Chave de assinatura',")],
+    ('Produção: publicar o jogo', 2): [("'Tudo pronto: pode enviar para a loja! 🎉'", "'Agora é com você: publique e mostre para a turma!'")],
+    ('Projeto · Trilha do Caramelo', 0): [('  int vidas = 3;', '  int vidas = 5;'), ("'♡' * (3 - vidas)", "'♡' * (5 - vidas)")],
+    ('Projeto · Trilha do Caramelo', 3): [("  InfoFase('Feira', 'fase3.tmx'),\n", "  InfoFase('Feira', 'fase3.tmx'),\n  InfoFase('Bônus', 'fase1.tmx'),\n")],
+})

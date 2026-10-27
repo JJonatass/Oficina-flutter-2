@@ -4388,7 +4388,8 @@ SETUP_TILED = (
     '  assets:\n'
     '    - assets/images/\n'
     '    - assets/tiles/\n\n'
-    'No simulador já existem os mapas arena.tmx (vista de cima) e fase1.tmx (plataforma), com o tileset tiles.png '
+    'No simulador já existem os mapas arena.tmx e arena2.tmx (vista de cima), fase1.tmx, fase2.tmx e fase3.tmx '
+    '(plataforma) e iso.tmx (isométrico), com o tileset tiles.png '
     'incorporado. Para usar um mapa seu, salve no Tiled com as camadas em CSV e o tileset incorporado, e acrescente o '
     '.tmx e a imagem dos blocos pelo botão 🖼 Sprites.'
 )
@@ -6102,6 +6103,9 @@ class Gato extends SpriteAnimationComponent with HasGameReference<CacaOssos> {
 
 PARTS.append(['Projeto · Caça-Ossos', 'Projeto 5 · Caça-Ossos'])
 
+
+import parte7  # noqa: E402
+parte7.adicionar(aula, PARTS, SETUP_FLAME, SETUP_TILED)
 
 import teoria  # noqa: E402
 teoria.inserir(LESSONS, EXERCISES, PARTS)

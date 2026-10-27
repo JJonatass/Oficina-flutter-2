@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="68" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="50">
+ <tileset firstgid="1" name="tiles" tilewidth="16" tileheight="16" tilecount="24" columns="8">
+  <image source="tiles.png" width="128" height="48"/>
+  <tile id="5"><animation><frame tileid="5" duration="300"/><frame tileid="16" duration="300"/><frame tileid="17" duration="300"/></animation></tile>
+  <tile id="18"><animation><frame tileid="18" duration="120"/><frame tileid="19" duration="120"/><frame tileid="20" duration="120"/></animation></tile>
+ </tileset>
+ <layer id="1" name="fundo" width="68" height="13">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,12,0,0,0,0,
+0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="2" name="blocos" width="68" height="13">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,2,2,2,2,2,2,2,0,0,0,0,0,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,0,2,2,2,0,0,0,0,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,13,13,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,13,13,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,6,6,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+</data>
+ </layer>
+ <objectgroup id="3" name="solidos">
+  <object id="1" type="chao" x="736" y="96" width="48" height="64"/>
+  <object id="2" type="chao" x="288" y="112" width="112" height="48"/>
+  <object id="3" type="chao" x="976" y="144" width="112" height="16"/>
+  <object id="4" type="chao" x="0" y="160" width="464" height="32"/>
+  <object id="5" type="chao" x="512" y="160" width="288" height="16"/>
+  <object id="6" type="chao" x="832" y="160" width="256" height="16"/>
+  <object id="7" type="chao" x="512" y="176" width="576" height="16"/>
+  <object id="8" type="chao" x="0" y="192" width="1088" height="16"/>
+  <object id="9" type="plataforma" x="624" y="32" width="80" height="7"/>
+  <object id="10" type="plataforma" x="96" y="48" width="80" height="7"/>
+  <object id="11" type="plataforma" x="320" y="64" width="112" height="7"/>
+  <object id="12" type="plataforma" x="784" y="64" width="112" height="7"/>
+  <object id="13" type="plataforma" x="512" y="80" width="64" height="7"/>
+  <object id="14" type="plataforma" x="16" y="96" width="64" height="7"/>
+  <object id="15" type="plataforma" x="928" y="96" width="64" height="7"/>
+  <object id="16" type="plataforma" x="144" y="112" width="64" height="7"/>
+  <object id="17" type="plataforma" x="672" y="112" width="64" height="7"/>
+  <object id="18" type="plataforma" x="240" y="128" width="48" height="7"/>
+  <object id="19" type="plataforma" x="480" y="128" width="144" height="7"/>
+  <object id="20" type="plataforma" x="848" y="128" width="80" height="7"/>
+ </objectgroup>
+ <objectgroup id="4" name="objetos">
+  <object id="21" name="espinhos" type="perigo" x="400" y="152" width="48" height="8"/>
+  <object id="22" name="espinhos" type="perigo" x="800" y="168" width="32" height="8"/>
+  <object id="23" name="agua" type="perigo" x="464" y="179" width="48" height="13"/>
+  <object id="24" name="dourado" type="dourado" x="664" y="24">
+   <properties><property name="valor" type="int" value="5"/></properties>
+  </object>
+  <object id="25" name="osso" type="osso" x="120" y="40">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="26" name="osso" type="osso" x="136" y="40">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="27" name="osso" type="osso" x="152" y="40">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="28" name="osso" type="osso" x="360" y="56">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="29" name="osso" type="osso" x="376" y="56">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="30" name="osso" type="osso" x="392" y="56">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="31" name="osso" type="osso" x="824" y="56">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="32" name="osso" type="osso" x="840" y="56">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="33" name="osso" type="osso" x="856" y="56">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="34" name="osso" type="osso" x="600" y="72">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="35" name="osso" type="osso" x="616" y="72">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="36" name="osso" type="osso" x="40" y="88">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="37" name="osso" type="osso" x="56" y="88">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="38" name="osso" type="osso" x="952" y="88">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="39" name="osso" type="osso" x="968" y="88">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="40" name="osso" type="osso" x="168" y="104">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="41" name="osso" type="osso" x="184" y="104">
+   <properties><property name="valor" type="int" value="1"/></properties>
+  </object>
+  <object id="42" name="gato" type="inimigo" x="344" y="112">
+   <point/>
+  </object>
+  <object id="43" name="gato" type="inimigo" x="552" y="128">
+   <point/>
+  </object>
+  <object id="44" name="fim" type="fim" x="1008" y="112" width="16" height="32"/>
+  <object id="45" name="fim" type="fim" x="1008" y="128" width="16" height="32"/>
+  <object id="46" name="inicio" type="inicio" x="24" y="160">
+   <point/>
+  </object>
+  <object id="47" name="gato" type="inimigo" x="248" y="160">
+   <point/>
+  </object>
+  <object id="48" name="gato" type="inimigo" x="680" y="160">
+   <point/>
+  </object>
+  <object id="49" name="gato" type="inimigo" x="920" y="160">
+   <point/>
+  </object>
+ </objectgroup>
+</map>

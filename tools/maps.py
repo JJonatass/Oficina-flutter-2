@@ -169,7 +169,53 @@ arena_tmx('arena2.tmx', ARENA2, ((2, 6), (17, 6), (2, 14), (17, 14), (9, 9), (9,
 
 
 # ---------------------------------------------------------------- fase de plataforma (vista de lado)
-FASE = [
+TIL = {'G': 1, 'D': 2, '=': 5, 'w': 6, '^': 13, '#': 14}
+
+
+def plataforma_tmx(nome, FASE):
+    """Fase de plataforma vista de lado: G grama, D terra, = tábua (só por cima), w água, ^ espinhos, # escada,
+    $ osso, O osso dourado, S gato, I início, F chegada (porta), f flor, a arbusto, p placa."""
+    FW, FH = len(FASE[0]), len(FASE)
+    assert all(len(l) == FW for l in FASE), nome
+    blocos = [[TIL.get(FASE[y][x], 0) for x in range(FW)] for y in range(FH)]
+    fundo = [[{'f': 10, 'a': 9, 'p': 11, 'F': 12}.get(FASE[y][x], 0) for x in range(FW)] for y in range(FH)]
+    nid = 1
+    sol = []
+    for r in rects(blocos, {1, 2}):
+        sol.append({'id': nid, 'type': 'chao', 'x': r[0] * T, 'y': r[1] * T, 'w': r[2] * T, 'h': r[3] * T})
+        nid += 1
+    for r in rects(blocos, {5}):
+        sol.append({'id': nid, 'type': 'plataforma', 'x': r[0] * T, 'y': r[1] * T, 'w': r[2] * T, 'h': 7})
+        nid += 1
+    objs = []
+    for r in rects(blocos, {13}):
+        objs.append({'id': nid, 'name': 'espinhos', 'type': 'perigo', 'x': r[0] * T, 'y': r[1] * T + 8, 'w': r[2] * T, 'h': 8})
+        nid += 1
+    for r in rects(blocos, {6}):
+        objs.append({'id': nid, 'name': 'agua', 'type': 'perigo', 'x': r[0] * T, 'y': r[1] * T + 3, 'w': r[2] * T, 'h': 13})
+        nid += 1
+    for y in range(FH):
+        for x in range(FW):
+            c = FASE[y][x]
+            cx, cy = x * T + T // 2, y * T + T // 2
+            if c == '$':
+                objs.append({'id': nid, 'name': 'osso', 'type': 'osso', 'x': cx, 'y': cy, 'props': {'valor': 1}})
+            elif c == 'O':
+                objs.append({'id': nid, 'name': 'dourado', 'type': 'dourado', 'x': cx, 'y': cy, 'props': {'valor': 5}})
+            elif c == 'S':
+                objs.append({'id': nid, 'name': 'gato', 'type': 'inimigo', 'x': cx, 'y': (y + 1) * T})
+            elif c == 'I':
+                objs.append({'id': nid, 'name': 'inicio', 'type': 'inicio', 'x': cx, 'y': (y + 1) * T})
+            elif c == 'F':
+                objs.append({'id': nid, 'name': 'fim', 'type': 'fim', 'x': x * T, 'y': y * T, 'w': T, 'h': T * 2})
+            else:
+                continue
+            nid += 1
+    (OUT / nome).write_text(tmx(FW, FH, [layer(1, 'fundo', fundo), layer(2, 'blocos', blocos),
+                                         objgroup(3, 'solidos', sol), objgroup(4, 'objetos', objs)], nid))
+
+
+plataforma_tmx('fase1.tmx', [
     '................................................',
     '................................................',
     '................................................',
@@ -183,41 +229,39 @@ FASE = [
     'GGGGGDDDD..GGGGGG....GGGG...DDDD^^^DDDDDGGGGGGGG',
     'DDDDDDDDDwwDDDDDDwwwwDDDDwwwDDDDDDDDDDDDDDDDDDDD',
     'DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD',
-]
-FW, FH = len(FASE[0]), len(FASE)
-TIL = {'G': 1, 'D': 2, '=': 5, 'w': 6, '^': 13, '#': 14}
-blocos = [[TIL.get(FASE[y][x], 0) for x in range(FW)] for y in range(FH)]
-fundo = [[{'f': 10, 'a': 9, 'p': 11}.get(FASE[y][x], 0) for x in range(FW)] for y in range(FH)]
-nid = 1
-sol = []
-for r in rects(blocos, {1, 2}):
-    sol.append({'id': nid, 'type': 'chao', 'x': r[0] * T, 'y': r[1] * T, 'w': r[2] * T, 'h': r[3] * T})
-    nid += 1
-for r in rects(blocos, {5}):
-    sol.append({'id': nid, 'type': 'plataforma', 'x': r[0] * T, 'y': r[1] * T, 'w': r[2] * T, 'h': 7})
-    nid += 1
-objs = []
-for r in rects(blocos, {13}):
-    objs.append({'id': nid, 'name': 'espinhos', 'type': 'perigo', 'x': r[0] * T, 'y': r[1] * T + 8, 'w': r[2] * T, 'h': 8})
-    nid += 1
-for r in rects(blocos, {6}):
-    objs.append({'id': nid, 'name': 'agua', 'type': 'perigo', 'x': r[0] * T, 'y': r[1] * T + 3, 'w': r[2] * T, 'h': 13})
-    nid += 1
-for y in range(FH):
-    for x in range(FW):
-        c = FASE[y][x]
-        cx, cy = x * T + T // 2, y * T + T // 2
-        if c == '$':
-            objs.append({'id': nid, 'name': 'osso', 'type': 'osso', 'x': cx, 'y': cy, 'props': {'valor': 1}})
-        elif c == 'I':
-            objs.append({'id': nid, 'name': 'inicio', 'type': 'inicio', 'x': cx, 'y': (y + 1) * T})
-        elif c == 'F':
-            objs.append({'id': nid, 'name': 'fim', 'type': 'fim', 'x': x * T, 'y': y * T, 'w': T, 'h': T * 2})
-        else:
-            continue
-        nid += 1
-(OUT / 'fase1.tmx').write_text(tmx(FW, FH, [layer(1, 'fundo', fundo), layer(2, 'blocos', blocos),
-                                              objgroup(3, 'solidos', sol), objgroup(4, 'objetos', objs)], nid))
+])
+
+# fases do Projeto 6 (Trilha do Caramelo): praça com gatos e feira com espinhos
+plataforma_tmx('fase2.tmx', [
+    '............................................................',
+    '............................................................',
+    '.....................$$$......................O.............',
+    '....................=====...................=====...........',
+    '..........$$...........................$$...................',
+    '.........====.........$$S.............====...........$$.....',
+    '..$...................GGGGGG...................====.........',
+    '.====......$.....=====DDDDDD.......$$....................F..',
+    '..........===.........DDDDDD....=======.......f......p...F..',
+    '.I....f.S........a....DDDDDD........S...........S.....GGGGGG',
+    'GGGGGGGGGGGGG..GGGGGGGGGGGGGGGG..GGGGGGGGG..GGGGGGGGGGGGGGGG',
+    'DDDDDDDDDDDDDwwDDDDDDDDDDDDDDDDwwDDDDDDDDDwwDDDDDDDDDDDDDDDD',
+    'DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD',
+])
+plataforma_tmx('fase3.tmx', [
+    '....................................................................',
+    '.........................................O..........................',
+    '.......$$$.............................=====........................',
+    '......=====...........$$$..........................$$$..............',
+    '....................=======..........$$..........=======............',
+    '..$$............................====.......................$$.......',
+    '.====.....$$.........S........................GGG.........====......',
+    '.........====.....GGGGGGG.........S.......====DDD..............F....',
+    '...............===DDDDDDD.....=========.......DDD....=====....pF....',
+    '.I.....f.......S..DDDDDDD^^^..............S...DDD..f.....S...GGGGGGG',
+    'GGGGGGGGGGGGGGGGGGGGGGGGGGGGG...GGGGGGGGGGGGGGGGGG^^GGGGGGGGGGGGGGGG',
+    'DDDDDDDDDDDDDDDDDDDDDDDDDDDDDwwwDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD',
+    'DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD',
+])
 # ---------------------------------------------------------------- mapa isométrico
 ISO = [
     'GGGGGGGGGGGG',

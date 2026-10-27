@@ -45,9 +45,9 @@ class _SucoState extends State<Suco> with SingleTickerProviderStateMixin {
     if (dt <= 0 || dt > 0.1) return;
     setState(() {
       // tudo o que o toque provocou vai voltando ao normal aos poucos
-      tremida = max(0, tremida - dt * 2.5);
-      esmaga = max(0, esmaga - dt * 3);
-      flash = max(0, flash - dt * 4);
+      tremida = max(0.0, tremida - dt * 2.5);
+      esmaga = max(0.0, esmaga - dt * 3);
+      flash = max(0.0, flash - dt * 4);
       for (final f in faiscas) {
         f.posicao += f.velocidade * dt;
         f.velocidade += const Offset(0, 600) * dt;

@@ -62,7 +62,7 @@ Pose pose(double t, double exagero) {
   // parábola: no chão em t = 0 e t = 1, no alto em t = 0.5
   final altura = 4 * t * (1 - t);
   // perto do chão, a bola esmaga (mais larga e mais baixa); no ar, estica na direção do movimento
-  final chao = max(0, 1 - min(t, 1 - t) / 0.08);
+  final chao = max(0.0, 1 - min(t, 1 - t) / 0.08);
   final rapidez = (1 - 2 * t).abs();
   final estica = 1 + exagero * 0.35 * rapidez * (1 - chao);
   final esmaga = 1 - exagero * 0.45 * chao;

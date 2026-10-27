@@ -94,7 +94,7 @@ class Grafico extends CustomPainter {
       for (var i = 0; i <= 120; i++) {
         final t = duracao * i / 120;
         final x = area.left + area.width * i / 120;
-        final y = area.bottom - area.height * (funcoes[c](t) / 4).clamp(0, 1);
+        final y = area.bottom - area.height * (funcoes[c](t) / 4).clamp(0.0, 1.0);
         if (i == 0) {
           caminho.moveTo(x, y);
         } else {

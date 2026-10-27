@@ -90,7 +90,7 @@ class Tela extends CustomPainter {
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF3E6B3A));
     // a barra de tempo mostra o desafio: quanto falta para o osso sumir
     canvas.drawRect(Rect.fromLTWH(20, 20, 320, 14), Paint()..color = Colors.black26);
-    canvas.drawRect(Rect.fromLTWH(20, 20, 320 * fracao.clamp(0, 1), 14), Paint()..color = fracao > 0.3 ? Colors.amber : Colors.redAccent);
+    canvas.drawRect(Rect.fromLTWH(20, 20, 320 * fracao.clamp(0.0, 1.0), 14), Paint()..color = fracao > 0.3 ? Colors.amber : Colors.redAccent);
     canvas.drawCircle(osso, 30, Paint()..color = Colors.white24);
     canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: osso, width: 40, height: 10), const Radius.circular(5)), Paint()..color = const Color(0xFFFAF4E2));
     for (final dx in [-20.0, 20.0]) {

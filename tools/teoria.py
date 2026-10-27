@@ -303,7 +303,7 @@ leitura(
               'a cor vai ao branco e volta. **Som**: curto, no exato momento. **Pausa de impacto**: congelar o jogo por 2 ou 3 '
               'quadros numa batida forte.'},
         {'p': 'O segredo é que tudo **decai**: começa forte e volta ao normal em poucos décimos de segundo. Na demonstração, '
-              'cada efeito é um número que vai a 1 no toque e desce até 0 com o tempo (`max(0, valor - dt * velocidade)`).'},
+              'cada efeito é um número que vai a 1 no toque e desce até 0 com o tempo (`max(0.0, valor - dt * velocidade)`).'},
         {'dica': 'Suco demais cansa e atrapalha: uma tela que treme o tempo todo esconde o que importa. Guarde os efeitos grandes '
                  'para os momentos grandes (perder uma vida, derrotar um chefe) e use efeitos pequenos nas ações comuns. E dê '
                  'ao jogador uma opção para reduzir a tremida.', 'titulo': 'Na medida certa'},
@@ -463,6 +463,423 @@ leitura(
          'exp': 'O modo loop recomeça a música quando ela acaba.'},
         {'q': 'Por que todo som importante precisa de um sinal visual?', 'ops': ['Para gastar menos bateria', 'Porque muita gente joga sem som', 'Porque o Flutter não toca som', 'Não precisa'], 'ok': 1,
          'exp': 'Quem joga no mudo ou não ouve bem continua recebendo a informação.'},
+    ],
+)
+
+
+# ------------------------------------------------------------------ Leituras da segunda leva
+leitura(
+    'Gravidade e pulo',
+    'Matemática de jogos: física e passo de tempo',
+    'Leitura: como a física avança quadro a quadro, por que o dt muda o resultado e o que é o passo fixo. No código, '
+    'uma bola rápida atravessa uma parede fina quando o aparelho é lento.',
+    'Em ▶ Testar, compare 60, 20 e 8 quadros por segundo e ligue o passo fixo. Depois engrosse a parede, diminua o passo e '
+    'deixe a bola mais lenta.',
+    'fisica',
+    [
+        ['Parede grossa', 'Troque const double paredeLargura = 6 por 40: a 8 fps ela para de ser atravessada.', r'paredeLargura\s*=\s*(?!6\b)\d+'],
+        ['Passo menor', 'Troque double passo = 1 / 120 por 1 / 240.', r'double\s+passo\s*=\s*1\s*/\s*(?!120\b)\d+'],
+        ['Bola mais lenta', 'Na classe Bola, troque Offset vel = const Offset(900, -150) por const Offset(400, -150).', r'vel\s*=\s*const\s+Offset\(\s*(?!900\b)\d+'],
+    ],
+    [
+        {'h': 'A física anda em passos'},
+        {'p': 'O jogo não calcula o movimento de forma contínua: a cada quadro ele dá um **passo**. Com a velocidade e a '
+              'aceleração conhecidas, o passo mais usado é o de **Euler semi-implícito**: primeiro `vel += aceleracao * dt`, '
+              'depois `pos += vel * dt`. É o que você já fez no pulo do caramelo: a gravidade muda a velocidade e a velocidade '
+              'muda a posição.'},
+        {'p': 'O `dt` é o tempo desde o quadro anterior. Multiplicar por ele faz o jogo andar na mesma rapidez em qualquer '
+              'aparelho. Mas só a rapidez fica igual: o **caminho** muda. Com dt grande, a curva do pulo vira uma escada de '
+              'pontos distantes, e a altura máxima muda um pouco.'},
+        {'fig': 'passo', 'legenda': 'A mesma bola, rápida, contra uma parede fina. Com passos curtos ela cai dentro da parede e '
+                                    'bate; com passos longos ela pula de um lado para o outro sem nunca estar dentro.'},
+        {'h': 'Atravessar paredes'},
+        {'p': 'Se a colisão só testa "está dentro agora?", um objeto rápido pode estar antes da parede num quadro e depois '
+              'dela no seguinte. Esse problema tem nome: **tunelamento**. Ele aparece com objetos rápidos, paredes finas e '
+              'aparelhos lentos, justamente no celular mais simples da turma.'},
+        {'h': 'Passo fixo'},
+        {'p': 'A solução clássica é separar o quadro da física. O jogo guarda o tempo que passou numa conta (`sobra += dt`) e '
+              'executa vários passos **pequenos e sempre iguais** enquanto houver tempo: `while (sobra >= passo) { fisica(passo); '
+              'sobra -= passo; }`. A física fica igual em qualquer aparelho, e as colisões não pulam paredes. Outras saídas: '
+              'deixar paredes grossas, limitar a velocidade máxima ou testar o segmento entre a posição antiga e a nova.'},
+        {'dica': 'Quando o jogo trava por um instante (uma notificação, por exemplo), o próximo dt pode ser enorme e jogar o '
+                 'personagem através do chão. Limite o dt: `if (dt > 0.05) dt = 0.05;`.', 'titulo': 'Cuidado com o dt gigante'},
+    ],
+    [
+        {'q': 'No Euler semi-implícito, o que se atualiza primeiro?', 'ops': ['A posição', 'A velocidade', 'O desenho', 'O dt'], 'ok': 1,
+         'exp': 'Primeiro vel += aceleração * dt, depois pos += vel * dt.'},
+        {'q': 'O que é tunelamento?', 'ops': ['Um efeito de câmera', 'Um objeto rápido atravessar uma parede entre dois passos', 'Um tipo de mapa', 'Pular duas vezes'], 'ok': 1,
+         'exp': 'Num passo ele está antes da parede, no outro já está depois, e nunca dentro.'},
+        {'q': 'O que o passo fixo garante?', 'ops': ['Mais quadros por segundo', 'A mesma física em qualquer aparelho', 'Sprites mais bonitos', 'Som sem atraso'], 'ok': 1,
+         'exp': 'Os passos da física têm sempre o mesmo tamanho, não importa o ritmo dos quadros.'},
+        {'q': 'Qual NÃO ajuda contra o tunelamento?', 'ops': ['Paredes mais grossas', 'Limitar a velocidade', 'Passos menores', 'Aumentar o dt'], 'ok': 3,
+         'exp': 'Um dt maior faz passos mais longos e piora o problema.'},
+    ],
+)
+
+leitura(
+    'Flame: colisões com hitboxes',
+    'Matemática de jogos: colisão em detalhes',
+    'Leitura: os testes de colisão mais usados (círculo, retângulo, círculo com retângulo) e como empurrar um objeto para '
+    'fora do outro. No código, você arrasta as formas e vê cada teste.',
+    'Em ▶ Testar, arraste a forma laranja em cada modo. Depois mude o raio, o tamanho do retângulo e esconda a seta de '
+    'empurrão.',
+    'colisao',
+    [
+        ['Círculos maiores', 'Troque double raio = 50 por 70.', r'double\s+raio\s*=\s*(?!50\b)\d+'],
+        ['Retângulo comprido', 'Troque Size tamanho = const Size(110, 80) por const Size(200, 40).', r'Size\s+tamanho\s*=\s*const\s+Size\(\s*(?!110\b)\d+'],
+        ['Sem empurrão', 'Troque bool mostrarEmpurrao = true por false.', r'mostrarEmpurrao\s*=\s*false'],
+    ],
+    [
+        {'h': 'Detectar e resolver'},
+        {'p': 'Colisão tem duas partes. **Detectar** é responder "estão se tocando?". **Resolver** é decidir o que fazer: '
+              'tirar vida, pegar o osso, ou empurrar um para fora do outro. Os jogos usam formas simples (círculos e '
+              'retângulos) no lugar do desenho, porque o teste fica rápido. Essas formas são as **hitboxes**.'},
+        {'fig': 'colisao', 'legenda': 'À esquerda, dois círculos: tocam quando a distância entre os centros é menor que a soma '
+                                      'dos raios. À direita, dois retângulos: tocam quando as faixas em x e em y se cruzam.'},
+        {'h': 'Os três testes'},
+        {'p': '**Círculo com círculo**: `(a - b).distance < ra + rb`. **Retângulo com retângulo alinhados** (AABB): se cruzam '
+              'quando `a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top`, que é o `overlaps` do '
+              'Rect. **Círculo com retângulo**: acha o ponto do retângulo mais perto do centro (com `clamp` em x e em y) e '
+              'testa se ele está dentro do círculo.'},
+        {'p': 'Retângulos girados e polígonos usam o **teorema do eixo separador** (SAT): se existe uma linha que separa as '
+              'duas formas, elas não se tocam. O Flame faz isso por você com `PolygonHitbox`.'},
+        {'h': 'Empurrar para fora'},
+        {'p': 'Para resolver uma batida contra parede, calcule o quanto um retângulo entrou no outro em cada lado e empurre '
+              'pelo lado mais curto: é o vetor verde da demonstração. O jogo de plataforma da Parte 7 faz isso eixo por eixo, '
+              'o que evita empurrões estranhos nos cantos.'},
+        {'dica': 'Testar todo mundo contra todo mundo cresce rápido: 100 objetos dão quase 5 mil pares. Jogos maiores dividem o '
+                 'mundo em células (uma grade) e só testam quem está na mesma célula. O HasCollisionDetection do Flame já faz '
+                 'uma triagem assim.', 'titulo': 'Muitos objetos'},
+    ],
+    [
+        {'q': 'Dois círculos de raio 30 têm centros a 50 pixels de distância. Estão colidindo?', 'ops': ['Sim', 'Não', 'Só se forem retângulos', 'Depende da cor'], 'ok': 0,
+         'exp': '50 é menor que 30 + 30 = 60.'},
+        {'q': 'Qual teste o Rect.overlaps faz?', 'ops': ['Círculo com círculo', 'Retângulos alinhados aos eixos (AABB)', 'Polígonos girados', 'Pixel por pixel'], 'ok': 1,
+         'exp': 'Compara as bordas esquerda, direita, de cima e de baixo dos dois retângulos.'},
+        {'q': 'Para círculo com retângulo, qual ponto se testa?', 'ops': ['O canto de cima', 'O centro do retângulo', 'O ponto do retângulo mais perto do centro do círculo', 'Qualquer ponto'], 'ok': 2,
+         'exp': 'Se o ponto mais perto está dentro do círculo, eles se tocam.'},
+        {'q': 'Ao resolver uma batida, por qual lado se empurra?', 'ops': ['Sempre para cima', 'Pelo lado em que entrou menos', 'Pelo lado em que entrou mais', 'Para a esquerda'], 'ok': 1,
+         'exp': 'O menor empurrão desfaz a sobreposição com o menor movimento.'},
+    ],
+)
+
+leitura(
+    'Joystick e botões na tela',
+    'Arte de jogos: interface e acessibilidade',
+    'Leitura: o que mostrar no HUD, onde pôr os controles no celular e como deixar o jogo jogável por mais gente. No '
+    'código, uma tela de jogo com opções de acessibilidade.',
+    'Em ▶ Testar, mude o tamanho do texto e dos botões, ligue o modo canhoto e as cores para daltonismo. Depois deixe os '
+    'botões maiores desde o início e comece com uma vida.',
+    'hud',
+    [
+        ['Botões maiores', 'Troque double tamanhoBotao = 56 por 72.', r'tamanhoBotao\s*=\s*(?!56\b)\d+'],
+        ['Cores seguras', 'Troque bool coresSeguras = false por true.', r'coresSeguras\s*=\s*true'],
+        ['Uma vida', 'Troque int vidas = 2 por 1.', r'int\s+vidas\s*=\s*(?!2\b)\d+'],
+    ],
+    [
+        {'h': 'O HUD'},
+        {'p': 'O **HUD** é tudo que fica por cima do jogo: vidas, pontos, tempo, mapa, botões. Ele deve mostrar só o que o '
+              'jogador precisa **agora**, num lugar fixo e fácil de achar. Informação que muda o tempo todo (vidas, pontos) '
+              'costuma ficar nos cantos de cima; avisos aparecem perto de onde a ação acontece e somem.'},
+        {'fig': 'hud', 'legenda': 'No celular, os polegares alcançam bem os cantos de baixo (em verde). Por isso os botões vão '
+                                  'lá, e as informações vão no alto, onde a mão não cobre.'},
+        {'h': 'Controles no celular'},
+        {'p': 'Os botões ficam na **zona do polegar**, longe das bordas que o sistema usa para gestos. Cada um precisa de pelo '
+              'menos **48** de área de toque (a recomendação do Material Design), mesmo que o desenho seja menor. Botões '
+              'que se usam juntos (andar e pular) ficam um em cada mão. E vale oferecer o **modo canhoto**, que troca os '
+              'lados.'},
+        {'h': 'Acessibilidade'},
+        {'p': 'Cerca de 1 em cada 12 homens tem algum tipo de daltonismo, e o par vermelho e verde é o mais confundido. Por '
+              'isso a regra é: **nunca use só a cor** para informar. Junte cor com símbolo, forma ou texto (✓ e ✗ na '
+              'demonstração) e prefira pares como azul e laranja. Outras opções que custam pouco: tamanho do texto, '
+              'legendas para os sons, desligar a tremida de tela, velocidade do jogo e controles remapeáveis.'},
+        {'dica': 'Jogue o seu jogo com o som desligado, com o celular longe do rosto e com uma mão só. Cada coisa difícil '
+                 'nesses testes é uma melhoria para todo mundo, não só para quem precisa.', 'titulo': 'Teste rápido'},
+    ],
+    [
+        {'q': 'Onde ficam melhor os botões num jogo de celular deitado?', 'ops': ['No meio da tela', 'Nos cantos de baixo, na zona do polegar', 'No alto, ao lado das vidas', 'Atrás do personagem'], 'ok': 1,
+         'exp': 'Os polegares alcançam os cantos de baixo sem cobrir o jogo.'},
+        {'q': 'Qual o tamanho mínimo recomendado para a área de toque?', 'ops': ['12', '24', '48', '200'], 'ok': 2,
+         'exp': 'O Material Design recomenda pelo menos 48 por 48.'},
+        {'q': 'Por que não informar só pela cor?', 'ops': ['Porque gasta bateria', 'Porque quem tem daltonismo pode não distinguir', 'Porque o Flutter não deixa', 'Porque fica feio'], 'ok': 1,
+         'exp': 'Cor junto com símbolo ou texto funciona para todos.'},
+        {'q': 'Qual par de cores é mais seguro para daltonismo?', 'ops': ['Vermelho e verde', 'Azul e laranja', 'Verde e marrom', 'Vermelho e marrom'], 'ok': 1,
+         'exp': 'Azul e laranja continuam diferentes nos tipos mais comuns de daltonismo.'},
+    ],
+    parte='Parte 6 · Celular, física e mapas',
+)
+
+leitura(
+    'Plataforma: gravidade e colisão com o mapa',
+    'Game design: design de fases e ritmo',
+    'Leitura: como montar uma fase que ensina, desafia e dá respiro, e como pensar o ritmo ao longo dela. No código, um '
+    'gráfico de tensão que avisa os problemas mais comuns.',
+    'Em ▶ Testar, toque nos trechos para trocar o tipo e observe os avisos. Depois aceite três desafios seguidos, comece a '
+    'fase com um desafio e deixe o chefe menos intenso.',
+    'ritmo',
+    [
+        ['Três seguidos', 'Troque final int limiteSeguidos = 2 por 3.', r'limiteSeguidos\s*=\s*(?!2\b)\d+'],
+        ['Começo diferente', "Na lista trechos, troque o primeiro 'ensina' por 'desafio' e veja dois avisos.", r"trechos\s*=\s*\[\s*'(?!ensina')"],
+        ['Chefe menos intenso', "No mapa tipos, troque 'chefe': 1.0 por 'chefe': 0.9.", r"'chefe'\s*:\s*0\.\d+"],
+    ],
+    [
+        {'h': 'Uma fase conta uma história'},
+        {'p': 'Uma boa fase não é uma pilha de obstáculos: ela tem começo, meio e fim. Um padrão muito usado tem quatro '
+              'tempos: **apresentar** uma ideia num lugar seguro, **praticar** com pouco risco, **desafiar** com tudo junto e '
+              'terminar com uma **surpresa** ou um momento forte. Muitas fases clássicas de plataforma seguem exatamente '
+              'esse roteiro com uma mecânica só.'},
+        {'fig': 'ritmo', 'legenda': 'A tensão de uma fase ao longo do tempo: sobe nos desafios, cai nos descansos e termina no '
+                                    'ponto mais alto. O zigue-zague mantém o jogador atento sem esgotá-lo.'},
+        {'h': 'Ritmo: tensão e respiro'},
+        {'p': 'Depois de um trecho difícil, o jogador precisa de um **respiro**: um lugar seguro, um osso de presente, uma '
+              'paisagem. Isso deixa o próximo desafio mais forte por contraste. Desafios demais em sequência cansam; '
+              'descanso demais entedia. A demonstração conta quantos trechos difíceis vêm seguidos e avisa quando passa do '
+              'limite.'},
+        {'h': 'O cenário ensina'},
+        {'p': 'O jogador lê o cenário. Um osso no alto ensina que dá para pular até lá; uma fileira de ossos indica o '
+              'caminho; uma plataforma diferente chama atenção. **Pontos de controle** (checkpoints) antes de trechos '
+              'difíceis evitam repetir a fase inteira, e caminhos secretos premiam quem explora sem atrapalhar quem só quer '
+              'passar.'},
+        {'dica': 'Desenhe a fase primeiro em papel quadriculado ou numa planilha: cada célula é um bloco. É o mesmo formato do '
+                 'Tiled e das listas de texto dos mapas da Oficina, e é muito mais rápido de mudar.', 'titulo': 'Papel antes do código'},
+    ],
+    [
+        {'q': 'Qual é a ordem do roteiro de quatro tempos?', 'ops': ['Desafiar, praticar, apresentar, surpreender', 'Apresentar, praticar, desafiar, surpreender', 'Surpreender, desafiar, praticar, apresentar', 'Praticar, desafiar, apresentar, surpreender'], 'ok': 1,
+         'exp': 'Primeiro a ideia num lugar seguro, depois prática, depois o desafio e por fim a surpresa.'},
+        {'q': 'Para que serve um trecho de descanso?', 'ops': ['Para encher a fase', 'Para baixar a tensão e dar força ao próximo desafio', 'Para o jogo carregar', 'Não serve para nada'], 'ok': 1,
+         'exp': 'O contraste entre tensão e respiro mantém o jogador atento.'},
+        {'q': 'Uma fileira de ossos no ar indica...', 'ops': ['Um bug', 'Um caminho para seguir', 'Que a fase acabou', 'Perigo'], 'ok': 1,
+         'exp': 'Itens colecionáveis guiam o olhar e o caminho do jogador.'},
+        {'q': 'Onde colocar um ponto de controle?', 'ops': ['No começo da fase', 'Logo antes de um trecho difícil', 'Depois da chegada', 'Em lugar nenhum'], 'ok': 1,
+         'exp': 'Assim quem erra no trecho difícil não repete tudo de novo.'},
+    ],
+)
+
+leitura(
+    'Geração procedural: semente, labirinto e cavernas',
+    'Game design: economia e balanceamento',
+    'Leitura: moedas, preços e melhorias, como o custo deve crescer e por que se balanceia com números. No código, uma '
+    'loja de melhorias com o gráfico da espera para cada nível.',
+    'Em ▶ Testar, mexa no crescimento do custo e no ganho por nível e veja as barras ficarem laranjas. Depois mude o preço '
+    'inicial, o ganho base e o limite de paciência.',
+    'economia',
+    [
+        ['Começo mais caro', 'Troque double custoBase = 10 por 25.', r'custoBase\s*=\s*(?!10\b)\d+'],
+        ['Ganho inicial maior', 'Troque double ganhoBase = 5 por 8.', r'ganhoBase\s*=\s*(?!5\b)\d+'],
+        ['Paciência curta', 'No pintor Barras, troque valores[i] > 10 por valores[i] > 5.', r'valores\[i\]\s*>\s*(?!10\b)\d+'],
+    ],
+    [
+        {'h': 'Fontes e ralos'},
+        {'p': 'Todo jogo com moeda tem **fontes** (de onde os ossos vêm: fases, baús, recompensas diárias) e **ralos** (para '
+              'onde vão: melhorias, roupas, vidas extras). Se a fonte for maior que o ralo por muito tempo, os ossos perdem '
+              'o valor; se o ralo for maior, o jogador sente que nunca consegue nada. Balancear é ajustar os dois.'},
+        {'fig': 'economia', 'legenda': 'O custo de cada nível cresce multiplicando (vermelho); o ganho cresce somando (verde). '
+                                       'No começo o jogador compra rápido; com o tempo, cada nível pede mais espera.'},
+        {'h': 'Curvas de custo'},
+        {'p': 'O jeito mais comum é o custo **exponencial**: `custo = base * crescimento ^ nível`. Com crescimento 1,5, cada '
+              'nível custa 50% a mais que o anterior. Como o ganho geralmente cresce em linha reta, a espera entre compras '
+              'aumenta aos poucos: rápido no começo (o jogador se empolga) e mais lento depois (cada compra vale mais). '
+              'Crescimento perto de 1 deixa tudo barato demais; perto de 2 vira um muro.'},
+        {'h': 'Balancear com números'},
+        {'p': 'Em vez de chutar preços, escreva a fórmula e olhe a tabela: quanto custa, quanto ganha, quanto tempo espera. A '
+              'demonstração pinta de laranja as esperas acima de 10 minutos, um limite de paciência que você escolhe. '
+              'Uma planilha faz o mesmo e é a ferramenta preferida de quem desenha economias de jogo.'},
+        {'dica': 'Nunca venda vantagem que faça o jogador sentir que precisa pagar para continuar. Uma economia justa '
+                 'recompensa quem joga, e o jogador percebe quando não é assim.', 'titulo': 'Justo com o jogador'},
+    ],
+    [
+        {'q': 'Com custo base 10 e crescimento 2, quanto custa o nível 3 (contando do 0)?', 'ops': ['30', '60', '80', '16'], 'ok': 2,
+         'exp': '10 × 2³ = 10 × 8 = 80.'},
+        {'q': 'O que são os "ralos" da economia?', 'ops': ['Os bugs do jogo', 'Os lugares onde o jogador gasta a moeda', 'As fontes de moeda', 'As fases secretas'], 'ok': 1,
+         'exp': 'Ralos tiram moeda do jogo: lojas, melhorias, consumíveis.'},
+        {'q': 'Por que o custo exponencial combina com ganho linear?', 'ops': ['Porque deixa tudo grátis', 'Porque a espera entre compras cresce aos poucos', 'Porque o Dart exige', 'Porque o jogo acaba mais rápido'], 'ok': 1,
+         'exp': 'O custo cresce mais rápido que o ganho, então cada compra pede um pouco mais de jogo.'},
+        {'q': 'Qual a melhor ferramenta para balancear preços?', 'ops': ['Chutar e torcer', 'Uma tabela ou planilha com as fórmulas', 'Copiar outro jogo', 'Deixar todos iguais'], 'ok': 1,
+         'exp': 'Com os números à vista, dá para ver onde a espera fica longa demais.'},
+    ],
+)
+
+leitura(
+    'Geração procedural: semente, labirinto e cavernas',
+    'Matemática de jogos: probabilidade e sorteio',
+    'Leitura: chance, sorteio com pesos e como o acaso parece injusto. No código, uma tabela de prêmios de baú e a '
+    'garantia contra o azar.',
+    'Em ▶ Testar, abra baús de 1 em 1 e de 100 em 100 e compare o esperado com o que saiu. Ligue a garantia. Depois deixe o '
+    'dourado mais raro, a garantia mais curta e crie um prêmio novo.',
+    'sorteio',
+    [
+        ['Dourado raríssimo', "Na tabela, troque Item('Osso dourado', 3, por Item('Osso dourado', 1,.", r"Item\('Osso dourado',\s*(?!3\b)\d+"],
+        ['Garantia curta', 'Troque final int garantia = 40 por 20.', r'garantia\s*=\s*(?!40\b)\d+'],
+        ['Prêmio novo', "Na tabela, acrescente Item('Petisco', 20, Color(0xFFA1887F)), antes do Osso dourado.", r"Item\(\s*'(?!Osso'|Bola'|Coleira'|Osso dourado')[^']+'\s*,\s*\d+"],
+    ],
+    [
+        {'h': 'Chance é proporção'},
+        {'p': 'Uma **probabilidade** vai de 0 (nunca) a 1 (sempre). Com 3 em 100, o osso dourado sai em média 3 vezes a '
+              'cada 100 baús. Em média: em 100 baús de verdade podem sair 1, 5 ou nenhum. Quanto mais baús, mais perto dos '
+              '3% fica a conta, e é isso que a demonstração mostra com o botão Abrir 100.'},
+        {'fig': 'sorteio', 'legenda': 'Sorteio com pesos: os prêmios ocupam faixas de 0 a 99 do tamanho do seu peso. Sorteia-se '
+                                      'um número e vê-se em que faixa ele caiu.'},
+        {'h': 'Sorteio com pesos'},
+        {'p': 'Em vez de porcentagens, cada prêmio recebe um **peso**. Some todos, sorteie um número de 0 até a soma e '
+              'percorra a lista diminuindo o número pelo peso de cada um até achar a faixa. Assim fica fácil acrescentar '
+              'um prêmio novo sem refazer todas as contas: a soma muda sozinha.'},
+        {'h': 'O acaso parece injusto'},
+        {'p': 'Sequências longas sem o prêmio raro acontecem mais do que as pessoas imaginam. Com 3% de chance, a chance de '
+              'passar 40 baús seguidos sem nenhum dourado é de quase 30%. Por isso muitos jogos usam uma **garantia** (se '
+              'passar de N tentativas, o próximo é garantido) ou um **saco de sorteio**: põe todos os resultados num saco, '
+              'embaralha e tira um por um, sem repor. O jogador sente o jogo mais justo, e a média continua parecida.'},
+        {'dica': 'Para testar, sorteie milhares de vezes e conte, como no botão Abrir 100. Uma tabela de prêmios com um erro '
+                 'de soma aparece na hora na contagem.', 'titulo': 'Confira contando'},
+    ],
+    [
+        {'q': 'Pesos 60, 25, 12 e 3. Qual a chance do primeiro?', 'ops': ['25%', '60%', '6%', '100%'], 'ok': 1,
+         'exp': 'A soma é 100, então 60 de 100 = 60%.'},
+        {'q': 'Num sorteio com pesos, o número sorteado vai...', 'ops': ['De 1 a 6', 'De 0 até a soma dos pesos', 'De 0 a 1 sempre', 'Do maior peso ao menor'], 'ok': 1,
+         'exp': 'Depois se vê em que faixa de peso o número caiu.'},
+        {'q': 'Para que serve a garantia contra o azar?', 'ops': ['Para dar sempre o prêmio raro', 'Para limitar a sequência máxima sem o prêmio', 'Para deixar o jogo mais difícil', 'Para economizar memória'], 'ok': 1,
+         'exp': 'Depois de N tentativas sem o prêmio, o próximo é garantido.'},
+        {'q': 'O que é um saco de sorteio?', 'ops': ['Um item do jogo', 'Pôr os resultados num saco e tirar sem repor', 'Sortear duas vezes', 'Um tipo de mapa'], 'ok': 1,
+         'exp': 'Como tirar cartas de um baralho: todos saem antes de repetir.'},
+    ],
+)
+
+leitura(
+    'Multijogador em tempo real com Supabase',
+    'Programação de jogos: arquitetura em camadas',
+    'Leitura: como organizar um jogo que cresce, separando os dados e as regras do desenho. No código, um estado de jogo '
+    'em ChangeNotifier e widgets que só mostram e mandam comandos.',
+    'Em ▶ Testar, pegue ossos, leve dano e veja o registro de eventos. Depois mude as regras só no modelo: mais vidas, '
+    'subir de nível mais devagar e um evento novo.',
+    'arquitetura',
+    [
+        ['Cinco vidas', 'No EstadoJogo, troque final int vidasIniciais = 3 por 5 e int vidas = 3 por 5.', r'vidasIniciais\s*=\s*5[\s\S]*int\s+vidas\s*=\s*5'],
+        ['Nível a cada 10', 'Em pegarOsso, troque if (ossos % 5 == 0) por if (ossos % 10 == 0).', r'ossos\s*%\s*(?!5\b)\d+\s*==\s*0'],
+        ['Evento novo', "Em reiniciar, troque registrar('jogo novo') por registrar('jogo novo com $vidas vidas').", r"registrar\('jogo novo [^']+'\)"],
+    ],
+    [
+        {'h': 'Quando o jogo cresce'},
+        {'p': 'Num jogo pequeno, dá para deixar tudo numa classe só. Quando ele cresce, mudar uma regra quebra o desenho, e '
+              'mudar o desenho quebra uma regra. A saída é separar em **camadas**: cada parte do código tem uma tarefa e '
+              'conversa com as outras de um jeito combinado.'},
+        {'fig': 'camadas', 'legenda': 'O visual manda comandos para o modelo (pegarOsso); o modelo muda os dados e avisa quem '
+                                      'estiver ouvindo (notifyListeners). O modelo não sabe como é desenhado.'},
+        {'h': 'Modelo e visual'},
+        {'p': 'O **modelo** guarda os dados (vidas, ossos, nível) e as regras (a cada 5 ossos sobe de nível). Ele não importa '
+              'nada visual, então dá para testar com `dart test` sem abrir o jogo. O **visual** (widgets do Flutter ou '
+              'componentes do Flame) só mostra o modelo e chama os métodos dele. Com `ChangeNotifier`, o modelo avisa '
+              'quando mudou, e o `ListenableBuilder` redesenha.'},
+        {'p': 'Num jogo Flame, o mesmo vale: a classe do jogo guarda o estado, os componentes desenham e mandam ações, e o '
+              'HUD em Flutter ouve o estado. Com o tempo, o código também se divide em arquivos e pastas: `lib/modelo/`, '
+              '`lib/componentes/`, `lib/telas/`.'},
+        {'h': 'Eventos'},
+        {'p': 'O registro de eventos da demonstração é uma ideia poderosa: tudo que acontece vira uma mensagem ("pegou osso", '
+              '"levou dano"). A partir dela dá para tocar sons, mostrar conquistas, salvar estatísticas e fazer replays, sem '
+              'espalhar código pelas classes.'},
+        {'dica': 'Se uma regra do jogo precisa de um BuildContext ou de um Canvas, ela provavelmente está na camada errada.',
+         'titulo': 'Sinal de alerta'},
+    ],
+    [
+        {'q': 'O que fica no modelo?', 'ops': ['Os widgets', 'Os dados e as regras do jogo', 'As imagens', 'Os sons'], 'ok': 1,
+         'exp': 'O modelo guarda o estado e as regras, sem nada visual.'},
+        {'q': 'Para que serve notifyListeners()?', 'ops': ['Para tocar um som', 'Para avisar quem ouve que o estado mudou', 'Para fechar o app', 'Para salvar no Hive'], 'ok': 1,
+         'exp': 'Quem está ouvindo (como o ListenableBuilder) redesenha.'},
+        {'q': 'Qual a vantagem de o modelo não importar nada visual?', 'ops': ['Fica mais bonito', 'Dá para testar as regras sem abrir o jogo', 'Ocupa menos memória', 'Nenhuma'], 'ok': 1,
+         'exp': 'Testes rodam rápido e sem tela.'},
+        {'q': 'Um registro de eventos ajuda a...', 'ops': ['Deixar o jogo mais lento', 'Ligar sons, conquistas e estatísticas sem espalhar código', 'Apagar o progresso', 'Trocar a fonte'], 'ok': 1,
+         'exp': 'Cada sistema ouve os eventos que interessam a ele.'},
+    ],
+)
+
+leitura(
+    'Projeto · Trilha do Caramelo',
+    'Game design: testar com jogadores',
+    'Leitura: como observar pessoas jogando, o que medir e como transformar o que você vê em mudanças. No código, um mapa '
+    'de calor de jogadores simulados mostra onde eles passam e onde morrem.',
+    'Em ▶ Testar, simule jogadores e alterne entre passos e mortes. Depois deixe os jogadores mais espertos, dê menos '
+    'passos a eles e tire um espinho do mapa.',
+    'playtest',
+    [
+        ['Jogadores espertos', 'Troque double vontade = 0.6 por 0.85.', r'vontade\s*=\s*0\.(?!6\b)\d+'],
+        ['Pouca paciência', 'Troque final int limitePassos = 250 por 120.', r'limitePassos\s*=\s*(?!250\b)\d+'],
+        ['Menos espinhos', "No mapa fase, troque a linha '#...x.....#...#' por '#.........#...#'.", r"'#\.\.\.\.\.\.\.\.\.#\.\.\.#'"],
+    ],
+    [
+        {'h': 'Você não é o seu jogador'},
+        {'p': 'Quem fez o jogo sabe onde está cada segredo e já jogou a fase cem vezes. Por isso não consegue mais ver o jogo '
+              'com olhos de novato. O **playtest** é ver outras pessoas jogarem. É o teste mais importante de um jogo, e o '
+              'mais barato.'},
+        {'h': 'Observar sem ajudar'},
+        {'p': 'Dê o celular e fique quieto. Não explique, não aponte, não defenda o jogo. Anote onde a pessoa hesita, onde '
+              'erra, onde ri, onde desiste e o que ela fala. Peça para pensar em voz alta. No fim, faça perguntas abertas: '
+              '"o que foi mais difícil?", "o que você achou que era aquele bloco?".'},
+        {'fig': 'calor', 'legenda': 'Um mapa de calor das mortes: as casas mais vermelhas são onde mais gente morreu. Um ponto '
+                                    'muito quente pode ser um trecho injusto ou mal explicado.'},
+        {'h': 'Medir'},
+        {'p': 'Com muita gente, observar não basta: o jogo pode **registrar** o que acontece (onde morreu, quanto tempo levou, '
+              'onde desistiu) e mostrar num mapa de calor, como na demonstração. Os números dizem **onde** está o problema; '
+              'a observação diz **por quê**. Os dois juntos dizem o que mudar.'},
+        {'p': 'Mude uma coisa de cada vez e teste de novo. Se mudar o pulo, a fase e os inimigos ao mesmo tempo, não dá para '
+              'saber o que resolveu (ou o que piorou).'},
+        {'dica': 'Pergunte antes de coletar dados e não guarde nada que identifique a pessoa. Mortes por trecho e tempo de '
+                 'fase bastam para melhorar o jogo.', 'titulo': 'Dados com respeito'},
+    ],
+    [
+        {'q': 'Por que quem fez o jogo não é um bom testador?', 'ops': ['Porque não sabe jogar', 'Porque já conhece tudo e não vê como um novato', 'Porque joga rápido demais', 'Porque é proibido'], 'ok': 1,
+         'exp': 'Conhecer cada segredo esconde o que é difícil para quem chega agora.'},
+        {'q': 'O que fazer enquanto a pessoa joga?', 'ops': ['Explicar cada parte', 'Observar e anotar sem ajudar', 'Jogar junto', 'Corrigir quando ela errar'], 'ok': 1,
+         'exp': 'Ajudar esconde exatamente os problemas que o teste deveria achar.'},
+        {'q': 'Um ponto muito quente no mapa de mortes indica...', 'ops': ['Que a fase está perfeita', 'Um trecho que talvez esteja difícil ou mal explicado', 'Um bug de desenho', 'Que ninguém passou ali'], 'ok': 1,
+         'exp': 'É o lugar para observar de perto no próximo teste.'},
+        {'q': 'Por que mudar uma coisa de cada vez?', 'ops': ['Para demorar mais', 'Para saber qual mudança resolveu', 'Porque o Flutter só deixa uma', 'Não precisa'], 'ok': 1,
+         'exp': 'Com várias mudanças juntas, não dá para saber o efeito de cada uma.'},
+    ],
+)
+
+leitura(
+    'Projeto · Trilha do Caramelo',
+    'Produção: publicar o jogo',
+    'Leitura: o caminho do código até a loja, com nome, ícone, versão, assinatura e página do jogo. No código, uma lista '
+    'de verificação que fica salva no aparelho.',
+    'Em ▶ Testar, marque as etapas que você já sabe fazer. Depois troque a versão, acrescente uma etapa e mude o texto '
+    'final.',
+    'publicar',
+    [
+        ['Versão nova', "Troque const String versao = '1.0.0+1' por '1.0.1+2'.", r"versao\s*=\s*'(?!1\.0\.0\+1')[\d.]+\+\d+'"],
+        ['Etapa nova', "Na lista etapas, acrescente Etapa('Qualidade', 'Pedir para 3 pessoas jogarem', 'Playtest antes de publicar.'), antes da primeira etapa da Loja.", r"Etapa\(\s*'Qualidade'\s*,\s*'(?!Testar num celular|Sem prints)"],
+        ['Outra mensagem', "Troque 'Tudo pronto: pode enviar para a loja! 🎉' por uma mensagem sua.", r"Text\(\s*'(?!Tudo pronto: pode enviar para a loja! 🎉')[^']+'\s*,\s*style:\s*TextStyle\(fontSize: 18\)"],
+    ],
+    [
+        {'h': 'Do código para o mundo'},
+        {'p': 'Publicar é transformar o projeto num pacote que outras pessoas instalam. O Flutter gera pacotes para várias '
+              'lojas e para a web com um comando: `flutter build appbundle` (Google Play), `flutter build ipa` (App Store, '
+              'num Mac) e `flutter build web` (qualquer site, como o itch.io ou o GitHub Pages, que aceitam jogos de '
+              'navegador sem taxa).'},
+        {'fig': 'loja', 'legenda': 'O caminho da publicação: cada passo depende do anterior. O botão ⬇ Projeto da Oficina entrega '
+                                   'o primeiro deles, o código pronto para abrir no computador.'},
+        {'h': 'Identidade'},
+        {'p': 'Antes do pacote: o **nome** que aparece embaixo do ícone, o **ícone** em vários tamanhos (o pacote '
+              'flutter_launcher_icons gera todos a partir de uma imagem), a **tela de abertura** e o **id do pacote** '
+              '(como br.edu.escola.caramelo), que nunca mais muda depois de publicado.'},
+        {'h': 'Versão e assinatura'},
+        {'p': 'No `pubspec.yaml`, `version: 1.0.0+1` tem duas partes: o nome da versão que o jogador vê (1.0.0) e o número '
+              'do pacote (+1), que precisa crescer a cada envio para a loja. Para a Google Play, o pacote é **assinado** com '
+              'uma chave sua: guarde a chave e a senha com cuidado, porque sem elas não dá para enviar atualizações.'},
+        {'h': 'A página da loja'},
+        {'p': 'A loja pede descrição, capturas de tela, classificação indicativa e uma **política de privacidade** (mesmo que '
+              'o jogo não colete nada, diga isso). Jogos com ranking online coletam nomes: explique o que é guardado e para '
+              'quê. A Google Play cobra uma taxa única de conta de desenvolvedor; a App Store, uma anual.'},
+        {'dica': 'Antes de publicar para todo mundo, use os testes fechados das lojas (teste interno da Google Play, '
+                 'TestFlight da Apple) com a turma. É o playtest com o jogo já instalado de verdade.', 'titulo': 'Teste fechado primeiro'},
+    ],
+    [
+        {'q': 'Qual comando gera o pacote para a Google Play?', 'ops': ['flutter run', 'flutter build appbundle', 'flutter pub get', 'flutter clean'], 'ok': 1,
+         'exp': 'O appbundle (.aab) é o formato que a Google Play pede.'},
+        {'q': 'Em version: 1.2.0+7, o que precisa crescer a cada envio?', 'ops': ['O 1', 'O 2', 'O 7, número do pacote', 'Nada'], 'ok': 2,
+         'exp': 'A loja recusa um pacote com número igual ou menor que o anterior.'},
+        {'q': 'O que acontece se você perder a chave de assinatura?', 'ops': ['Nada', 'Não consegue mais enviar atualizações do mesmo jogo', 'O jogo some da loja', 'O ícone muda'], 'ok': 1,
+         'exp': 'As atualizações precisam ser assinadas com a mesma chave.'},
+        {'q': 'Onde dá para publicar um jogo Flutter web sem taxa?', 'ops': ['Só na App Store', 'Em sites como itch.io ou GitHub Pages', 'Em nenhum lugar', 'Só no Google Drive'], 'ok': 1,
+         'exp': 'O flutter build web gera arquivos que qualquer hospedagem de site aceita.'},
     ],
 )
 
