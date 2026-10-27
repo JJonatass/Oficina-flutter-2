@@ -226,6 +226,15 @@ MANUAL = {
 }
 
 
+MANUAL.update({
+    ('Game design: analisar um jogo (MDA)', 0): [("'Cobrinha': [3, 1, 0, 4, 0, 1, 0, 5],", "'Cobrinha': [3, 1, 0, 5, 0, 1, 0, 5],")],
+    ('Game design: analisar um jogo (MDA)', 1): [("  'Multijogador': [3, 2, 0, 3, 5, 1, 1, 3],\n", "  'Multijogador': [3, 2, 0, 3, 5, 1, 1, 3],\n  'Meu jogo': [2, 4, 3, 2, 0, 5, 1, 1],\n")],
+    ('Game design: ética e bem-estar do jogador', 1): [("Premio('Osso comum', '🦴', 0.70)", "Premio('Osso comum', '🦴', 0.73)"), ("Premio('Coleira dourada', '👑', 0.05)", "Premio('Coleira dourada', '👑', 0.02)")],
+    ('Game design: ética e bem-estar do jogador', 2): [("Premio('Osso comum', '🦴', 0.70)", "Premio('Osso comum', '🦴', 0.60)"), ("  Premio('Coleira dourada', '👑', 0.05),", "  Premio('Petisco', '🍖', 0.10),\n  Premio('Coleira dourada', '👑', 0.05),")],
+    ('Carreira: game jams, portfólio e mercado', 0): [("const nome = 'Seu Nome';", "const nome = 'Ana Lima';")],
+    ('Carreira: game jams, portfólio e mercado', 1): [("'Projeto em dupla'),\n];", "'Projeto em dupla'),\n  Projeto('Meu Jogo', 'Tudo', 'O jogo do meu projeto final.', 'meusite.itch.io/meujogo', 'Projeto final'),\n];")],
+})
+
 def resposta(titulo, i, code, desc, rx):
     """Devolve a lista de trocas que resolve a etapa, ou None."""
     m = MANUAL.get((titulo, i))

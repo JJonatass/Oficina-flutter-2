@@ -1,4 +1,4 @@
-# Partes 8 e 9 da Oficina Flutter 2: mais sistemas de jogo (diálogos, inventário, conquistas, bando,
+# Partes 8 e 10 da Oficina Flutter 2 (a Parte 9 está em parte9.py): mais sistemas de jogo (diálogos, inventário, conquistas, bando,
 # conta do jogador, tradução) e desafios abertos com o projeto final e a sala de jogos da turma.
 import pathlib
 import solucoes
@@ -149,7 +149,11 @@ def adicionar(aula, PARTS, SETUP_FLAME):
         ],
     )
 
-    # ---------------------------------------------------------------- Parte 9: desafios abertos
+    # ---------------------------------------------------------------- Parte 9: mais gêneros e técnicas, Projeto 7
+    import parte9
+    parte9.adicionar(aula, PARTS, SETUP_FLAME)
+
+    # ---------------------------------------------------------------- Parte 10: desafios abertos
     desafio(aula,
         'Desafio · Relógio de reação',
         'Desafio: o código já traz a tela, as cores e os textos, e marca com FAÇA o que falta. A pessoa toca para começar, espera '
@@ -164,7 +168,7 @@ def adicionar(aula, PARTS, SETUP_FLAME):
             ['Recorde', 'Guarde o menor tempo numa variável recorde e mostre na tela.', r'recorde\s*=[^=]'],
         ],
     )
-    PARTS.append(['Desafio · Relógio de reação', 'Parte 9 · Desafios e projeto final'])
+    PARTS.append(['Desafio · Relógio de reação', 'Parte 10 · Desafios e projeto final'])
 
     desafio(aula,
         'Desafio · Cobrinha do caramelo',

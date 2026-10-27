@@ -218,6 +218,25 @@ FIGS = r"""<script>
         var cam=[[0,1,3,7],[0,2,5,3,7],[0,1,4],[0,2,6]][Math.floor(t/2.5)%4],k=Math.min(cam.length-1,Math.floor((t%2.5)/2.5*cam.length*1.3));
         E.forEach(function(e){var a=P(e[0]),b=P(e[1]),on=false;for(var i=0;i<k;i++)if(cam[i]===e[0]&&cam[i+1]===e[1])on=true;g.strokeStyle=on?OURO:'rgba(120,130,150,0.6)';g.lineWidth=on?4:2;g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke()});
         N.forEach(function(n,i){var p=P(i),fim=[4,6,7].indexOf(i)>=0,on=cam.slice(0,k+1).indexOf(i)>=0;g.fillStyle=on?OURO:(fim?'#FF8A65':'#81C784');g.fillRect(p[0]-42,p[1]-14,84,28);txt(g,n[0],p[0],p[1]+5,'#0F1B2D',13,'center')})})},
+    mda:function(c,st){var B=[['Mecânicas','regras e código'],['Dinâmicas','o que acontece ao jogar'],['Estéticas','o que o jogador sente']];
+      laco(c,st,function(g,t,W,H){var ink=cor('--ink','#0F1B2D'),bw=(W-80)/3,y=H/2-36;
+        B.forEach(function(b,i){var x=20+i*(bw+20);g.fillStyle=['#81C784','#FFD54F','#FF8A65'][i];g.fillRect(x,y,bw,72);txt(g,b[0],x+bw/2,y+30,'#0F1B2D',17,'center');txt(g,b[1],x+bw/2,y+54,'#0F1B2D',12,'center')});
+        var k=(t*0.45)%2,ida=k<1,f=ida?k:k-1,x0=ida?20+bw/2:W-20-bw/2,x1=ida?W-20-bw/2:20+bw/2,xp=x0+(x1-x0)*f,yy=ida?y-22:y+96;
+        seta(g,20+bw/2,y-22,W-20-bw/2,y-22,ida?CAR:'rgba(120,130,150,0.5)',3);seta(g,W-20-bw/2,y+96,20+bw/2,y+96,ida?'rgba(120,130,150,0.5)':CAR,3);
+        txt(g,'quem faz o jogo começa pelas regras',W/2,y-32,ink,12,'center');txt(g,'quem joga começa pelo que sente',W/2,y+116,ink,12,'center');
+        g.fillStyle=ink;g.beginPath();g.arc(xp,yy,7,0,7);g.fill()})},
+    bau:function(c,st){laco(c,st,function(g,t,W,H){var ink=cor('--ink','#0F1B2D'),lin=cor('--line','#D6DDE7'),x0=50,y0=H-30,w=W-70,h=H-60,N=60,p=0.05;
+        g.strokeStyle=lin;g.lineWidth=1;[0.5,0.9].forEach(function(q){var yq=y0-q*h;g.beginPath();g.moveTo(x0,yq);g.lineTo(x0+w,yq);g.stroke();txt(g,Math.round(q*100)+'%',x0-8,yq+4,ink,11,'right')});
+        g.strokeStyle=ink;g.beginPath();g.moveTo(x0,y0-h);g.lineTo(x0,y0);g.lineTo(x0+w,y0);g.stroke();txt(g,'baús abertos',x0+w,y0+20,ink,11,'right');
+        g.strokeStyle=CAR;g.lineWidth=3;g.beginPath();for(var n=0;n<=N;n++){var yy=y0-(1-Math.pow(1-p,n))*h,xx=x0+n/N*w;if(n===0)g.moveTo(xx,yy);else g.lineTo(xx,yy)}g.stroke();
+        var m=Math.floor((t*8)%(N+1)),pr=1-Math.pow(1-p,m),xm=x0+m/N*w,ym=y0-pr*h;g.fillStyle=OURO;g.beginPath();g.arc(xm,ym,7,0,7);g.fill();
+        txt(g,m+' baús: '+Math.round(pr*100)+'% de chance de já ter a coleira (5% cada)',x0+10,y0-h+4,ink,13,'left')})},
+    jam:function(c,st){var F=[['Ideia',2],['Protótipo',10],['Conteúdo',16],['Polimento',12],['Entrega',4],['Dormir!',4]];
+      laco(c,st,function(g,t,W,H){var ink=cor('--ink','#0F1B2D'),x0=20,w=W-40,tot=48,hora=(t*4)%(tot+6),x=x0;
+        F.forEach(function(f,i){var fw=f[1]/tot*w;g.fillStyle=['#90CAF9','#81C784','#FFD54F','#FF8A65','#BA68C8','#B0BEC5'][i];g.globalAlpha=hora>=(x-x0)/w*tot?0.95:0.35;g.fillRect(x,H/2-26,fw-3,52);g.globalAlpha=1;
+          g.save();g.translate(x+fw/2,H/2+44);txt(g,f[0],0,0,ink,12,'center');g.restore();x+=fw});
+        for(var hh=0;hh<=48;hh+=12)txt(g,hh+'h',x0+hh/tot*w,H/2-36,ink,11,'center');
+        var xc=x0+Math.min(tot,hora)/tot*w;g.strokeStyle=VERM;g.lineWidth=2;g.beginPath();g.moveTo(xc,H/2-30);g.lineTo(xc,H/2+30);g.stroke()})},
     projeto:function(c,st){var et=['Documento','Protótipo','Uma fase','Arte e som','Teste','Entrega'];
       laco(c,st,function(g,t,W,H){var ink=cor('--ink','#0F1B2D'),lin=cor('--line','#D6DDE7'),x0=110,w=(W-130)/6,sem=(t*0.8)%7;
         for(var s=0;s<6;s++){txt(g,'sem '+(s+1),x0+s*w+w/2,18,ink,11,'center');g.strokeStyle=lin;g.beginPath();g.moveTo(x0+s*w,24);g.lineTo(x0+s*w,H-10);g.stroke()}

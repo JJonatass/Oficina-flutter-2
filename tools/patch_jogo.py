@@ -91,4 +91,18 @@ def patch(src):
                "      case 'remove':{var ix=lstIdx(v,args[0]);if(ix>=0)v.splice(ix,1);mutated=true;return ix>=0}\n      case 'contains':return lstIdx(v,args[0])>=0;\n      case 'indexOf':return lstIdx(v,args[0]);",
                'lista eq')
     src = sub1(src, "function eq(a,b){", "function lstIdx(v,x){var i=v.indexOf(x);if(i>=0||x==null||typeof x!=='object')return i;if(!(x instanceof Dbl||x.nat==='Offset'||x.nat==='Size'||x.nat==='Vec2'||(x.cls&&ST.dataClasses[x.cls]&&ST.dataClasses[x.cls].methods['operator=='])))return -1;for(var k=0;k<v.length;k++){try{if(v[k]&&typeof v[k]==='object'&&eq(v[k],x))return k}catch(e){}}return -1}\nfunction eq(a,b){", 'lstIdx')
+    # width: lado (constante do topo do arquivo) vale o número da constante
+    src = sub1(src, "if(raw==='double.infinity')return Infinity;return /^-?\\d*\\.?\\d+$/.test(raw)?parseFloat(raw):null}",
+               "if(raw==='double.infinity')return Infinity;if(/^-?\\d*\\.?\\d+$/.test(raw))return parseFloat(raw);"
+               "if(/^[A-Za-z_]\\w*$/.test(raw)&&!/^(null|true|false)$/.test(raw)){try{var nv=OF.ST.value(raw),nx=typeof nv==='number'?nv:(nv&&typeof nv.v==='number'?nv.v:null);if(nx!==null&&isFinite(nx))return nx}catch(e){}}return null}",
+               'numVal constante')
+    # Text(nome) com uma constante String do topo do arquivo
+    src = sub1(src, "if(!m)return '{'+raw+'}';",
+               "if(!m){if(/^[A-Za-z_]\\w*$/.test(raw)){try{var sv0=OF.ST.value(raw);if(typeof sv0==='string')return sv0}catch(e){}}return '{'+raw+'}'}",
+               'strVal constante')
+    # color: corDestaque (constante Color do topo do arquivo)
+    src = sub1(src, "  if(raw==null)return null;raw=raw.trim().replace(/\\.resolveFrom\\(\\s*\\w+\\s*\\)$/,'');\n",
+               "  if(raw==null)return null;raw=raw.trim().replace(/\\.resolveFrom\\(\\s*\\w+\\s*\\)$/,'');\n"
+               "  if(/^[A-Za-z_]\\w*$/.test(raw)&&!/^(null|true|false)$/.test(raw)){try{var cv0=OF.ST.value(raw),cs0=cv0&&cv0.raw?cv0.raw:(cv0&&cv0.src?cv0.src:null);if(cs0&&cs0!==raw)return colorVal(cs0)}catch(e){}}\n",
+               'colorVal constante')
     return src

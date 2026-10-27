@@ -980,6 +980,157 @@ leitura(
 )
 
 
+# ------------------------------------------------------------------ Leituras da quarta leva
+leitura(
+    'IA de turnos: o gato que pensa (minimax)',
+    'Game design: analisar um jogo (MDA)',
+    'Leitura: como olhar um jogo pronto e entender por que ele diverte, com o modelo MDA (mecânicas, dinâmicas e '
+    'estéticas) e os tipos de diversão. No código, um gráfico de radar mostra o "formato" da diversão de cada jogo.',
+    'Em ▶ Testar, compare os jogos da Oficina pelos chips e mexa nos controles. Depois mude uma nota, ponha o seu jogo '
+    'no mapa e troque a cor do radar.',
+    'mda',
+    [
+        ['Outro olhar', "No mapa jogos, troque a nota de Desafio da Cobrinha: 'Cobrinha': [3, 1, 0, 5, 0, 1, 0, 5].", r"'Cobrinha':\s*\[(?!3, 1, 0, 4, 0, 1, 0, 5\])"],
+        ['O seu jogo', "Acrescente no mapa jogos uma linha com o seu jogo e oito notas de 0 a 5, como 'Meu jogo': [2, 4, 3, 2, 0, 5, 1, 1].", r"'(?!Cobrinha'|Trilha do Caramelo'|Diálogos'|Multijogador')[^']+':\s*\[\s*\d"],
+        ['Outra cor', 'Troque const Color(0xFFD68C3E) por const Color(0xFF42A5F5).', r'corRadar\s*=\s*const Color\(0x(?!FFD68C3E)'],
+    ],
+    [
+        {'h': 'Por que este jogo é divertido?'},
+        {'p': 'Para fazer jogos bons, ajuda muito saber **analisar** jogos prontos: em vez de só "gostei" ou "não gostei", '
+              'explicar o que no jogo causa aquela sensação. O modelo **MDA** (Mecânicas, Dinâmicas e Estéticas), proposto '
+              'por Hunicke, LeBlanc e Zubek, separa um jogo em três camadas.'},
+        {'p': '**Mecânicas** são as regras e o código: o caramelo pula com força 700, cada osso vale 1, o gato anda a 60. '
+              '**Dinâmicas** são o que acontece quando alguém joga com essas regras: arriscar um pulo longo pelo osso dourado, '
+              'esperar o gato virar para passar. **Estéticas** são o que o jogador sente: tensão, descoberta, orgulho.'},
+        {'fig': 'mda', 'legenda': 'Quem faz o jogo mexe nas mecânicas para causar uma sensação; quem joga sente primeiro a '
+                                  'estética e só depois percebe as regras. Analisar é fazer o caminho de volta.'},
+        {'h': 'Os tipos de diversão'},
+        {'p': 'O MDA lista oito estéticas: **sensação** (o prazer dos sentidos, do som e do "suco"), **fantasia** (ser outra '
+              'coisa num mundo de faz de conta), **narrativa** (a história), **desafio** (vencer obstáculos), **companhia** '
+              '(jogar com outras pessoas), **descoberta** (explorar o desconhecido), **expressão** (mostrar quem você é, criar) '
+              'e **passatempo** (algo leve para passar o tempo). Nenhum jogo tem todas no máximo: cada um tem um formato.'},
+        {'p': 'Pessoas diferentes procuram coisas diferentes. Uma classificação famosa, a de Richard Bartle, fala de jogadores '
+              'que gostam de **conquistar** (completar tudo), **explorar** (conhecer cada canto), **socializar** (estar com '
+              'os outros) e **competir** (vencer os outros). Saber para quem é o jogo ajuda a escolher as estéticas.'},
+        {'h': 'Como analisar'},
+        {'p': 'Escolha um jogo, jogue 15 minutos e anote: 1) qual é o ciclo principal; 2) quais mecânicas sustentam esse ciclo; '
+              '3) que dinâmicas aparecem (o que os jogadores fazem que as regras não mandam diretamente); 4) quais estéticas '
+              'você sentiu. Depois pergunte: se eu mudasse uma mecânica, que sensação mudaria?'},
+        {'dica': 'Antes de começar o seu projeto, desenhe o radar que você **quer** para ele. Ao testar com colegas, peça '
+                 'que eles desenhem o radar que **sentiram**. A diferença entre os dois mostra o que ajustar.', 'titulo': 'Use no projeto'},
+    ],
+    [
+        {'q': 'No MDA, "o gato anda a 60 pixels por segundo" é...', 'ops': ['Uma estética', 'Uma mecânica', 'Uma dinâmica', 'Uma narrativa'], 'ok': 1,
+         'exp': 'É uma regra escrita no código: mecânica.'},
+        {'q': 'Jogadores esperam o gato virar de costas para passar. Isso é...', 'ops': ['Uma mecânica', 'Uma dinâmica', 'Um bug', 'Uma estética'], 'ok': 1,
+         'exp': 'É um comportamento que surge das regras durante o jogo.'},
+        {'q': 'Por onde o jogador percebe um jogo primeiro?', 'ops': ['Pelo código', 'Pelas mecânicas', 'Pela estética, o que sente', 'Pelo documento de design'], 'ok': 2,
+         'exp': 'Quem joga sente antes de entender as regras.'},
+        {'q': 'Um jogo de construir e decorar a própria casa oferece principalmente...', 'ops': ['Expressão', 'Companhia', 'Narrativa', 'Sensação'], 'ok': 0,
+         'exp': 'Criar algo seu é a estética da expressão.'},
+    ],
+    parte='Parte 9 · Mais gêneros e técnicas',
+)
+
+leitura(
+    'Conquistas',
+    'Game design: ética e bem-estar do jogador',
+    'Leitura: o que um jogo pode (e não deve) fazer para prender o jogador: sorteios transparentes, pausas, cuidado com '
+    'crianças e com o dinheiro de quem joga. No código, um baú honesto mostra as chances e sugere pausas.',
+    'Em ▶ Testar, abra baús e compare quantas vezes a coleira dourada sai com a média prometida. Depois ajuste a pausa, '
+    'deixe o prêmio raro mais raro e crie um prêmio novo.',
+    'etica',
+    [
+        ['Pausa antes', 'Troque final int pausaACada = 10 por 5.', r'pausaACada\s*=\s*(?!10\b)\d+'],
+        ['Raro mais raro', "Deixe a coleira com 0.02 e o osso comum com 0.73 (as chances precisam somar 1).", r"'Coleira dourada',\s*'👑',\s*0\.02[\s\S]*|'Osso comum',\s*'🦴',\s*0\.73[\s\S]*'Coleira dourada',\s*'👑',\s*0\.02"],
+        ['Prêmio novo', "Acrescente Premio('Petisco', '🍖', 0.10) antes da coleira e troque a chance do osso comum para 0.60.", r"Premio\('Petisco',\s*'🍖',\s*0\.1"],
+    ],
+    [
+        {'h': 'Prender ou respeitar?'},
+        {'p': 'Todo jogo quer que a pessoa volte. A pergunta ética é **como**: porque o jogo é bom, ou porque ele usa truques '
+              'que exploram a ansiedade, a vontade de colecionar ou o medo de perder algo? Os mesmos sistemas desta trilha '
+              '(conquistas, prêmios diários, sorteios, ranking) podem ser usados das duas formas.'},
+        {'h': 'Sorteios e caixas de prêmio'},
+        {'p': 'Caixas de prêmio pagas (as "loot boxes") misturam jogo e aposta: a pessoa paga sem saber o que vem. Vários '
+              'países já limitam ou proíbem esse tipo de sorteio para menores, e as lojas de aplicativos exigem que as chances '
+              'sejam mostradas. A regra mínima é a **transparência**: diga a chance de cada prêmio.'},
+        {'fig': 'bau', 'legenda': 'Com 5% por baú, depois de 14 baús a chance de já ter o prêmio passa de 50%, mas só depois '
+                                  'de 45 baús passa de 90%. "Em média 1 a cada 20" não garante nada para ninguém.'},
+        {'p': 'A figura mostra por que os sorteios enganam a intuição: a chance de conseguir o prêmio em n tentativas é '
+              '1 − (1 − p)ⁿ, e ela sobe devagar no fim. Muita gente gasta bem mais que a "média" antes de conseguir.'},
+        {'h': 'Padrões que prejudicam'},
+        {'p': 'Alguns padrões de design são considerados **abusivos**: cronômetros que fazem perder o progresso se a pessoa '
+              'não voltar a tempo, moedas do jogo que escondem quanto dinheiro de verdade está sendo gasto, notificações '
+              'insistentes, vergonha por não comprar, e jogos infinitos sem nenhum ponto de parada. Prefira **pontos de pausa '
+              'naturais** (fim de fase, fim de dia no jogo), progresso que não se perde e preços em reais.'},
+        {'h': 'Crianças e dados'},
+        {'p': 'Jogos para crianças pedem cuidado redobrado: nada de compras fáceis, chats abertos com desconhecidos ou coleta de '
+              'dados pessoais sem necessidade. No Brasil, a LGPD protege os dados pessoais e trata de forma especial os de '
+              'crianças e adolescentes. Guarde só o que o jogo precisa (um apelido, o progresso) e explique por quê.'},
+        {'dica': 'Pergunte ao seu jogo: "eu ficaria à vontade se o jogador visse exatamente como este sistema funciona?" Se a '
+                 'resposta for não, o sistema provavelmente está do lado errado.', 'titulo': 'Um teste simples'},
+    ],
+    [
+        {'q': 'Qual atitude torna um sorteio de prêmios mais justo?', 'ops': ['Esconder as chances', 'Mostrar a chance de cada prêmio', 'Mudar as chances sem avisar', 'Cobrar mais caro'], 'ok': 1,
+         'exp': 'Transparência é o mínimo: a pessoa decide sabendo o que está em jogo.'},
+        {'q': 'Um prêmio com 5% de chance por tentativa sai, com certeza, em 20 tentativas?', 'ops': ['Sim', 'Não: a chance de já ter saído é cerca de 64%', 'Sim, se tiver sorte', 'Só no simulador'], 'ok': 1,
+         'exp': '1 − 0,95²⁰ ≈ 0,64. Média não é garantia.'},
+        {'q': 'Qual destes é um ponto de pausa natural?', 'ops': ['Um cronômetro que apaga o progresso', 'O fim de uma fase', 'Uma notificação a cada hora', 'Um sorteio infinito'], 'ok': 1,
+         'exp': 'Terminar algo dá à pessoa um bom momento para parar.'},
+        {'q': 'O que guardar de um jogador criança?', 'ops': ['Tudo que der', 'Nome completo e endereço', 'Só o necessário, como apelido e progresso', 'Fotos'], 'ok': 2,
+         'exp': 'Menos dados, menos risco. A LGPD trata com cuidado especial os dados de crianças.'},
+    ],
+)
+
+leitura(
+    'Sala de jogos (galeria)',
+    'Carreira: game jams, portfólio e mercado',
+    'Leitura: o que vem depois da disciplina: game jams, um portfólio que mostra o que você sabe fazer e como é o mercado '
+    'de jogos no Brasil. No código, uma página de portfólio feita em Flutter para você preencher.',
+    'Em ▶ Testar, veja a página de portfólio. Depois troque o nome, acrescente um projeto seu e escolha a sua cor.',
+    'portfolio',
+    [
+        ['Seu nome', "Troque const nome = 'Seu Nome' pelo seu nome, como const nome = 'Ana Lima'.", r"const nome = '(?!Seu Nome')[^']+'"],
+        ['Projeto novo', "Acrescente na lista projetos um Projeto com um jogo seu (nome, papel, resumo, link e evento).", r"Projeto\('(?!Trilha do Caramelo'|Caramelo Voador'|Torres do Caramelo')[^']+'"],
+        ['Sua cor', 'Troque const corDestaque = Color(0xFFD68C3E) por Color(0xFF7E57C2).', r'corDestaque\s*=\s*Color\(0x(?!FFD68C3E)'],
+    ],
+    [
+        {'h': 'Game jams: fazer um jogo num fim de semana'},
+        {'p': 'Uma **game jam** é um evento em que pessoas fazem um jogo do zero num prazo curto, quase sempre 48 horas, a '
+              'partir de um tema revelado no começo. A maior é a Global Game Jam, que acontece todo ano em janeiro, com sedes '
+              'em várias cidades do Brasil; há também jams online o ano todo, como as do site itch.io. Não precisa saber tudo: '
+              'muitas equipes misturam quem programa, quem desenha, quem faz som e quem nunca fez um jogo.'},
+        {'fig': 'jam', 'legenda': 'Um jeito de dividir 48 horas: a ideia sai rápido, o protótipo jogável vem antes de qualquer '
+                                  'arte, e o polimento e a entrega têm tempo reservado. Dormir também está no plano.'},
+        {'p': 'O segredo de uma jam é o mesmo do projeto final, só que mais rápido: **escopo pequeno**, protótipo jogável no '
+              'primeiro dia, e cortar ideias sem dó. Um jogo pequeno e terminado é o melhor resultado possível.'},
+        {'h': 'Portfólio: mostrar o que você fez'},
+        {'p': 'Para estágios e vagas, um **portfólio** vale mais que uma lista de cursos. Ele mostra de 3 a 5 projetos, cada '
+              'um com uma imagem ou vídeo curto, um link para jogar (itch.io e GitHub Pages aceitam jogos Flutter web) e, '
+              'principalmente, **o que você fez** naquele projeto. Recrutadores querem saber o seu papel, não só o jogo.'},
+        {'p': 'Guarde o código no GitHub com um README que explique o jogo e como rodar. Os jogos desta trilha (Pula-Caixa, '
+              'Trilha do Caramelo, Torres do Caramelo e o seu projeto final) já são um começo de portfólio.'},
+        {'h': 'O mercado de jogos no Brasil'},
+        {'p': 'O Brasil tem centenas de estúdios de jogos, a maioria pequenos e independentes, e um público enorme, sobretudo '
+              'no celular. Além de estúdios de entretenimento, há trabalho em **jogos sérios** (educação, saúde, treinamento), '
+              'em gamificação de aplicativos e em empresas que usam motores de jogos para simulações. Quem programa jogos '
+              'também aprende coisas valorizadas em qualquer software: desempenho, interfaces, física e dados em tempo real.'},
+        {'dica': 'Participe de uma jam ainda durante o curso, mesmo online. Em 48 horas você aprende a cortar escopo, a '
+                 'trabalhar em equipe e sai com mais um jogo no portfólio.', 'titulo': 'Próximo passo'},
+    ],
+    [
+        {'q': 'Qual é o melhor resultado de uma game jam?', 'ops': ['Um jogo enorme pela metade', 'Um jogo pequeno e terminado', 'Só a ideia escrita', 'Muitas artes sem jogo'], 'ok': 1,
+         'exp': 'Terminar é o que conta: dá para jogar, mostrar e aprender com ele.'},
+        {'q': 'O que um recrutador mais quer ver em cada projeto do portfólio?', 'ops': ['O tamanho do código', 'O que você fez no projeto e um link para jogar', 'A lista de cursos', 'Só o nome do jogo'], 'ok': 1,
+         'exp': 'O seu papel e o jogo funcionando mostram o que você sabe fazer.'},
+        {'q': 'Onde dá para publicar um jogo Flutter web para o portfólio?', 'ops': ['Só na App Store', 'Em itch.io ou GitHub Pages', 'Em nenhum lugar', 'Só em CD'], 'ok': 1,
+         'exp': 'Os dois aceitam os arquivos do flutter build web sem custo.'},
+        {'q': 'Além de estúdios de entretenimento, onde há trabalho com jogos?', 'ops': ['Em lugar nenhum', 'Em jogos sérios, gamificação e simulações', 'Só em fliperamas', 'Só fora do Brasil'], 'ok': 1,
+         'exp': 'Educação, saúde, treinamento e simulações também usam jogos.'},
+    ],
+)
+
+
 def inserir(LESSONS, EXERCISES, PARTS):
     """Põe cada aula de leitura antes da aula indicada e acerta o início das partes."""
     for a in AULAS:
