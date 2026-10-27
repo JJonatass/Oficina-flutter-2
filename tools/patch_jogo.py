@@ -64,4 +64,31 @@ def patch(src):
                " 'Navigator e jogos: cada tela aberta com push ou pushReplacement tem o seu jogo do Flame. O jogo da tela de baixo fica parado enquanto outra está por cima, e o de uma tela que saiu é descartado (com onRemove).',\n"
                " 'dart:math: Random (com ou sem semente; a sequência não é a mesma do Dart), min e max (também como valor, em reduce(max)), sqrt, pow, sin, cos, atan2 e pi. A classe Point não existe: use uma classe sua com x e y.',",
                'limites parte 7')
+    # obj.campo(args) quando o campo guarda uma função: chama a função (antes devolvia a própria função)
+    src = sub1(src, "      try{TARGS=a.targs||null;return member(mo,a.name,margs)}finally{ARGN=null;TARGS=null}}",
+               "      if(a.args&&mo&&mo.cls&&hasOwn(mo.f,a.name)&&mo.f[a.name]&&mo.f[a.name].lam){ARGN=null;return callLam(mo.f[a.name],margs)}\n"
+               "      try{TARGS=a.targs||null;return member(mo,a.name,margs)}finally{ARGN=null;TARGS=null}}", 'campo funcao chamada')
+    # parâmetros [opcionais] com valor padrão que tem chaves, como [Map m = const {}]
+    src = sub1(src, "  var inner=txt.trim(),bi=inner.indexOf('{'),out=[];",
+               "  var inner=txt.trim(),bi=-1,out=[];for(var ii=0,dd=0;ii<inner.length;ii++){var ch=inner[ii];if(ch==='['||ch==='(')dd++;else if(ch===']'||ch===')')dd--;else if(ch==='{'&&dd===0){bi=ii;break}}",
+               'parseParams chaves')
+    src = sub1(src, "    if(!found&&pr.def!=null){try{val=ev(pTern(new Ps(pr.def)),mkEnv())}",
+               "    if(!found&&pr.def!=null){try{val=ev(pTern(new Ps(String(pr.def).replace(/^const\\s+/,''))),mkEnv())}", 'padrao const')
+    src = sub1(src, "  var bi=inner.indexOf('{'),si=inner.indexOf('[');",
+               "  var si=inner.indexOf('['),bi=-1;for(var ii=0,dd=0;ii<inner.length;ii++){var ch=inner[ii];if(ch==='['||ch==='(')dd++;else if(ch===']'||ch===')')dd--;else if(ch==='{'&&dd===0){bi=ii;break}}",
+               'declParams chaves')
+    # DateTime.now() com milissegundos (o relógio de reação e o multijogador precisam)
+    src = sub1(src, "    if(c==='DateTime'&&name==='now'){var n=new Date();return mkDate(n.getFullYear(),n.getMonth()+1,n.getDate(),n.getHours(),n.getMinutes(),n.getSeconds())}",
+               "    if(c==='DateTime'&&name==='now'){var n=new Date();var dn=mkDate(n.getFullYear(),n.getMonth()+1,n.getDate(),n.getHours(),n.getMinutes(),n.getSeconds());dn.j=new Date(n.getTime());return dn}",
+               'now com ms')
+    # Offset == Offset compara dx e dy (contains, indexOf e == em listas de posições)
+    src = sub1(src, "function eq(a,b){\n  if(isRaw(a)&&isRaw(b))return a.raw===b.raw;",
+               "function eq(a,b){\n  if(isRaw(a)&&isRaw(b))return a.raw===b.raw;\n"
+               "  if(a&&b&&a.nat&&b.nat&&a.nat===b.nat&&(a.nat==='Offset'||a.nat==='Size'||a.nat==='Vec2')){var ka=a.nat==='Offset'?['dx','dy']:(a.nat==='Size'?['width','height']:['x','y']);return nn(a.f[ka[0]])===nn(b.f[ka[0]])&&nn(a.f[ka[1]])===nn(b.f[ka[1]])}",
+               'eq offset')
+    # contains, indexOf e remove de listas comparam com == do Dart (Offset, números, classes com operator ==)
+    src = sub1(src, "      case 'remove':{var ix=v.indexOf(args[0]);if(ix>=0)v.splice(ix,1);mutated=true;return ix>=0}\n      case 'contains':return v.indexOf(args[0])>=0;\n      case 'indexOf':return v.indexOf(args[0]);",
+               "      case 'remove':{var ix=lstIdx(v,args[0]);if(ix>=0)v.splice(ix,1);mutated=true;return ix>=0}\n      case 'contains':return lstIdx(v,args[0])>=0;\n      case 'indexOf':return lstIdx(v,args[0]);",
+               'lista eq')
+    src = sub1(src, "function eq(a,b){", "function lstIdx(v,x){var i=v.indexOf(x);if(i>=0||x==null||typeof x!=='object')return i;if(!(x instanceof Dbl||x.nat==='Offset'||x.nat==='Size'||x.nat==='Vec2'||(x.cls&&ST.dataClasses[x.cls]&&ST.dataClasses[x.cls].methods['operator=='])))return -1;for(var k=0;k<v.length;k++){try{if(v[k]&&typeof v[k]==='object'&&eq(v[k],x))return k}catch(e){}}return -1}\nfunction eq(a,b){", 'lstIdx')
     return src

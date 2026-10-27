@@ -6107,5 +6107,8 @@ PARTS.append(['Projeto · Caça-Ossos', 'Projeto 5 · Caça-Ossos'])
 import parte7  # noqa: E402
 parte7.adicionar(aula, PARTS, SETUP_FLAME, SETUP_TILED)
 
+import parte8  # noqa: E402
+parte8.adicionar(aula, PARTS, SETUP_FLAME)
+
 import teoria  # noqa: E402
 teoria.inserir(LESSONS, EXERCISES, PARTS)

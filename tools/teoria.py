@@ -884,6 +884,102 @@ leitura(
 )
 
 
+# ------------------------------------------------------------------ Leituras da terceira leva
+leitura(
+    'Diálogos e escolhas',
+    'Game design: narrativa e personagens',
+    'Leitura: como contar uma história num jogo, personagens com vontade própria e o cuidado com as ramificações. No '
+    'código, o mapa de uma história com escolhas conta os finais e os caminhos possíveis.',
+    'Em ▶ Testar, toque nas cenas para ver aonde cada uma leva. Depois crie um final novo, ligue uma cena a outra e veja '
+    'o número de caminhos mudar.',
+    'narrativa',
+    [
+        ['Final novo', "Troque 'Sozinho': [] por 'Sozinho': ['Achou'], acrescente 'Achou': [] no mapa historia e 'Achou': 3 no mapa passo.", r"'Achou'\s*:\s*\[\]"],
+        ['Mais um caminho', "Troque 'Fuga': [] por 'Fuga': ['Desculpa']: quem fugiu ainda pode voltar atrás.", r"'Fuga'\s*:\s*\['Desculpa'\]"],
+        ['Começo diferente', "Troque 'Muro': ['Gentil', 'Bravo'] por 'Muro': ['Gentil', 'Bravo', 'Fuga'].", r"'Muro'\s*:\s*\['Gentil',\s*'Bravo',\s*'Fuga'\]"],
+    ],
+    [
+        {'h': 'História que se joga'},
+        {'p': 'Num livro, o leitor acompanha a história; num jogo, o jogador **faz** a história. Por isso a narrativa de jogo '
+              'mostra pelo que acontece na tela mais do que conta com texto. Um cenário destruído, um gato que foge e volta, '
+              'um osso escondido num lugar estranho contam coisas sem nenhuma frase. Quando houver texto, ele deve ser curto e '
+              'dito por alguém.'},
+        {'h': 'Personagens com vontade'},
+        {'p': 'Um bom personagem quer alguma coisa e tem um jeito próprio de falar. O Mingau quer o muro dele e fala com '
+              'desconfiança; o caramelo quer ossos e amigos. Quando o que o jogador quer esbarra no que o personagem quer, '
+              'nasce um conflito, e o conflito move a história. Antes de escrever falas, escreva numa linha o que cada '
+              'personagem quer e do que ele tem medo.'},
+        {'fig': 'narrativa', 'legenda': 'Uma história com escolhas é um mapa de cenas. Cada escolha abre um galho; galhos que se '
+                                        'juntam de novo evitam que a história exploda em tamanho.'},
+        {'h': 'Ramificações'},
+        {'p': 'Cada escolha que leva a um lugar diferente dobra o trabalho: duas escolhas seguidas de dois caminhos já dão '
+              'quatro histórias para escrever, testar e desenhar. Por isso os jogos fazem os galhos **voltarem a se juntar** '
+              '(como a cena Desculpa, que leva de volta ao Segredo) e guardam as consequências em variáveis, como a amizade, '
+              'que mudam um detalhe depois sem criar uma história inteira nova.'},
+        {'dica': 'Escreva o roteiro como dados (o mapa de falas da aula de diálogos), não como código. Assim dá para revisar, '
+                 'traduzir e acrescentar cenas sem mexer na lógica do jogo.', 'titulo': 'Roteiro é dado'},
+    ],
+    [
+        {'q': 'O que significa "mostrar em vez de contar" num jogo?', 'ops': ['Escrever textos maiores', 'Deixar o cenário e as ações contarem a história', 'Não ter história', 'Usar só vídeos'], 'ok': 1,
+         'exp': 'O jogador entende o que aconteceu olhando e jogando, sem precisar de um parágrafo.'},
+        {'q': 'O que move uma história?', 'ops': ['O número de fases', 'O conflito entre o que os personagens querem', 'A cor do cenário', 'A música'], 'ok': 1,
+         'exp': 'Quando vontades se chocam, algo precisa acontecer.'},
+        {'q': 'Duas escolhas seguidas, cada uma com dois caminhos que não se juntam, dão quantos finais?', 'ops': ['2', '3', '4', '8'], 'ok': 2,
+         'exp': '2 × 2 = 4 caminhos diferentes até o fim.'},
+        {'q': 'Como evitar que a história cresça demais?', 'ops': ['Tirar todas as escolhas', 'Fazer galhos se juntarem e guardar consequências em variáveis', 'Escrever só finais tristes', 'Não testar'], 'ok': 1,
+         'exp': 'Galhos que voltam e variáveis que mudam detalhes mantêm o tamanho controlado.'},
+    ],
+    parte='Parte 8 · Mais sistemas de jogo',
+)
+
+leitura(
+    'Sala de jogos (galeria)',
+    'Projeto final: o seu jogo',
+    'Leitura: como planejar, construir e entregar um jogo seu do começo ao fim, com o documento do jogo, as etapas por '
+    'semana e a ficha de avaliação. O código é o seu caderno do projeto, guardado no aparelho.',
+    'Em ▶ Testar, preencha o documento do seu jogo, marque as etapas prontas e faça a sua autoavaliação. Depois ajuste as '
+    'semanas e os pesos para o calendário da turma.',
+    'gdd',
+    [
+        ['Mais uma pergunta', "Na lista perguntas, acrescente ['publico', 'Para quem é o jogo', 'Crianças de 8 a 12 anos'], no fim.", r"\['publico',"],
+        ['Prazo da entrega', "Na última etapa, troque a semana 6 por 8: ['Menu, fim de jogo e entrega (link na 🕹 Galeria)', 8].", r"entrega \(link na 🕹 Galeria\)',\s*(?!6\b)\d+\]"],
+        ['Pesos da ficha', "Na ficha, troque ['O ciclo principal é divertido e claro', 3] por 4 e ['Código organizado e comentado', 1] por 0.", r"divertido e claro',\s*4\][\s\S]*comentado',\s*0\]"],
+    ],
+    [
+        {'h': 'Do zero a um jogo seu'},
+        {'p': 'O projeto final junta tudo: você escolhe o jogo, planeja, constrói, testa com colegas e entrega um link na '
+              'Galeria. O segredo é **começar pequeno**: um jogo curto e terminado vale mais que um jogo enorme pela metade. '
+              'Se a ideia couber em uma frase ("um caramelo que foge dos gatos pegando ossos numa praça"), ela cabe no prazo.'},
+        {'h': '1. O documento do jogo'},
+        {'p': 'Antes do código, escreva o **documento de design** (GDD): nome, gênero, objetivo, ciclo principal, controles, '
+              'como o desafio cresce, arte e som. Uma página basta. Ele serve para você não se perder e para o professor e '
+              'os colegas entenderem a ideia antes de ela existir.'},
+        {'fig': 'projeto', 'legenda': 'As seis etapas do projeto, uma por semana. Cada etapa termina com algo que dá para jogar ou '
+                                      'mostrar, e o teste com colegas vem antes da entrega, não depois.'},
+        {'h': '2. Etapas que dá para jogar'},
+        {'p': 'Construa em camadas jogáveis: primeiro um **protótipo** com quadrados e círculos (o ciclo funciona e é '
+              'divertido?), depois uma fase inteira do começo ao fim, depois arte e som no lugar das formas, depois o teste '
+              'com três colegas, e só então menu, fim de jogo e entrega. Em qualquer semana você tem um jogo que funciona.'},
+        {'h': '3. A ficha de avaliação'},
+        {'p': 'A ficha diz o que conta e quanto: o ciclo divertido e claro pesa mais que tudo, depois funcionar sem travar, a '
+              'dificuldade que ensina, a arte e o som e, por fim, o código organizado. Cada critério vale de 0 a 4. Use a '
+              'ficha para se autoavaliar no meio do caminho: ela mostra onde vale a pena gastar a próxima semana.'},
+        {'dica': 'Guarde uma cópia do código a cada etapa (o botão ⬇ Projeto baixa o .zip). Se algo quebrar, você volta para '
+                 'a última versão que funcionava.', 'titulo': 'Versões'},
+    ],
+    [
+        {'q': 'Qual projeto tem mais chance de ficar bom no prazo?', 'ops': ['Um jogo enorme com dez fases', 'Um jogo curto, com uma ideia clara, terminado', 'Um jogo sem documento', 'Um jogo só com arte'], 'ok': 1,
+         'exp': 'Terminar e polir algo pequeno vale mais que um projeto grande pela metade.'},
+        {'q': 'O que vem antes da arte e do som?', 'ops': ['A entrega', 'Um protótipo com formas simples e uma fase jogável', 'O menu', 'Nada'], 'ok': 1,
+         'exp': 'Primeiro garanta que o ciclo funciona e é divertido.'},
+        {'q': 'Quando fazer o teste com colegas?', 'ops': ['Depois de entregar', 'Antes da entrega, para dar tempo de ajustar', 'Nunca', 'No primeiro dia'], 'ok': 1,
+         'exp': 'O teste só ajuda se ainda houver tempo de mudar o jogo.'},
+        {'q': 'Qual critério pesa mais na ficha?', 'ops': ['Código organizado', 'O ciclo principal divertido e claro', 'O nome do jogo', 'O tamanho do mapa'], 'ok': 1,
+         'exp': 'Um jogo é, antes de tudo, a ação que o jogador repete e gosta de repetir.'},
+    ],
+)
+
+
 def inserir(LESSONS, EXERCISES, PARTS):
     """Põe cada aula de leitura antes da aula indicada e acerta o início das partes."""
     for a in AULAS:

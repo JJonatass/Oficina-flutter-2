@@ -286,3 +286,13 @@ MANUAL.update({
     ('Projeto · Trilha do Caramelo', 0): [('  int vidas = 3;', '  int vidas = 5;'), ("'♡' * (3 - vidas)", "'♡' * (5 - vidas)")],
     ('Projeto · Trilha do Caramelo', 3): [("  InfoFase('Feira', 'fase3.tmx'),\n", "  InfoFase('Feira', 'fase3.tmx'),\n  InfoFase('Bônus', 'fase1.tmx'),\n")],
 })
+
+# Terceira leva de leituras
+MANUAL.update({
+    ('Game design: narrativa e personagens', 0): [("  'Sozinho': [],\n", "  'Sozinho': ['Achou'],\n  'Achou': [],\n"), ("'Amigos': 4};", "'Amigos': 4, 'Achou': 3};")],
+    ('Game design: narrativa e personagens', 1): [("  'Fuga': [],", "  'Fuga': ['Desculpa'],")],
+    ('Game design: narrativa e personagens', 2): [("'Muro': ['Gentil', 'Bravo'],", "'Muro': ['Gentil', 'Bravo', 'Fuga'],")],
+    ('Projeto final: o seu jogo', 0): [("  ['arte', 'Arte e som', 'Pixel art 16×16, música alegre em loop'],\n", "  ['arte', 'Arte e som', 'Pixel art 16×16, música alegre em loop'],\n  ['publico', 'Para quem é o jogo', 'Crianças de 8 a 12 anos'],\n")],
+    ('Projeto final: o seu jogo', 1): [("entrega (link na 🕹 Galeria)', 6]", "entrega (link na 🕹 Galeria)', 8]")],
+    ('Projeto final: o seu jogo', 2): [("divertido e claro', 3]", "divertido e claro', 4]"), ("comentado', 1]", "comentado', 0]")],
+})
