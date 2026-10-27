@@ -27,6 +27,7 @@ Na página:
 - **🗺 Mapa**: editor de fases em blocos que gera o .tmx (camadas, sólidos, perigos, ossos, início e fim).
 - **🔗 Compartilhar** gera um link com o código, os sprites e os mapas; **🕹 Galeria** guarda os jogos recebidos,
   com estrelas. Não há servidor: cada jogo fica salvo só no navegador de quem abriu o link.
+- **📘 Aula** (botão fixo no canto da tela): abre a aula atual numa janela, com Anterior/Próxima e a lista de todas as aulas por parte, com busca.
 - **🧠 Revisão**: seis perguntas por parte, com as opções embaralhadas e o melhor resultado guardado no navegador.
 - **📚 Glossário**: termos de jogos com busca e um botão que abre a aula onde cada um aparece.
 - No celular, dá para instalar como app (PWA) e abrir sem internet.
@@ -57,6 +58,7 @@ O `index.html` é gerado; para mudar aulas ou o motor, edite `tools/` e rode:
 - `tools/parte8.py`, `tools/parte8/*.dart`: Partes 8 e 10 (sistemas de jogo, desafios) e Sala de jogos
 - `tools/parte9.py`, `tools/parte9/*.dart`: Parte 9 (mais gêneros e técnicas) e Projeto 7
 - `tools/revisao.py`, `tools/patch_revisao.py`: perguntas de revisão de cada parte e glossário
+- `tools/patch_aula.py`: janela da aula (botão 📘 Aula)
 - `tools/solucoes.py`: gabarito das etapas dos exercícios (conferido no build)
 - `tools/sprites.py`, `tools/maps.py`: sprites e mapas prontos
 - `tools/lessons.py`: aulas, exercícios e partes

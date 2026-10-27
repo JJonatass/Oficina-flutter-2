@@ -11,7 +11,7 @@ import json, re, sys, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'tools'))
-import patch_engine, patch_input, patch_media, patch_flame, patch_limits, patch_extra, patch_draw, patch_dart, patch_sens, patch_ui, patch_widgets, patch_data, patch_plat, patch_leitura, patch_jogo, patch_ferramentas, patch_revisao, solucoes, lessons  # noqa: E402
+import patch_engine, patch_input, patch_media, patch_flame, patch_limits, patch_extra, patch_draw, patch_dart, patch_sens, patch_ui, patch_widgets, patch_data, patch_plat, patch_leitura, patch_jogo, patch_ferramentas, patch_revisao, patch_aula, solucoes, lessons  # noqa: E402
 
 
 def sub1(src, old, new, label):
@@ -111,6 +111,7 @@ def build():
     src = patch_ferramentas.finish(src)
     patch_revisao.validar(lessons)
     src = patch_revisao.finish(src)
+    src = patch_aula.finish(src)
     (ROOT / 'index.html').write_text(src, encoding='utf-8')
     import hashlib
     patch_plat.write_pwa(ROOT, hashlib.sha1(src.encode()).hexdigest()[:10])
